@@ -17,10 +17,10 @@ const seedAdmin = async () => {
       console.log("Admin already exists");
       process.exit();
     }
-    const hashedPassword = await bcrypt.hash("Admin123!", 10);
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
 
     await User.create({
-      email: "krakenamen@gmail.com",
+      email: process.env.ADMIN_EMAIL,
       password: hashedPassword,
       role: "admin",
       isVerified: true
