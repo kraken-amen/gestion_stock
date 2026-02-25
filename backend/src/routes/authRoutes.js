@@ -8,7 +8,7 @@ router.post("/create-user",protect,adminOnly,createUserByAdmin);
 
 // Routes pour l'Utilisateur (US1: Authentification Double Facteur)
 router.get("/roles", protect, adminOnly, getAvailableRoles);
-router.get("/users", protect, adminOnly, getAllUsers);
+router.get("/users", getAllUsers);
 router.post("/login", login);
 router.post("/otp", verifyCode);
 router.put("/update-user/:id", protect, adminOnly, authController.updateUser);
