@@ -119,7 +119,7 @@ exports.verifyCode = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-// 1. Modification User (Update)
+//  Modification User (Update)
 exports.updateUser = async (req, res) => {
   try {
     const { email, role, isActive } = req.body;
@@ -135,7 +135,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// 2. Désactivation User
+// Désactivation User
 exports.toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findById(req.params.email);
@@ -147,4 +147,22 @@ exports.toggleUserStatus = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la mise à jour de l'utilisateur" });
   }
+};
+// get all users
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select("-password"); 
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs" });
+    }
+};
+// get available roles for front
+exports.getAvailableRoles = async (req, res) => {
+    try {
+        const roles = ["admin", "responsable_region", "user"]; 
+        res.status(200).json(roles);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la récupération des rôles" });
+    }
 };
