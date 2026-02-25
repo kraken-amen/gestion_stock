@@ -31,29 +31,6 @@ const Login = () => {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
-        <style>{`
-          @keyframes blob {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
-          input:-webkit-autofill,
-          input:-webkit-autofill:hover,
-          input:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0 1000px white inset !important;
-            -webkit-text-fill-color: #1f2937 !important;
-          }
-        `}</style>
-
         <div className="w-full max-w-md">
           {/* Card Container */}
           <div className="backdrop-blur-md bg-white/95 rounded-3xl shadow-2xl p-8 border border-white/20">
@@ -156,29 +133,18 @@ const Login = () => {
               <span className="text-gray-500 text-xs font-medium">OU</span>
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
             </div>
-
-            {/* Social Buttons */}
-            <div className="grid grid-cols-2 gap-4">
-              <button className="py-2 px-4 rounded-xl border-2 border-gray-200 hover:border-teal-500 transition-all hover:bg-gray-50 font-semibold text-gray-700">
-                <span className="text-lg">f</span>
-              </button>
-              <button className="py-2 px-4 rounded-xl border-2 border-gray-200 hover:border-teal-500 transition-all hover:bg-gray-50 font-semibold text-gray-700">
-                <span className="text-lg">G</span>
-              </button>
-            </div>
-
             {/* Sign Up Link */}
             <p className="mt-6 text-center text-gray-700">
               Vous n'avez pas de compte?{' '}
               <a href="#" className="font-bold text-teal-600 hover:text-teal-700 transition-colors">
-                Inscrivez-vous
+                contactez l'administrateur
               </a>
             </p>
           </div>
 
           {/* Footer Text */}
           <p className="mt-6 text-center text-white/80 text-xs">
-            © 2024 Tunisie Telecom. Tous droits réservés.
+            © 2026 Tunisie Telecom. Tous droits réservés.
           </p>
         </div>
       </div>
