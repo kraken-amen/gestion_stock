@@ -1,0 +1,36 @@
+nav {
+  background-color: #1e293b;
+  padding: 15px;
+}
+
+nav a {
+  color: white;
+  margin-right: 15px;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #38bdf8;
+}
+
+button {
+  padding: 8px 14px;
+  background-color: #2563eb;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+input {
+  padding: 8px;
+  margin: 5px 0;
+  display: block;
+  width: 250px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
