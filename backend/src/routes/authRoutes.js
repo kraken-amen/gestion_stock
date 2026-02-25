@@ -11,6 +11,6 @@ router.get("/roles", protect, adminOnly, getAvailableRoles);
 router.get("/users", protect, adminOnly, getAllUsers);
 router.post("/login", login);
 router.post("/otp", verifyCode);
-router.put("/update-user/:email", protect, adminOnly, authController.updateUser);
-router.patch("/toggle-status/:email", protect, adminOnly, authController.toggleUserStatus);
+router.put("/update-user/:id", protect, adminOnly, authController.updateUser);
+router.patch("/toggle-status/:id", protect, adminOnly, authController.toggleUserStatus);
 module.exports = router;

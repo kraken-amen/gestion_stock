@@ -124,21 +124,22 @@ exports.updateUser = async (req, res) => {
   try {
     const { email, role, isActive } = req.body;
     const user = await User.findByIdAndUpdate(
-      req.params.email, 
+      req.params.id,
       { email, role, isActive }, 
       { new: true }
     );
+
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
     res.json({ message: "Utilisateur mis à jour", user });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la mise à jour de l'utilisateur" });
+    res.status(500).json({ message: error.message });
   }
 };
 
 // Désactivation User
 exports.toggleUserStatus = async (req, res) => {
   try {
-    const user = await User.findById(req.params.email);
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
     
     user.isActive = !user.isActive;
