@@ -10,11 +10,16 @@ export interface User {
 
 // login response
 export interface LoginResponse {
-  user: User;
+  email: string;
   token: string;
 }
 //roles
 export interface Role {
   _id: string;
   name: string; // "admin", "user", etc.
+}
+export interface OtpResponse {
+  message: string;
+  token: string;
+  email: string;
 }

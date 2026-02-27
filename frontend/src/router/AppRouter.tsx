@@ -2,9 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "../pages/Login"
 import Dashboard from "../pages/Dashboard"
 import Users from "../pages/Users"
-import Roles from "../pages/Roles"
 import DashboardLayout from "../layouts/DashboardLayout"
-
+import Otp from "../pages/Otp"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -14,8 +13,8 @@ const AppRouter = () => {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
-          <Route path="/roles" element={<Roles />} />
         </Route>
+        <Route path="/otp" element={<Otp />} />
       </Routes>
     </BrowserRouter>
   )
