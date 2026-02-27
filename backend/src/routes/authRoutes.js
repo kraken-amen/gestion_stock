@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { login, verifyCode, createUserByAdmin,getAllUsers,getAvailableRoles } = require("../controllers/authController");
+const { login, verifyCode, createUserByAdmin,
+    getAllUsers,getAvailableRoles,updateUser,
+    toggleUserStatus,resendOtp } = require("../controllers/authController");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
-const authController = require("../controllers/authController");
 // Route pour l'Admin (US2: Création de compte)
 router.post("/create-user",protect,adminOnly,createUserByAdmin);
 
@@ -10,7 +11,8 @@ router.post("/create-user",protect,adminOnly,createUserByAdmin);
 router.get("/roles", protect, adminOnly, getAvailableRoles);
 router.get("/users", getAllUsers);
 router.post("/login", login);
-router.post("/otp", verifyCode);
-router.put("/update-user/:id", protect, adminOnly, authController.updateUser);
-router.patch("/toggle-status/:id", protect, adminOnly, authController.toggleUserStatus);
+router.post("/verify-otp", verifyCode);
+router.put("/update-user/:id", protect, adminOnly,updateUser);
+router.patch("/toggle-status/:id", protect, adminOnly,toggleUserStatus);
+router.post("/resend-otp", resendOtp);
 module.exports = router;

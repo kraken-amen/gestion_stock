@@ -56,7 +56,7 @@ exports.login = async (req, res) => {
 
     // 5. Stocker le code et définir l'expiration (10 minutes)
     user.verificationCode = code;
-    user.verificationCodeExpires = Date.now() + 10 * 60 * 1000;
+    user.verificationCodeExpires = Date.now() + 60 * 1000;
     await user.save();
 
     // 6. Envoyer le code de sécurité par email
@@ -64,7 +64,7 @@ exports.login = async (req, res) => {
       await sendEmail({
         email: user.email,
         subject: "Votre Code de Connexion - Système de Stock",
-        message: `Votre code de vérification est : ${code}`
+        message: `Votre code de vérification est : ${code}. Il expire dans 1 minute.`
       });
 
       return res.status(200).json({
@@ -80,6 +80,50 @@ exports.login = async (req, res) => {
   }
 };
 
+// Fonction pour renvoyer un nouveau code OTP
+exports.resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1. Vérifier si l'utilisateur existe
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    // 2. Vérifier si le compte est actif avant d'envoyer quoi que ce soit
+    if (!user.isActive) {
+      return res.status(403).json({ message: "Compte désactivé" });
+    }
+
+    // 3. Générer un nouveau code de 6 chiffres
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 4. Mettre à jour le code et l'expiration (1 minute comme demandé)
+    user.verificationCode = newCode;
+    user.verificationCodeExpires = Date.now() + 60 * 1000; // 1 minute
+    await user.save();
+
+    // 5. Renvoyer l'email avec le nouveau code
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "Nouveau Code de Vérification",
+        message: `Votre nouveau code de vérification est : ${newCode}. Il expire dans 1 minute.`
+      });
+
+      return res.status(200).json({ 
+        message: "Un nouveau code a été envoyé à votre adresse email." 
+      });
+    } catch (mailError) {
+      return res.status(500).json({ message: "Erreur lors de l'envoi de l'email" });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur lors du renvoi de l'OTP" });
+  }
+};
 // --- VERIFY CODE : Validation finale et génération du Token JWT ---
 exports.verifyCode = async (req, res) => {
   try {
