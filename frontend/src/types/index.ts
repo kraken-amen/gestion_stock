@@ -13,13 +13,15 @@ export interface LoginResponse {
   email: string;
   token: string;
 }
-//roles
-export interface Role {
-  _id: string;
-  name: string; // "admin", "user", etc.
-}
+//otp response
 export interface OtpResponse {
   message: string;
   token: string;
   email: string;
+}
+//toast
+export interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info'; // Types autorisés
 }
