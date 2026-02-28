@@ -1,9 +1,9 @@
 import api from './api';
 
-export const getUsers = () => api.get('/users'); 
+export const getUsers = () => api.get('/auth/users'); 
 
-export const createUser = (userData: any) => api.post('/create-user', userData);
+export const createUser = (userData: any) => api.post('/auth/create-user', userData);
 
-export const updateUser = (email: string, data: any) => api.put(`/update-user/${email}`, data);
+export const updateUser = (email: string, data: any) => api.put(`/auth/update-user/${email}`, data);
 
-export const toggleUserStatus = (email: string) => api.patch(`/toggle-status/${email}`);
+export const toggleUserStatus = (email: string) => api.patch(`/auth/toggle-status/${email}`);
