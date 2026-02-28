@@ -16,13 +16,13 @@ exports.createUserByAdmin = async (req, res) => {
 
     // 2. Hasher le mot de passe initial avec bcryptjs
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     // 3. Créer l'utilisateur avec le statut non vérifié par défaut
     const newUser = await User.create({
       email,
       password: hashedPassword,
       role,
-      isVerified: false 
+      isVerified: false
     });
 
     res.status(201).json({ message: "Utilisateur créé avec succès par l'Admin", data: newUser });
@@ -43,8 +43,8 @@ exports.login = async (req, res) => {
     }
     // 2. Vérifier si le compte est actif
     if (!user.isActive) {
-   return res.status(403).json({ message: "Votre compte est désactivé. Contactez l'admin." });
-}
+      return res.status(403).json({ message: "Votre compte est désactivé. Contactez l'admin." });
+    }
     // 3. Comparer le mot de passe saisi avec le hash stocké
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -56,7 +56,7 @@ exports.login = async (req, res) => {
 
     // 5. Stocker le code et définir l'expiration (10 minutes)
     user.verificationCode = code;
-    user.verificationCodeExpires = Date.now() + 60 * 1000;
+    user.verificationCodeExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
 
     // 6. Envoyer le code de sécurité par email
@@ -112,8 +112,8 @@ exports.resendOtp = async (req, res) => {
         message: `Votre nouveau code de vérification est : ${newCode}. Il expire dans 1 minute.`
       });
 
-      return res.status(200).json({ 
-        message: "Un nouveau code a été envoyé à votre adresse email." 
+      return res.status(200).json({
+        message: "Un nouveau code a été envoyé à votre adresse email."
       });
     } catch (mailError) {
       return res.status(500).json({ message: "Erreur lors de l'envoi de l'email" });
@@ -169,7 +169,7 @@ exports.updateUser = async (req, res) => {
     const { email, role, isActive } = req.body;
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { email, role, isActive }, 
+      { email, role, isActive },
       { new: true }
     );
 
@@ -185,7 +185,7 @@ exports.toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
-    
+
     user.isActive = !user.isActive;
     await user.save();
     res.json({ message: `Statut changé: ${user.isActive ? 'Activé' : 'Désactivé'}` });
@@ -195,19 +195,10 @@ exports.toggleUserStatus = async (req, res) => {
 };
 // get all users
 exports.getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find().select("-password"); 
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs" });
-    }
-};
-// get available roles for front
-exports.getAvailableRoles = async (req, res) => {
-    try {
-        const roles = ["admin", "responsable_region", "user"]; 
-        res.status(200).json(roles);
-    } catch (error) {
-        res.status(500).json({ message: "Erreur lors de la récupération des rôles" });
-    }
+  try {
+    const users = await User.find().select("-password");
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs" });
+  }
 };

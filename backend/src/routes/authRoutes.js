@@ -8,7 +8,6 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
 router.post("/create-user",protect,adminOnly,createUserByAdmin);
 
 // Routes pour l'Utilisateur (US1: Authentification Double Facteur)
-router.get("/roles", protect, adminOnly, getAvailableRoles);
 router.get("/users", getAllUsers);
 router.post("/login", login);
 router.post("/verify-otp", verifyCode);
