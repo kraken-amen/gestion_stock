@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Search, Edit2, Plus, Filter, Mail, Power, ArrowLeft } from 'lucide-react';
-import { getUsers, toggleUserStatus } from "../services/userService";
+import { Search, Edit2, Plus, Filter, Mail, Power, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { createUser, getUsers, toggleUserStatus } from "../services/userService";
 import { useNavigate } from 'react-router-dom';
 import type { User } from "../types";
 
@@ -11,13 +11,17 @@ export default function UsersListPage() {
   const [filterRole, setFilterRole] = useState('all'); // État pour le filtre de rôle
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     role: 'user'
   });
   const [errors, setErrors] = useState({
-    email: ''
+    email: '',
+    password: '',
+    role: 'user'
   });
 
   // --- EFFETS (EFFECTS) ---
@@ -68,6 +72,33 @@ export default function UsersListPage() {
       default: return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
     }
   };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await createUser(formData);
+      setIsModalOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Erreur lors de la création de l'utilisateur:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleClose = () => {
+  setFormData({
+    email: '',
+    password: '',
+    role: 'user'
+  });
+  setErrors({
+    email: '',
+    password: '',
+    role: 'user'
+  });
+  setShowPassword(false);
+  setIsModalOpen(false);
+};
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -227,20 +258,22 @@ export default function UsersListPage() {
       {
         isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Dark Overlay */}
             <div
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
-              onClick={() => setIsModalOpen(false)} 
+              className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+              onClick={handleClose}
             ></div>
 
-            {/* محتوى المربع (Le Formulaire) */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-white/20 rounded-3xl p-8 shadow-2xl">
+            {/* Modal Content */}
+            <div className="relative w-full max-w-md bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 border border-white/20 rounded-2xl p-8 shadow-2xl overflow-hidden">
+              {/* Background Effects */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+              {/* Le Formulaire */}
               <h2 className="text-2xl font-bold text-white mb-6">Ajouter un utilisateur</h2>
 
               <form className="space-y-4">
-                <div>
-                  <label className="block text-sm text-white/70 mb-2">Nom complet</label>
-                  <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" />
-                </div>
+
                 {/* email */}
                 <div>
                   <label className="block text-sm font-semibold text-white/90 mb-2">Email Address</label>
@@ -257,27 +290,65 @@ export default function UsersListPage() {
                   )}
                 </div>
 
+                {/* password */}
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-white/90 mb-2">Password</label>
+
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder="Enter password"
+                      className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/10 rounded-xl px-4 py-3 pr-12 text-white placeholder-white/40 focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium"
+                    />
+                    {errors.password && (
+                      <p className="text-red-300 text-xs font-medium mt-1">{errors.password}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Role */}
                 <div>
-                  <label className="block text-sm text-white/70 mb-2">Rôle</label>
-                  <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none">
-                    <option value="user">Utilisateur</option>
-                    <option value="admin">Administrateur</option>
+                  <label className="block text-sm font-semibold text-white/90 mb-2">User Role</label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/20 rounded-xl px-4 py-3 text-white focus:border-white/50
+                    focus:bg-white/10 focus:outline-none transition-all font-medium
+                    appearance-none cursor-pointer "
+                  >
+                    <option value="user" className="bg-slate-900">User</option>
+                    <option value="responsable_region" className="bg-slate-900">Regional Responsible</option>
+                    <option value="admin" className="bg-slate-900">Administrator</option>
                   </select>
                 </div>
 
-                <div className="flex gap-3 mt-8">
+                {/* Buttons */}
+                <div className="flex gap-3 mt-8 pt-4 border-t border-white/10">
                   <button
                     type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 py-3 rounded-xl font-bold text-white/70 hover:bg-white/5 transition-colors"
+                    onClick={handleClose}
+                    className="relative flex-1 py-3 rounded-xl font-bold text-white/70 hover:text-white bg-white/5 hover:bg-white/10 transition-all border border-white/10 hover:border-white/30"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20"
+                    disabled={loading}
+                    onClick={handleSubmit}
+                    className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-105"
                   >
-                    Créer
+                    {loading ? 'Ajout en cours...' : 'Ajouter'}
                   </button>
                 </div>
               </form>
