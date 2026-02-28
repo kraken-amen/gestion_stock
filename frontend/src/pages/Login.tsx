@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { login } from "../services/authService"
 import { useNavigate } from "react-router-dom"
-import { Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff ,X} from "lucide-react"
 import type { Toast } from "../types"
 
 const Login = () => {
@@ -10,63 +10,67 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate()
-  const [toasts, setToasts] = useState<Toast[]>([]);
+ const [toasts, setToasts] = useState<Toast[]>([]);
   const addToast = (message: string, type: 'success' | 'error' = 'error') => {
-    const id = Date.now();
-    // TypeScript accepte maintenant l'ajout car il sait que c'est un tableau de Toast
-    setToasts((prev) => [...prev, { id, message, type }]);
+  const id = Date.now();
+  // TypeScript accepte maintenant l'ajout car il sait que c'est un tableau de Toast
+  setToasts((prev) => [...prev, { id, message, type }]);
 
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
+  setTimeout(() => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, 5000);
+};
+// Fonction de suppression manuel du toast
+  const removeToast = (id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   };
   // --- LOGIQUE DE CONNEXION ---
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Empêcher le rechargement de la page (important !)
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault(); // Empêcher le rechargement de la page (important !)
 
-    // 1. Validation locale (Avant d'appeler l'API)
-    if (!email.trim() || !password.trim()) {
-      addToast('Veuillez remplir tous les champs', 'error');
-      return;
+  // 1. Validation locale (Avant d'appeler l'API)
+  if (!email.trim() || !password.trim()) {
+    addToast('Veuillez remplir tous les champs', 'error');
+    return;
+  }
+
+  // Validation format email
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    addToast('Veuillez entrer un email valide', 'error');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    // 2. Appel au service login (Backend) 
+    // On utilise l'email et le password d'état
+    const response = await login(email, password);
+
+    // 3. Si succès : Redirection vers la page OTP
+    // On passe l'email dans le "state" pour la vérification suivante
+    if (response) {
+      addToast('Identifiants valides. Code envoyé par email.', 'success');
+      
+      // Petit délai pour laisser l'utilisateur voir le Toast de succès
+      setTimeout(() => {
+        navigate("/otp", { state: { email: email } });
+      }, 1000);
     }
 
-    // Validation format email
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      addToast('Veuillez entrer un email valide', 'error');
-      return;
-    }
+  } catch (error: any) {
+    // 4. Gestion des erreurs (401, 403, 404, etc.)
+    console.error("Erreur de connexion:", error);
+    
+    // On affiche le message d'erreur du backend s'il existe
+    const errorMsg = error.response?.data?.message || "Identifiants invalides";
+    addToast(errorMsg, 'error');
 
-    setIsLoading(true);
-
-    try {
-      // 2. Appel au service login (Backend) 
-      // On utilise l'email et le password d'état
-      const response = await login(email, password);
-
-      // 3. Si succès : Redirection vers la page OTP
-      // On passe l'email dans le "state" pour la vérification suivante
-      if (response) {
-        addToast('Identifiants valides. Code envoyé par email.', 'success');
-
-        // Petit délai pour laisser l'utilisateur voir le Toast de succès
-        setTimeout(() => {
-          navigate("/otp", { state: { email: email } });
-        }, 1000);
-      }
-
-    } catch (error: any) {
-      // 4. Gestion des erreurs (401, 403, 404, etc.)
-      console.error("Erreur de connexion:", error);
-
-      // On affiche le message d'erreur du backend s'il existe
-      const errorMsg = error.response?.data?.message || "Identifiants invalides";
-      addToast(errorMsg, 'error');
-
-    } finally {
-      // 5. Arrêter l'animation de chargement dans tous les cas
-      setIsLoading(false);
-    }
-  };
+  } finally {
+    // 5. Arrêter l'animation de chargement dans tous les cas
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen overflow-hidden relative font-sans">
@@ -74,10 +78,10 @@ const Login = () => {
       <div className="absolute inset-0">
         {/* Gradient principal: bleu sombre -> violet */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 opacity-100"></div>
-
+        
         {/* Blob animé bleu */}
         <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-600 via-blue-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse"></div>
-
+        
         {/* Blob animé violet */}
         <div className="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-tr from-purple-600 via-purple-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
@@ -108,10 +112,10 @@ const Login = () => {
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/10 mb-5 border-2 border-white/30 backdrop-blur-md shadow-lg transform hover:scale-110 transition-transform duration-300">
                 <span className="text-4xl font-black text-white drop-shadow-lg">TT</span>
               </div>
-
+              
               {/* Titre principal */}
               <h1 className="text-4xl font-black text-white mb-2 drop-shadow-lg">Tunisie Telecom</h1>
-
+              
               {/* Sous-titre */}
               <p className="text-white/70 text-sm font-medium">Vérification de sécurité requise</p>
             </div>
@@ -193,19 +197,29 @@ const Login = () => {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`flex items-start gap-4 p-4 rounded-lg backdrop-blur-xl border-2 shadow-lg animate-in slide-in-from-right transition-all duration-300 ${toast.type === 'success'
-              ? 'bg-green-500/20 border-green-400/50 text-green-100'
-              : 'bg-red-500/20 border-red-400/50 text-red-100'
-              }`}
+            className={`flex items-start gap-4 p-4 rounded-lg backdrop-blur-xl border-2 shadow-lg animate-in slide-in-from-right transition-all duration-300 ${
+              toast.type === 'success'
+                ? 'bg-green-500/20 border-green-400/50 text-green-100'
+                : 'bg-red-500/20 border-red-400/50 text-red-100'
+            }`}
           >
             {/* Indicateur de couleur */}
             <div
-              className={`w-1 h-1 rounded-full mt-1.5 ${toast.type === 'success' ? 'bg-green-400' : 'bg-red-400'
-                }`}
+              className={`w-1 h-1 rounded-full mt-1.5 ${
+                toast.type === 'success' ? 'bg-green-400' : 'bg-red-400'
+              }`}
             ></div>
 
             {/* Message */}
             <p className="flex-1 font-medium text-sm leading-tight">{toast.message}</p>
+
+            {/* Bouton fermer */}
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="text-white/50 hover:text-white transition-colors flex-shrink-0 mt-0.5"
+            >
+              <X size={18} />
+            </button>
           </div>
         ))}
       </div>

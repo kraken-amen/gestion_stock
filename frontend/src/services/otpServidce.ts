@@ -5,7 +5,7 @@ export const verifyOTP = async (email: string, code: string): Promise<OtpRespons
   //verificationCode
   const response = await api.post<OtpResponse>('/auth/verify-otp', { 
     email, 
-    verificationCode: code 
+    code 
   });
   return response.data;
 };
