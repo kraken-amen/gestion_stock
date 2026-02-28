@@ -10,6 +10,15 @@ export default function UsersListPage() {
   const [searchTerm, setSearchTerm] = useState(''); // État pour la barre de recherche
   const [filterRole, setFilterRole] = useState('all'); // État pour le filtre de rôle
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    role: 'user'
+  });
+  const [errors, setErrors] = useState({
+    email: ''
+  });
 
   // --- EFFETS (EFFECTS) ---
   // Charger les utilisateurs dès le chargement de la page
@@ -53,23 +62,35 @@ export default function UsersListPage() {
 
   // --- STYLE DES BADGES DE RÔLE ---
   const getRoleColor = (role: string) => {
-    switch(role) {
+    switch (role) {
       case 'admin': return 'bg-red-500/20 text-red-400 border border-red-400/50';
       case 'responsable_region': return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
       default: return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
     }
   };
-
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (errors.email) {
+      setErrors(prev => ({
+        ...prev,
+        email: ''
+      }));
+    }
+  };
   return (
     <div className="min-h-screen overflow-hidden relative font-sans">
       {/* Background avec les couleurs Tunisie Telecom - Bleu sombre et Violet */}
       <div className="absolute inset-0">
         {/* Gradient principal: bleu sombre -> violet */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 opacity-100"></div>
-        
+
         {/* Blob animé bleu */}
         <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-600 via-blue-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse"></div>
-        
+
         {/* Blob animé violet */}
         <div className="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-tr from-purple-600 via-purple-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
@@ -94,7 +115,7 @@ export default function UsersListPage() {
                 <p className="text-white/70 text-sm font-medium">Administration et contrôle des accès plateforme</p>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold transition-all shadow-lg hover:shadow-xl">
+            <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold transition-all shadow-lg hover:shadow-xl">
               <Plus size={18} />
               Nouveau User
             </button>
@@ -178,7 +199,7 @@ export default function UsersListPage() {
                     {/* Boutons d'Action */}
                     <td className="px-8 py-5 text-center">
                       <div className="flex items-center justify-center gap-3">
-                        <button 
+                        <button
                           onClick={() => handleToggle(user._id!)}
                           className={`p-2.5 rounded-lg transition-all ${user.isActive ? 'bg-red-500/20 text-red-300 hover:bg-red-500/40 border border-red-400/50' : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/40 border border-emerald-400/50'}`}
                           title={user.isActive ? "Bloquer l'utilisateur" : "Activer l'utilisateur"}
@@ -203,6 +224,68 @@ export default function UsersListPage() {
           </div>
         </div>
       </div>
+      {
+        isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+              onClick={() => setIsModalOpen(false)} 
+            ></div>
+
+            {/* محتوى المربع (Le Formulaire) */}
+            <div className="relative w-full max-w-md bg-slate-900 border border-white/20 rounded-3xl p-8 shadow-2xl">
+              <h2 className="text-2xl font-bold text-white mb-6">Ajouter un utilisateur</h2>
+
+              <form className="space-y-4">
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">Nom complet</label>
+                  <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" />
+                </div>
+                {/* email */}
+                <div>
+                  <label className="block text-sm font-semibold text-white/90 mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="user@tunisietelecom.com"
+                    className={`w-full bg-white/5 backdrop-blur-sm border-2 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium`}
+                  />
+                  {errors.email && (
+                    <p className="text-red-300 text-xs font-medium mt-1">{errors.email}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-white/70 mb-2">Rôle</label>
+                  <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none">
+                    <option value="user">Utilisateur</option>
+                    <option value="admin">Administrateur</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 mt-8">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 py-3 rounded-xl font-bold text-white/70 hover:bg-white/5 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20"
+                  >
+                    Créer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )
+      }
     </div>
+
   );
 }
