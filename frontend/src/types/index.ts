@@ -17,6 +17,7 @@ export interface LoginResponse {
 export interface OtpResponse {
   message: string;
   token: string;
+  role: 'admin' | 'responsable_region' | 'user';
   email: string;
 }
 //toast

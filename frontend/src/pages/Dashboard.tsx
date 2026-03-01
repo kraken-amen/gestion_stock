@@ -17,7 +17,6 @@ const Dashboard = () => {
     }
 
     getUsers().then(res => setUsers(res.data)).catch(err => console.error(err));
-    console.log(users);
   }, [navigate]);
 
   // --- LOGIQUE DE CALCUL
