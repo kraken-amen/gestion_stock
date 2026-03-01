@@ -25,3 +25,16 @@ export interface Toast {
   message: string;
   type: 'success' | 'error' | 'info'; // Types autorisés
 }
+//props for user model create
+export interface Props {
+    isOpen: boolean;
+    onClose: () => void;
+    onUserCreated: () => void; 
+}
+//props for user model update
+export interface PropsUpdate {
+    isOpen: boolean;
+    onClose: () => void;
+    onUserUpdated: () => void; 
+    user: User;
+}
