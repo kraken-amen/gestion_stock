@@ -1,8 +1,8 @@
 import { Users as UsersIcon, ShieldCheck, UserCheck, UserX, ArrowRight, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getUsers } from '../services/userService';
+import { getUsers } from '../../services/userService';
 import { useEffect, useState } from 'react';
-import type { User } from '../types';
+import type { User } from '../../types';
 
 const Dashboard = () => {
   const navigate = useNavigate();

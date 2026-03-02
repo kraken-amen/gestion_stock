@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "../pages/Login"
-import Dashboard from "../pages/Dashboard"
-import Users from "../pages/Listusers"
+import Dashboard from "../pages/admin/Dashboard"
+import Users from "../pages/admin/Listusers"
 import Otp from "../pages/Otp"
 import { OtpProtectedRoute } from "../components/ProtectedRoute"
 const AppRouter = () => {
