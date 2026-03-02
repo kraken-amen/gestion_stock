@@ -11,10 +11,10 @@ mongoose.connect(process.env.MONGO_URI)
 
 const seedAdmin = async () => {
   try {
-    const adminExists = await User.findOne({ role: "admin" });
+    const adminExists = await User.findOne({ role: "administrateur" });
 
     if (adminExists) {
-      console.log("Admin already exists");
+      console.log("Administrateur already exists");
       process.exit();
     }
     const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
@@ -22,11 +22,11 @@ const seedAdmin = async () => {
     await User.create({
       email: process.env.ADMIN_EMAIL,
       password: hashedPassword,
-      role: "admin",
+      role: "administrateur",
       isVerified: true
     });
 
-    console.log("Admin created successfully");
+    console.log("Administrateur created successfully");
     process.exit();
 
   } catch (error) {

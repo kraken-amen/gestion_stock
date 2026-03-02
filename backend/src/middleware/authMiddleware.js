@@ -22,9 +22,9 @@ exports.protect = (req, res, next) => {
   }
 };
 exports.adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
+  if (req.user && req.user.role === "administrateur") {
     next(); 
   } else {
-    return res.status(403).json({ message: "Access denied: Admins only" });
+    return res.status(403).json({ message: "Access denied: Administrateurs only" });
   }
 };

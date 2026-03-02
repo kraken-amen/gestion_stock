@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { login, verifyCode, createUserByAdmin,
-    getAllUsers,getAvailableRoles,updateUser,
+    getAllUsers,updateUser,
     toggleUserStatus,resendOtp } = require("../controllers/authController");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 // Route pour l'Admin (US2: Création de compte)

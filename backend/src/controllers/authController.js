@@ -25,7 +25,7 @@ exports.createUserByAdmin = async (req, res) => {
       isVerified: false
     });
 
-    res.status(201).json({ message: "Utilisateur créé avec succès par l'Admin", data: newUser });
+    res.status(201).json({ message: "Utilisateur créé avec succès par l'Administrateur", data: newUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

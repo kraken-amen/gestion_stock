@@ -11,6 +11,7 @@ export default function UsersListPage() {
   const [users, setUsers] = useState<User[]>([]); // État pour stocker la liste des utilisateurs
   const [searchTerm, setSearchTerm] = useState(''); // État pour la barre de recherche
   const [filterRole, setFilterRole] = useState('all'); // État pour le filtre de rôle
+  const [filterStatus, setFilterStatus] = useState('all'); // État pour le filtre de statut
   const navigate = useNavigate();
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
@@ -52,14 +53,15 @@ export default function UsersListPage() {
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    return matchesSearch && matchesRole;
+    const matchesStatus = filterStatus === 'all' || user.isActive === (filterStatus === 'true');
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   // --- STYLE DES BADGES DE RÔLE ---
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-500/20 text-red-400 border border-red-400/50';
-      case 'responsable_region': return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
+      case 'administrateur': return 'bg-red-500/20 text-red-400 border border-red-400/50';
+      case 'responsable region': return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
       default: return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
     }
   };
@@ -108,8 +110,8 @@ export default function UsersListPage() {
         {/* Contenu */}
         <div className="max-w-7xl mx-auto px-6 py-10">
           {/* --- SECTION FILTRES (CONTROLS) --- */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-            {/* Barre de recherche par email */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            {/* Barre de recherche */}
             <div className="md:col-span-2 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <input
@@ -120,6 +122,7 @@ export default function UsersListPage() {
                 className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
               />
             </div>
+
             {/* Sélecteur de rôle */}
             <div className="relative">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
@@ -131,7 +134,21 @@ export default function UsersListPage() {
                 <option value="all" className="bg-slate-900">Tous les rôles</option>
                 <option value="admin" className="bg-slate-900">Admin</option>
                 <option value="responsable_region" className="bg-slate-900">Responsable Région</option>
-                <option value="user" className="bg-slate-900">User</option>
+                <option value="user" className="bg-slate-900">Utilisateur</option>
+              </select>
+            </div>
+
+            {/* Sélecteur de statut */}
+            <div className="relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
+              >
+                <option value="all" className="bg-slate-900">Tous les statuts</option>
+                <option value="true" className="bg-slate-900">Actif</option>
+                <option value="false" className="bg-slate-900">Bloqué</option>
               </select>
             </div>
           </div>

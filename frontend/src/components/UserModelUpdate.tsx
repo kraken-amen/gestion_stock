@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Eye, EyeOff } from 'lucide-react';
 import { updateUser } from '../services/userService';
 import type { PropsUpdate } from '../types';
+import { useToast } from '../context/ToastContext';
 
 /**
  * Composant de mise à jour des informations utilisateur.
@@ -15,9 +16,9 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        role: 'user'
+        role: 'utilisateur'
     });
-
+    const { addToast } = useToast();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -30,7 +31,7 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
             setFormData({
                 email: user.email || '',
                 password: '', // Le mot de passe reste vide par défaut (sécurité)
-                role: user.role || 'user'
+                role: user.role || 'utilisateur'
             });
         }
     }, [user, isOpen]);
@@ -40,6 +41,15 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
      */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.email.trim()) {
+            addToast('Veuillez remplir tous les champs', 'error');
+            return;
+        }
+        // Validation format email
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            addToast('Veuillez entrer un email valide', 'error');
+            return;
+        }
         setLoading(true);
         try {
             // Appel au service de mise à jour
@@ -90,7 +100,7 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white/50 cursor-not-allowed font-medium"
+                            className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white/50 font-medium"
                         />
                     </div>
 
@@ -123,9 +133,9 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
                             value={formData.role}
                             onChange={handleInputChange}
                             className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/20 rounded-xl px-4 py-3 text-white focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium appearance-none cursor-pointer ">
-                                <option value="user" className="bg-slate-900">User</option>
-                                <option value="responsable_region" className="bg-slate-900">Regional Responsible</option>
-                                <option value="admin" className="bg-slate-900">Administrator</option>
+                                <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
+                                <option value="responsable region" className="bg-slate-900">Responsable Region</option>
+                                <option value="administrateur" className="bg-slate-900">Administrateur</option>
                             </select>
                     </div>
 

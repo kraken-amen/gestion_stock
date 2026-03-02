@@ -104,13 +104,13 @@ export default function Otp() {
       addToast('Connexion réussie !', 'success');
       setTimeout(() => {
     switch (data.role) {
-      case 'admin':
+      case 'administrateur':
         navigate('/Dashboard');
         break;
-      case 'responsable_region':
+      case 'responsable region':
         navigate('/DashboardRespo');
         break;
-      case 'user':
+      case 'utilisateur':
         navigate('/DashboardUser');
         break;
       default:
