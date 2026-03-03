@@ -2,13 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, RefreshCcw, X, Send } from 'lucide-react';
 import { verifyOTP, resendOTP } from '../services/otpServidce'; // Vérifie l'orthographe du fichier
+import { useAuth } from '../hooks/useAuth';
 
 export default function Otp() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(false);
   const [toasts, setToasts] = useState<Array<{ id: number; message: string; type: 'error' | 'success' }>>([]);
-
+  const { loginUser } = useAuth();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ export default function Otp() {
     setLoading(true);
     try {
       const data = await verifyOTP(email, code);
-      localStorage.setItem('token', data.token);
+      loginUser(data);
       localStorage.removeItem('otp_expiry'); // Nettoyage après succès
       addToast('Connexion réussie !', 'success');
       setTimeout(() => {
