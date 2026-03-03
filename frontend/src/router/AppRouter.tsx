@@ -1,23 +1,26 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "../pages/Login"
-import Dashboard from "../pages/admin/Dashboard"
-import Users from "../pages/admin/Listusers"
+import Dashboard from "../pages/Dashboard"
+import Users from "../pages/Listusers"
 import Otp from "../pages/Otp"
 import { OtpProtectedRoute } from "../components/ProtectedRoute"
 import { ToastProvider } from "../context/ToastContext"
+import { AuthProvider } from "../context/AuthContext"
 const AppRouter = () => {
   return (
-    <BrowserRouter>
-      <ToastProvider>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/otp" element={<OtpProtectedRoute><Otp /></OtpProtectedRoute>} />
-        </Routes>
-      </ToastProvider >
+    <AuthProvider>
+      <BrowserRouter>
+        <ToastProvider>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/otp" element={<OtpProtectedRoute><Otp /></OtpProtectedRoute>} />
+          </Routes>
+        </ToastProvider >
+      </BrowserRouter >
+    </AuthProvider>
 
-    </BrowserRouter >
   )
 }
 

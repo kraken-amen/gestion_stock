@@ -103,19 +103,7 @@ export default function Otp() {
       localStorage.removeItem('otp_expiry'); // Nettoyage après succès
       addToast('Connexion réussie !', 'success');
       setTimeout(() => {
-    switch (data.role) {
-      case 'administrateur':
         navigate('/Dashboard');
-        break;
-      case 'responsable region':
-        navigate('/DashboardRespo');
-        break;
-      case 'utilisateur':
-        navigate('/DashboardUser');
-        break;
-      default:
-        navigate('/auth'); 
-    }
   }, 1500);
     } catch (err: any) {
       addToast(err.response?.data?.message || 'Code invalide', 'error');

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Search, Edit2, Plus, Filter, Mail, Power, ArrowLeft } from 'lucide-react';
-import { getUsers, toggleUserStatus } from "../../services/userService";
+import { getUsers, toggleUserStatus } from "../services/userService";
 import { useNavigate } from 'react-router-dom';
-import type { User } from "../../types";
-import UserModelCreate from '../../components/UserModelCreate';
-import UserModelUpdate from '../../components/UserModelUpdate';
+import type { User } from "../types";
+import UserModelCreate from '../components/UserModelCreate';
+import UserModelUpdate from '../components/UserModelUpdate';
 
 export default function UsersListPage() {
   // --- ÉTATS (STATES) ---
