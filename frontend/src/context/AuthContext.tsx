@@ -1,10 +1,10 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
-import type { AuthContextType } from "../types";
+import type { AuthContextType, User } from "../types";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // LocalStorage verification

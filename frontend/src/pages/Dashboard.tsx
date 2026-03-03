@@ -14,6 +14,7 @@ const Dashboard = () => {
   };
   useEffect(() => {
     console.log("USER ROLE =", user?.role)
+    console.log("USER =", user)
   }, [user]);
   return (
     <div className="min-h-screen overflow-hidden relative font-sans">
