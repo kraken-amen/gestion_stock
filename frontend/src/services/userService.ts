@@ -7,3 +7,5 @@ export const createUser = (userData: any) => api.post('/auth/create-user', userD
 export const updateUser = (_id: string,email: string, password: string, role: string) => api.put(`/auth/update-user/${_id}`, {email,password,role});
 
 export const toggleUserStatus = (_id: string) => api.patch(`/auth/toggle-status/${_id}`);
+
+export const deleteUser = (_id: string) => api.delete(`/auth/delete-user/${_id}`);

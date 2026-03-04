@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginUser = (userData: any) => {
     setUser(userData);
-    localStorage.setItem("role", userData.role); 
+    localStorage.setItem("role", JSON.stringify(userData.role)); 
     localStorage.setItem("token", userData.token); 
   };
 

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { login, verifyCode, createUserByAdmin,
-    getAllUsers,updateUser,
+    getAllUsers,updateUser,deleteUser,
     toggleUserStatus,resendOtp } = require("../controllers/authController");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 // Route pour l'Admin (US2: Création de compte)
@@ -14,4 +14,5 @@ router.post("/verify-otp", verifyCode);
 router.put("/update-user/:id", protect, adminOnly,updateUser);
 router.patch("/toggle-status/:id", protect, adminOnly,toggleUserStatus);
 router.post("/resend-otp", resendOtp);
+router.delete("/delete-user/:id", protect, adminOnly,deleteUser);
 module.exports = router;

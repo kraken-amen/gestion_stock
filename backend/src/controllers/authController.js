@@ -179,13 +179,26 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (req.user.id === userIdToDelete) {
+      return res.status(400).json({ message: "tu ne peux pas te supprimer" });
+    }
+    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+    res.json({ message: "Utilisateur supprimé" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 // Désactivation User
 exports.toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
-
+    if (req.user.id === userIdToDeactivate) {
+      return res.status(400).json({ message: "tu ne peux pas desactiver ton propre compte" });
+    }
     user.isActive = !user.isActive;
     await user.save();
     res.json({ message: `Statut changé: ${user.isActive ? 'Activé' : 'Désactivé'}` });
