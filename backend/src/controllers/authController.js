@@ -181,29 +181,37 @@ exports.updateUser = async (req, res) => {
 };
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const userIdToDelete = req.params.id;
     if (req.user.id === userIdToDelete) {
-      return res.status(400).json({ message: "tu ne peux pas te supprimer" });
+      return res.status(400).json({ message: "Action interdite : tu ne peux pas supprimer ton propre compte" });
     }
-    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
-    res.json({ message: "Utilisateur supprimé" });
+    const user = await User.findByIdAndDelete(userIdToDelete);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+    res.json({ message: "Utilisateur supprimé avec succès" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Erreur lors de la suppression : " + error.message });
   }
 };
 // Désactivation User
 exports.toggleUserStatus = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const userIdToToggle = req.params.id; 
+    const user = await User.findById(userIdToToggle);
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
-    if (req.user.id === userIdToDeactivate) {
-      return res.status(400).json({ message: "tu ne peux pas desactiver ton propre compte" });
+    if (req.user.id === user._id.toString()) {
+      return res.status(400).json({ message: "Tu ne peux pas désactiver ton propre compte" });
     }
     user.isActive = !user.isActive;
     await user.save();
-    res.json({ message: `Statut changé: ${user.isActive ? 'Activé' : 'Désactivé'}` });
+    res.json({ 
+      message: `Statut changé: ${user.isActive ? 'Activé' : 'Désactivé'}`,
+      isActive: user.isActive 
+    });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la mise à jour de l'utilisateur" });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 // get all users
