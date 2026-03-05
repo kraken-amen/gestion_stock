@@ -11,12 +11,11 @@ import { useToast } from '../context/ToastContext';
  * @param onUserUpdated - Callback après une mise à jour réussie.
  * @param user - Les données de l'utilisateur à modifier.
  */
-const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) => {
+const UserModelUpdateAdmin = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) => {
     // État local pour gérer les données du formulaire
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        role: 'utilisateur'
     });
     const { addToast } = useToast();
     const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +30,6 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
             setFormData({
                 email: user.email || '',
                 password: '', // Le mot de passe reste vide par défaut (sécurité)
-                role: user.role || 'utilisateur'
             });
         }
     }, [user, isOpen]);
@@ -57,7 +55,7 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
         setLoading(true);
         try {
             // Appel au service de mise à jour
-            await updateUser(user._id,formData.email, formData.password, formData.role);
+            await updateUser(user._id,formData.email, formData.password);
             
             // Notification au composant parent pour rafraîchir la liste
             onUserUpdated(); 
@@ -128,21 +126,6 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
                             </button>
                         </div>
                     </div>
-
-                    {/* Sélection du rôle utilisateur */}
-                    <div>
-                        <label className="block text-sm font-semibold text-white/90 mb-2">Rôle Utilisateur</label>
-                        <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/20 rounded-xl px-4 py-3 text-white focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium appearance-none cursor-pointer ">
-                                <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
-                                <option value="responsable region" className="bg-slate-900">Responsable Region</option>
-                                <option value="administrateur" className="bg-slate-900">Administrateur</option>
-                            </select>
-                    </div>
-
                     {/* Actions : Annuler ou Enregistrer */}
                     <div className="flex gap-3 mt-8 pt-4 border-t border-white/10">
                         <button
@@ -167,4 +150,4 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
     )
 }
 
-export default UserModelUpdate;
+export default UserModelUpdateAdmin;

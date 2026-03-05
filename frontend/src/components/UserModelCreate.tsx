@@ -30,6 +30,14 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
             addToast('Veuillez entrer un email valide', 'error');
             return;
         }
+        if (!formData.password.trim()) {
+            addToast('Veuillez remplir tous les champs', 'error');
+            return;
+        }
+        if (formData.password.length < 8) {
+            addToast('Le mot de passe doit contenir au moins 6 caractères', 'error');
+            return;
+        }
         setLoading(true);
         try {
             await createUser(formData);

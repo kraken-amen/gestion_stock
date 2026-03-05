@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { User } from "../types";
 import UserModelCreate from '../components/UserModelCreate';
 import UserModelUpdate from '../components/UserModelUpdate';
-
+import UserModelUpdateAdmin from '../components/UserModelUpdateAdmin';
 export default function UsersListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,10 @@ export default function UsersListPage() {
   const navigate = useNavigate();
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
+  const [isModalOpenUpdateAdmin, setIsModalOpenUpdateAdmin] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const savedUser = localStorage.getItem('user');
+  const currentAuthUser = savedUser ? JSON.parse(savedUser) : null;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -62,6 +65,9 @@ export default function UsersListPage() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  const adminAccount = filteredUsers.find(u => u._id === currentAuthUser?.id || u._id === currentAuthUser?._id);
+  const otherUsers = filteredUsers.filter(u => u._id !== currentAuthUser?.id && u._id !== currentAuthUser?._id);
+
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'administrateur': return 'bg-red-500/20 text-red-400 border border-red-400/50';
@@ -101,6 +107,38 @@ export default function UsersListPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+
+          {adminAccount && !loading && (
+            <div className="mb-8 backdrop-blur-xl bg-blue-600/10 border border-blue-500/30 rounded-2xl p-4 md:p-6 shadow-2xl flex flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl ring-4 ring-blue-500/20 ${getRoleColor(adminAccount.role)}`}>
+                  {adminAccount.email?.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-black text-base md:text-lg text-white truncate max-w-[120px] md:max-w-none">
+                      {adminAccount.email?.split('@')[0]}
+                    </span>
+                    <span className="bg-blue-500 text-[8px] md:text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-tighter whitespace-nowrap">
+                      Mon Compte
+                    </span>
+                  </div>
+                  <span className="text-white/50 text-xs md:text-sm flex items-center gap-1 truncate">
+                    <Mail size={14} className="flex-shrink-0" />
+                    <span className="truncate">{adminAccount.email}</span>
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => { setSelectedUser(adminAccount); setIsModalOpenUpdate(true); }}
+                className="p-2 md:p-3 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all active:scale-95 flex-shrink-0"
+                title="Modifier mon profil"
+              >
+                <Edit2 size={20} />
+              </button>
+            </div>
+          )}
+
           {/* Filters Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             {/* Barre de recherche */}
@@ -163,7 +201,7 @@ export default function UsersListPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filteredUsers.map((user) => (
+                  {otherUsers.map((user) => (
 
                     <tr key={user._id} className="hover:bg-white/5 transition-colors group">
                       <td className="px-6 py-4">
@@ -204,12 +242,12 @@ export default function UsersListPage() {
                           >
                             <Edit2 size={16} />
                           </button>
-                            <button
-                              onClick={() => handleDelete(user._id!)}
-                              className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                          <button
+                            onClick={() => handleDelete(user._id!)}
+                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -217,7 +255,7 @@ export default function UsersListPage() {
                 </tbody>
               </table>
             )}
-            {!loading && filteredUsers.length === 0 && (
+            {!loading && otherUsers.length === 0 && (
               <div className="py-20 text-center text-white/40">
                 <UserCircle className="mx-auto mb-4 opacity-20" size={60} />
                 <p>Aucun utilisateur trouvé.</p>
@@ -237,6 +275,14 @@ export default function UsersListPage() {
         <UserModelUpdate
           isOpen={isModalOpenUpdate}
           onClose={() => { setIsModalOpenUpdate(false); setSelectedUser(null); }}
+          onUserUpdated={fetchUsers}
+          user={selectedUser}
+        />
+      )}
+      {isModalOpenUpdateAdmin && selectedUser && (
+        <UserModelUpdateAdmin
+          isOpen={isModalOpenUpdateAdmin}
+          onClose={() => { setIsModalOpenUpdateAdmin(false); setSelectedUser(null); }}
           onUserUpdated={fetchUsers}
           user={selectedUser}
         />

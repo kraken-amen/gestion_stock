@@ -156,6 +156,7 @@ exports.verifyCode = async (req, res) => {
     res.status(200).json({
       message: "Authentification réussie",
       token,
+      id: user._id,
       role: user.role
     });
 
@@ -166,17 +167,26 @@ exports.verifyCode = async (req, res) => {
 //  Modification User (Update)
 exports.updateUser = async (req, res) => {
   try {
-    const { email, role, isActive } = req.body;
+    const { email, role, password, isActive } = req.body;
+    let updateData = { email, role, isActive };
+    if (password && password.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { email, role, isActive },
-      { new: true }
-    );
+      updateData, 
+      { new: true, runValidators: true }
+    ).select("-password"); 
 
-    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
-    res.json({ message: "Utilisateur mis à jour", user });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.json({ message: "Utilisateur mis à jour avec succès", user });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Erreur update: " + error.message });
   }
 };
 exports.deleteUser = async (req, res) => {

@@ -18,12 +18,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginUser = (userData: any) => {
     setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("role", JSON.stringify(userData.role)); 
     localStorage.setItem("token", userData.token); 
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("user");
     localStorage.removeItem("role");
     localStorage.removeItem("token");
   };
