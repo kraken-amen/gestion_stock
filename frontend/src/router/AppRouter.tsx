@@ -5,18 +5,24 @@ import Users from "../pages/Listusers"
 import Otp from "../pages/Otp"
 import { OtpProtectedRoute } from "../components/ProtectedRoute"
 import { ToastProvider } from "../context/ToastContext"
+import DashboardLayout from "../layouts/DashboardLayout"
 const AppRouter = () => {
   return (
     <BrowserRouter>
       <ToastProvider>
         <Routes>
+          {/* Public / Unauthenticated Routes */}
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
           <Route path="/otp" element={<OtpProtectedRoute><Otp /></OtpProtectedRoute>} />
+
+          {/* Dashboard Routes with Sidebar */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/users" element={<Users />} />
+          </Route>
         </Routes>
-      </ToastProvider >
-    </BrowserRouter >
+      </ToastProvider>
+    </BrowserRouter>
   )
 }
 

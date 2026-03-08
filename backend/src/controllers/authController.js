@@ -64,7 +64,7 @@ exports.login = async (req, res) => {
       await sendEmail({
         email: user.email,
         subject: "Votre Code de Connexion - Système de Stock",
-        message: `Votre code de vérification est : ${code}. Il expire dans 1 minute.`
+        message: `Votre code de vérification est : ${code}. Il expire dans 10 minutes.`
       });
 
       return res.status(200).json({
@@ -109,7 +109,7 @@ exports.resendOtp = async (req, res) => {
       await sendEmail({
         email: user.email,
         subject: "Nouveau Code de Vérification",
-        message: `Votre nouveau code de vérification est : ${newCode}. Il expire dans 1 minute.`
+        message: `Votre nouveau code de vérification est : ${newCode}. Il expire dans 10 minutes.`
       });
 
       return res.status(200).json({

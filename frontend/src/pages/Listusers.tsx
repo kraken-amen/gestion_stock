@@ -130,7 +130,7 @@ export default function UsersListPage() {
                 </div>
               </div>
               <button
-                onClick={() => { setSelectedUser(adminAccount); setIsModalOpenUpdate(true); }}
+                onClick={() => { setSelectedUser(adminAccount); setIsModalOpenUpdateAdmin(true); }}
                 className="p-2 md:p-3 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all active:scale-95 flex-shrink-0"
                 title="Modifier mon profil"
               >
