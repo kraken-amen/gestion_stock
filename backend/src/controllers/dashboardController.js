@@ -1,35 +1,43 @@
-const Stock = require("../models/Stock")
+const Stock = require("../models/Stock");
+const Product = require("../models/Product");
 
-exports.getDashboard = async (req,res)=>{
-  try{
-
-    const totalProducts = await Stock.countDocuments()
-
-    const totalStock = await Stock.aggregate([
+exports.getDashboard = async (req, res) => {
+  try {
+    const totalProducts = await Product.countDocuments();
+    const stockStats = await Stock.aggregate([
       {
-        $group:{
-          _id:null,
-          total:{ $sum:"$quantite" }
+        $lookup: { 
+          from: "products", 
+          localField: "product_id",
+          foreignField: "_id",
+          as: "product_info"
+        }
+      },
+      { $unwind: "$product_info" },
+      {
+        $group: {
+          _id: null,
+          totalQuantity: { $sum: "$quantite" },
+          totalValue: { $sum: { $multiply: ["$quantite", "$product_info.prix"] } }
         }
       }
-    ])
-
+    ]);
     const stockByRegion = await Stock.aggregate([
-      {
-        $group:{
-          _id:"$region",
-          total:{ $sum:"$quantite" }
-        }
-      }
-    ])
+      { $group: { _id: "$region", total: { $sum: "$quantite" } } }
+    ]);
+    const lowStockItems = await Stock.find({ quantite: { $lt: 5 } })
+      .populate("product_id", "libelle prix");
 
     res.json({
       totalProducts,
-      totalStock: totalStock[0]?.total || 0,
-      stockByRegion
-    })
+      totalQuantity: stockStats[0]?.totalQuantity || 0,
+      totalInventoryValue: stockStats[0]?.totalValue || 0,
+      stockByRegion,
+      lowStockItems
+    });
 
-  }catch(error){
-    res.status(500).json({message:"Erreur serveur"})
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
-}
+};

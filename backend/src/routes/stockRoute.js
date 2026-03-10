@@ -8,8 +8,8 @@ const { getDashboard } = require('../controllers/dashboardController')
 router.post('/movement', protect, handleMovement);
 router.get('/my-stock', protect, getRegionalStock);
 router.get('/view', protect, getAllStocks)
-router.post('/create-stock', protect, createStock)
-router.put('/update-stock/:id', protect, adminOnly, updateStock)
-router.delete('/delete-stock/:id', protect, adminOnly, deleteStock)
+router.post('/create', protect, createStock)
+router.put('/update/:id', protect, updateStock)
+router.delete('/delete/:id', protect, deleteStock)
 router.get('/dashboard', protect, getDashboard)
 module.exports = router;

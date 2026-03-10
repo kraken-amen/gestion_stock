@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const authRoutes = require("./src/routes/authRoutes");
 const stockRoutes = require("./src/routes/stockRoute");
+const productRoutes = require("./src/routes/productRoutes");
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 // Stock Routes
 app.use("/api/stock", stockRoutes);
+// Product Routes
+app.use("/api/product", productRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
