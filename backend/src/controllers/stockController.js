@@ -1,34 +1,49 @@
-const Product = require('../models/Product');
-//us4
-exports.handleMovement = async (req, res) => {
+const Stock = require('../models/Stock')
+
+exports.getAllStocks = async (req, res) => {
   try {
-    const { codeArticle, quantityChange, type } = req.body; 
-    const product = await Product.findOne({ codeArticle });
-
-    if (!product) {
-      return res.status(404).json({ message: "Produit non trouvé" });
-    }
-    let newQuantity = type === 'entree' 
-      ? product.quantite + Number(quantityChange) 
-      : product.quantite - Number(quantityChange);
-    if (newQuantity < 0) {
-      return res.status(400).json({ message: "Stock insuffisant pour cette sortie" });
-    }
-
-    product.quantite = newQuantity;
-    product.dateMovement = Date.now(); 
-    await product.save();
-
-    res.status(200).json({ message: "Mouvement enregistré", product });
+    const stocks = await Stock.find()
+    res.json(stocks)
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error });
+    res.status(500).json({ message: "Erreur serveur" })
   }
-};
-exports.getRegionalStock = async (req, res) => {
+}
+exports.createStock = async (req, res) => {
   try {
-    const products = await Product.find({ region: req.user.region });
-    res.status(200).json(products);
+
+    const stock = new Stock(req.body)
+
+    await stock.save()
+
+    res.status(201).json(stock)
+
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la récupération du stock" });
+    res.status(500).json({ message: "Erreur serveur" })
   }
-};
+}
+exports.updateStock = async (req,res)=>{
+  try{
+
+    const stock = await Stock.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new:true }
+    )
+
+    res.json(stock)
+
+  }catch(error){
+    res.status(500).json({message:"Erreur serveur"})
+  }
+}
+exports.deleteStock = async (req,res)=>{
+  try{
+
+    await Stock.findByIdAndDelete(req.params.id)
+
+    res.json({message:"Stock supprimé"})
+
+  }catch(error){
+    res.status(500).json({message:"Erreur serveur"})
+  }
+}
