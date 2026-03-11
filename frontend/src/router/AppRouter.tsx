@@ -6,6 +6,8 @@ import Otp from "../pages/Otp"
 import { OtpProtectedRoute } from "../components/ProtectedRoute"
 import { ToastProvider } from "../context/ToastContext"
 import DashboardLayout from "../layouts/DashboardLayout"
+import TunisiaMap from "../pages/TunisiaMap"
+import RegionPage from "../pages/Region"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -19,6 +21,8 @@ const AppRouter = () => {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/map" element={<TunisiaMap />} />
+            <Route path="/region/:name" element={<RegionPage />} />
           </Route>
         </Routes>
       </ToastProvider>
