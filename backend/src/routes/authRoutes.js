@@ -3,16 +3,21 @@ const router = express.Router();
 const { login, verifyCode, createUserByAdmin,
     getAllUsers,updateUser,deleteUser,
     toggleUserStatus,resendOtp } = require("../controllers/authController");
-const { protect, adminOnly } = require("../middleware/authMiddleware");
-// Route pour l'Admin (US2: Création de compte)
-router.post("/create-user",protect,adminOnly,createUserByAdmin);
-
-// Routes pour l'Utilisateur (US1: Authentification Double Facteur)
+const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+//us3
+router.post("/create-user",protect,authorizeRoles("administrateur"),createUserByAdmin);
+//us1
 router.get("/users", getAllUsers);
+//us1
 router.post("/login", login);
+//us1
 router.post("/verify-otp", verifyCode);
-router.put("/update-user/:id", protect, adminOnly,updateUser);
-router.patch("/toggle-status/:id", protect, adminOnly,toggleUserStatus);
+//us3
+router.put("/update-user/:id", protect, authorizeRoles("administrateur"),updateUser);
+//us3
+router.patch("/toggle-status/:id", protect, authorizeRoles("administrateur"),toggleUserStatus);
+//us1
 router.post("/resend-otp", resendOtp);
-router.delete("/delete-user/:id", protect, adminOnly,deleteUser);
+//us3
+router.delete("/delete-user/:id", protect, authorizeRoles("administrateur"),deleteUser);
 module.exports = router;

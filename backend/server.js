@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const authRoutes = require("./src/routes/authRoutes");
 const stockRoutes = require("./src/routes/stockRoute");
 const productRoutes = require("./src/routes/productRoutes");
-
+const moveRoutes = require("./src/routes/moveRoute");
 dotenv.config();
 
 const app = express();
@@ -30,6 +30,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/stock", stockRoutes);
 // Product Routes
 app.use("/api/product", productRoutes);
+// Movement Routes
+app.use("/api/movement", moveRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
