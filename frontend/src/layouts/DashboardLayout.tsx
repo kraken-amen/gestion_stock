@@ -49,8 +49,8 @@ const DashboardLayout = () => {
         {/* Navigation Links */}
         <nav className="space-y-1.5 flex-1">
           <NavItem icon={<BarChart3 size={20} />} label="Tableau de Bord" to="/dashboard" />
+          <NavItem icon={<Package size={20} />} label="Stocks" to="/map" />
           <NavItem icon={<ShoppingCart size={20} />} label="Commandes" to="/commandes" />
-          <NavItem icon={<Package size={20} />} label="Stocks" to="/stocks" />
           <NavItem icon={<Users size={20} />} label="Utilisateurs" to="/users" />
           <NavItem icon={<Settings size={20} />} label="Paramètres" to="/settings" />
         </nav>
