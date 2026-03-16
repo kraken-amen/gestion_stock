@@ -6,8 +6,8 @@ exports.getDashboard = async (req, res) => {
     const totalProducts = await Product.countDocuments();
     const stockStats = await Stock.aggregate([
       {
-        $lookup: { 
-          from: "products", 
+        $lookup: {
+          from: "products",
           localField: "product_id",
           foreignField: "_id",
           as: "product_info"
@@ -23,7 +23,26 @@ exports.getDashboard = async (req, res) => {
       }
     ]);
     const stockByRegion = await Stock.aggregate([
-      { $group: { _id: "$region", total: { $sum: "$quantite" } } }
+      {
+        $lookup: {
+          from: "products",
+          localField: "product_id",
+          foreignField: "_id",
+          as: "product_info"
+        }
+      },
+      { $unwind: "$product_info" },
+      {
+        $group: {
+          _id: "$region",
+          totalQuantity: { $sum: "$quantite" },
+          totalValue: {
+            $sum: {
+              $multiply: ["$quantite", "$product_info.prix"]
+            }
+          }
+        }
+      }
     ]);
     const lowStockItems = await Stock.find({ quantite: { $lt: 5 } })
       .populate("product_id", "libelle prix");

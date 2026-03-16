@@ -57,3 +57,29 @@ export interface PropsUpdate {
     onUserUpdated: () => void; 
     user: User;
 }
+//region interface
+export interface RegionStock {
+  _id: string;
+  totalValue: number;
+  totalQuantity: number;
+  
+}
+export interface Product {
+    _id: string;
+    libelle: string;
+    prix: number;
+}
+
+export interface StockItem {
+    _id: string;
+    quantite: number;
+    product_id: Product;
+}
+//dashboard response
+export interface DashboardResponse {
+  totalProducts: number;
+  totalQuantity: number;
+  totalInventoryValue: number;
+  stockByRegion: RegionStock[];
+  lowStockItems: StockItem[];
+}
