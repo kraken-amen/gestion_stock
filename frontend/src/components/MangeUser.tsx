@@ -1,4 +1,4 @@
-import { UsersIcon, ShieldCheck, UserCheck, UserX, ArrowRight, Loader2 } from "lucide-react";
+import { UsersIcon, ShieldCheck, UserCheck, UserX, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUsers } from "../services/userService";
@@ -86,9 +86,9 @@ const MangeUser = () => {
             </div>
 
             {/* Section Gestion: Responsive Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"> */}
                 {/* Button Manage Regions */}
-                <button
+                {/* <button
                     onClick={() => navigate('/regions')}
                     className="group backdrop-blur-xl bg-gradient-to-br from-blue-600/30 to-indigo-600/30 border border-blue-400/20 hover:border-blue-300/50 rounded-2xl p-6 md:p-8 transition-all duration-300 active:scale-95"
                 >
@@ -99,10 +99,10 @@ const MangeUser = () => {
                         </div>
                         <ArrowRight className="text-white/50 group-hover:text-white group-hover:translate-x-2 transition-all" size={24} />
                     </div>
-                </button>
+                </button> */}
 
                 {/* Button Manage Users */}
-                <button
+                {/* <button
                     onClick={() => navigate('/users')}
                     className="group backdrop-blur-xl bg-white/5 border border-white/10 hover:border-white/30 rounded-2xl p-6 md:p-8 transition-all duration-300 active:scale-95"
                 >
@@ -114,7 +114,7 @@ const MangeUser = () => {
                         <ArrowRight className="text-white/50 group-hover:text-white group-hover:translate-x-2 transition-all" size={24} />
                     </div>
                 </button>
-            </div>
+            </div> */}
 
             {/* Resume de l'activité: Improved for Mobile */}
             <div className="mt-8 md:mt-12 backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl">

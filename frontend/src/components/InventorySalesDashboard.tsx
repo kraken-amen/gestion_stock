@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { TrendingUp, Package, DollarSign, Activity, X as CloseIcon, AlertCircle, Check, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, Package, Activity, X as CloseIcon, AlertCircle, Check, Bell, Loader2 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
@@ -8,11 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/Badge';
 import type { Transaction, TopItem } from '../types';
+import { getDashboard } from '../services/dashboardService';
+import type { DashboardResponse } from '../types';
 
 export default function InventorySalesDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRegion, setFilterRegion] = useState('all');
-
+    const [data, setData] = useState<DashboardResponse | null>(null)
+    const [loading, setLoading] = useState(true);
     // Sales Trends Data
     const salesTrendsData = [
         { month: 'Janvier', ventes: 4000, stocks: 2400 },
@@ -57,7 +60,28 @@ export default function InventorySalesDashboard() {
         { id: 'TXN004', product: 'AirPods Pro', amount: 300, status: 'success', date: '2024-03-07', region: 'Tunis' },
         { id: 'TXN005', product: 'Samsung S24', amount: 1200, status: 'failed', date: '2024-03-06', region: 'Gabès' }
     ];
+    useEffect(() => {
+        const fetchAllData = async () => {
+            try {
+                setLoading(true);
+                const res = await getDashboard();
+                setData(res);
+            } catch (error) {
+                console.error("Failed to fetch dashboard data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAllData();
+    }, []);
 
+    if (loading || !data) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center bg-slate-950">
+                <Loader2 className="animate-spin text-blue-500" size={48} />
+            </div>
+        );
+    }
     const filteredTransactions = transactions.filter(txn =>
         (filterRegion === 'all' || txn.region === filterRegion) &&
         (searchTerm === '' || txn.product.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -100,13 +124,13 @@ export default function InventorySalesDashboard() {
                         <CardHeader className="pb-3">
                             <CardTitle className="text-white/70 text-sm font-semibold flex items-center justify-between">
                                 <span>Ventes Totales</span>
-                                <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/50">
+                                {/* <div className="p-2 rounded-lg bg-blue-500/20 border border-blue-400/50">
                                     <DollarSign className="text-blue-400" size={18} />
-                                </div>
+                                </div> */}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl font-black text-white drop-shadow-lg">2.45M</p>
+                            <p className="text-3xl font-black text-white drop-shadow-lg">{data.totalInventoryValue}</p>
                             <Badge className="mt-3 bg-emerald-500/20 text-emerald-400 border-emerald-400/50">+12.5% ce mois</Badge>
                         </CardContent>
                     </Card>
@@ -122,7 +146,7 @@ export default function InventorySalesDashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-3xl font-black text-white drop-shadow-lg">45.8K</p>
+                            <p className="text-3xl font-black text-white drop-shadow-lg">{data.totalQuantity}</p>
                             <p className="text-white/70 text-xs font-medium mt-3">8.2K articles</p>
                         </CardContent>
                     </Card>
