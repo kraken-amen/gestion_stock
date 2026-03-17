@@ -83,3 +83,18 @@ export interface DashboardResponse {
   stockByRegion: RegionStock[];
   lowStockItems: StockItem[];
 }
+export interface Transaction {
+    id: string;
+    product: string;
+    amount: number;
+    status: 'success' | 'pending' | 'failed';
+    date: string;
+    region: string;
+}
+
+export interface TopItem {
+    name: string;
+    sales: number;
+    revenue: number;
+    growth: number;
+}

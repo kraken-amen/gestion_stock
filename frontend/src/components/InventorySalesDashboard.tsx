@@ -7,22 +7,7 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/Badge';
-
-interface Transaction {
-    id: string;
-    product: string;
-    amount: number;
-    status: 'success' | 'pending' | 'failed';
-    date: string;
-    region: string;
-}
-
-interface TopItem {
-    name: string;
-    sales: number;
-    revenue: number;
-    growth: number;
-}
+import type { Transaction, TopItem } from '../types';
 
 export default function InventorySalesDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
