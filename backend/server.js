@@ -32,6 +32,8 @@ app.use("/api/stock", stockRoutes);
 app.use("/api/product", productRoutes);
 // Movement Routes
 app.use("/api/movement", moveRoutes);
+// Demande Routes
+app.use("/api/demande", demandeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
