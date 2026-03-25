@@ -6,7 +6,7 @@ const sendEmail = require("../utils/sendEmail");
 // --- CREATE USER : Création d'un compte par l'administrateur (US2) ---
 exports.createUserByAdmin = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, region } = req.body;
 
     // 1. Vérifier si l'utilisateur existe déjà dans la base de données
     const userExists = await User.findOne({ email });
@@ -22,6 +22,7 @@ exports.createUserByAdmin = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      region: role === "responsable region" ? region : null,
       isVerified: false
     });
 
@@ -167,17 +168,25 @@ exports.verifyCode = async (req, res) => {
 //  Modification User (Update)
 exports.updateUser = async (req, res) => {
   try {
-    const { email, role, password, isActive } = req.body;
-    let updateData = { email, role, isActive };
+    const { email, role, password, region, isActive } = req.body;
+    let updateData = { email, role, region, isActive };
+    if (role === "responsable region") {
+      if (!region) {
+        return res.status(400).json({ message: "Region est obligatoire pour responsable region" });
+      }
+      updateData.region = region;
+    } else {
+      updateData.region = null;
+    }
     if (password && password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(password, salt);
     }
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      updateData, 
+      updateData,
       { new: true, runValidators: true }
-    ).select("-password"); 
+    ).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
@@ -221,7 +230,7 @@ exports.toggleUserStatus = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Erreur lors de la désactivation: " + error.message });
   }
 };
 // get all users

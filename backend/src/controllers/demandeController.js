@@ -7,7 +7,7 @@ exports.createDemande = async (req, res) => {
         const newDemande = new Demande({
             product_id,
             quantite,
-            region_id: req.user.region,
+            region,
             user_id: req.user._id,
             status: 'PENDING'
         });

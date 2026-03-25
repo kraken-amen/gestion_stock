@@ -1,20 +1,49 @@
 import React from 'react'
 import { useState } from 'react';
-import { Eye, EyeOff} from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { createUser } from '../services/userService';
 import type { Props } from '../types';
 import { useToast } from '../context/ToastContext';
-
+import Select from 'react-select';
+import customSelectStyles from './ui/selectStyles';
 const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
+    const options = [
+        { value: 'tunis', label: 'Tunis' },
+        { value: 'sfax', label: 'Sfax' },
+        { value: 'sousse', label: 'Sousse' },
+        { value: 'monastir', label: 'Monastir' },
+        { value: 'nabeul', label: 'Nabeul' },
+        { value: 'beja', label: 'Beja' },
+        { value: 'bizerte', label: 'Bizerte' },
+        { value: 'gabes', label: 'Gabes' },
+        { value: 'gafsa', label: 'Gafsa' },
+        { value: 'jendouba', label: 'Jendouba' },
+        { value: 'kasserine', label: 'Kasserine' },
+        { value: 'kairouan', label: 'Kairouan' },
+        { value: 'kebili', label: 'Kebili' },
+        { value: 'ariana', label: 'Ariana' },
+        { value: 'kef', label: 'Kef' },
+        { value: 'mahdia', label: 'Mahdia' },
+        { value: 'manouba', label: 'Manouba' },
+        { value: 'medenine', label: 'Medenine' },
+        { value: 'sidi bouzid', label: 'Sidi Bouzid' },
+        { value: 'siliana', label: 'Siliana' },
+        { value: 'tozeur', label: 'Tozeur' },
+        { value: 'zaghouan', label: 'Zaghouan' },
+        { value: 'tataouine', label: 'Tataouine' },
+        { value: 'ben arous', label: 'Ben Arous' }
+    ];
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        role: 'utilisateur'
+        role: 'utilisateur',
+        region: ''
     });
     const [errors, setErrors] = useState({
         email: '',
         password: '',
-        role: 'utilisateur'
+        role: 'utilisateur',
+        region: ''
     });
     const { addToast } = useToast();
     const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +64,11 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
             return;
         }
         if (formData.password.length < 8) {
-            addToast('Le mot de passe doit contenir au moins 6 caractères', 'error');
+            addToast('Le mot de passe doit contenir au moins 8 caractères', 'error');
+            return;
+        }
+        if (formData.role === "responsable region" && !formData.region) {
+            addToast('Veuillez sélectionner une région', 'error');
             return;
         }
         setLoading(true);
@@ -51,8 +84,8 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
     };
     //close modal
     const handleClose = () => {
-        setFormData({ email: '', password: '', role: 'utilisateur' });
-        setErrors({ email: '', password: '', role: 'utilisateur' });
+        setFormData({ email: '', password: '', role: 'utilisateur', region: '' });
+        setErrors({ email: '', password: '', role: 'utilisateur', region: '' });
         onClose();
     };
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -68,6 +101,7 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
             }));
         }
     };
+    
     return (
         <div className="min-h-screen overflow-hidden relative font-sans">
             {isOpen && (
@@ -143,6 +177,20 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
                                     <option value="administrateur" className="bg-slate-900">Administrateur</option>
                                 </select>
                             </div>
+                            {/* Region */}
+                            {formData.role === "responsable region" && (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
+
+                                    <Select
+                                        options={options}
+                                        placeholder="Choisir une region"
+                                        isSearchable={true}                                        classNamePrefix="my-react-select"
+                                        styles={customSelectStyles}
+                                        onChange={(option) => setFormData({ ...formData, region: option?.value || '' })}
+                                    />
+                                </div>
+                            )}
 
                             {/* Buttons */}
                             <div className="flex gap-3 mt-8 pt-4 border-t border-white/10">

@@ -6,6 +6,7 @@ const authRoutes = require("./src/routes/authRoutes");
 const stockRoutes = require("./src/routes/stockRoute");
 const productRoutes = require("./src/routes/productRoutes");
 const moveRoutes = require("./src/routes/moveRoute");
+const demandeRoutes = require("./src/routes/demandeRoutes");
 dotenv.config();
 
 const app = express();

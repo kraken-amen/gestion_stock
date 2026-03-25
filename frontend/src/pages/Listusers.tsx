@@ -64,8 +64,7 @@ export default function UsersListPage() {
     const matchesStatus = filterStatus === 'all' || user.isActive === (filterStatus === 'true');
     return matchesSearch && matchesRole && matchesStatus;
   });
-
-  const adminAccount = filteredUsers.find(u => u._id === currentAuthUser?.id || u._id === currentAuthUser?._id);
+  const adminAccount = users.find(u => u._id === currentAuthUser?.id || u._id === currentAuthUser?._id);
   const otherUsers = filteredUsers.filter(u => u._id !== currentAuthUser?.id && u._id !== currentAuthUser?._id);
 
   const getRoleColor = (role: string) => {
@@ -217,7 +216,7 @@ export default function UsersListPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap ${getRoleColor(user.role)}`}>
-                          {user.role}
+                          {user.role === "responsable region" ? "responsable " + user.region : user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4">
