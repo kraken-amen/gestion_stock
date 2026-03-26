@@ -1,13 +1,12 @@
-const Demande = require('../models/demande');
+const Demande = require('../models/Demande');
 const mongoose = require('mongoose');
 
 exports.createDemande = async (req, res) => {
     try {
-        const { product_id, quantite } = req.body;
+        const { items } = req.body;
         const newDemande = new Demande({
             user_id: req.user._id,
-            product_id,
-            quantite,
+            items,
             status: 'PENDING'
         });
         await newDemande.save();
@@ -19,9 +18,9 @@ exports.createDemande = async (req, res) => {
 exports.getAllDemandes = async (req, res) => {
     try {
         const demandes = await Demande.find()
-            .populate('product_id', 'nom libelle')
-            .populate('user_id', 'nom')
-            .sort({ date: -1 });
+            .populate('items.product_id', 'codeArticle libelle prix')
+            .populate('user_id', 'email role region')
+            .sort({ createdAt: -1 });
         res.json(demandes);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -31,8 +30,8 @@ exports.getAllDemandes = async (req, res) => {
 exports.getDemandeById = async (req, res) => {
     try {
         const demande = await Demande.findById(req.params.id)
-            .populate('product_id')
-            .populate('user_id');
+            .populate('items.product_id', 'codeArticle libelle prix')
+            .populate('user_id', 'email role region');
         if (!demande) return res.status(404).json({ message: "Demande non trouvée" });
         res.json(demande);
     } catch (error) {
@@ -73,31 +72,41 @@ exports.approveRequest = async (req, res) => {
     try {
         const demande = await Demande.findById(requestId).session(session);
         if (!demande) throw new Error("Demande non trouvée");
-
-        const centraleStock = await Stock.findOne({
-            product_id: demande.product_id,
-            region_id: demande.region_id
-        }).session(session);
-
-        if (!centraleStock || centraleStock.quantite < demande.quantite) {
-            throw new Error("Stock Centrale insuffisant !");
-        }
-
-        centraleStock.quantite -= demande.quantite;
-        await centraleStock.save({ session });
-
-        await Movement.create([{
-            stock_id: centraleStock._id,
-            quantite: demande.quantite,
-            type: 'sortie',
-            description: `Transfert vers Region ${demande.region_id}`
+        if (demande.status !== 'PENDING') throw new Error("Cette demande est déjà traitée");
+        const [newCommande] = await Commande.create([{
+            demande_id: demande._id,
+            status: "PREPARING" 
         }], { session });
+
+        await Livraison.create([{
+            commande_id: newCommande._id,
+            status: "IN_TRANSIT"
+        }], { session });
+        for (let item of demande.items) {
+            const centraleStock = await Stock.findOne({
+                product_id: item.product_id,
+                region: "Centrale"
+            }).session(session);
+
+            if (!centraleStock || centraleStock.quantite < item.quantite) {
+                throw new Error(`Stock insuffisant pour le produit: ${item.product_id}`);
+            }
+            centraleStock.quantite -= item.quantite;
+            await centraleStock.save({ session });
+            await Movement.create([{
+                product_id: item.product_id,
+                from: User.user._id,
+                to: demande.user_id,
+                quantite: item.quantite,
+                type: 'sortie',
+            }], { session });
+        }
 
         demande.status = 'APPROVED';
         await demande.save({ session });
 
         await session.commitTransaction();
-        res.json({ message: "Demande approuvée et la quantité a été déduite du stock central" });
+        res.json({ message: "Demande approuvée. Stock central mis à jour." });
     } catch (error) {
         await session.abortTransaction();
         res.status(400).json({ message: error.message });

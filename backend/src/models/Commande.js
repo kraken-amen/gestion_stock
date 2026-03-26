@@ -5,19 +5,6 @@ const commandeSchema = new mongoose.Schema({
     ref: "Demande",
     required: true
   },
-  items: [
-    {
-      product_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true
-      },
-      quantite: {
-        type: Number,
-        required: true
-      }
-    }
-  ],
   status: {
     type: String,
     enum: ["PREPARING", "SHIPPED", "DELIVERED"],

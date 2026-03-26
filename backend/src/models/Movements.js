@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
 const MovementSchema = new mongoose.Schema({
-    commande_id: {
+    livraison_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Commande",
+        ref: "Livraison",
+        required: true
+    },
+    product_id:
+    {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
         required: true
     },
 

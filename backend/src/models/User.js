@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const regions = require("../utils/regions");
+const Region = require('../utils/Region');
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     region: {
         type: String,
-        enum: regions,
+        enum: Region,
         required: function () {
             return this.role === "responsable region";
         }
