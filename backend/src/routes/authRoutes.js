@@ -7,7 +7,7 @@ const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 //us3
 router.post("/create-user", protect, authorizeRoles("administrateur"), createUserByAdmin);
 //us1
-router.get("/", getAllUsers);
+router.get("/", protect, authorizeRoles("administrateur"), getAllUsers);
 //us1
 router.post("/login", login);
 //us1

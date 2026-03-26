@@ -5,10 +5,9 @@ exports.createDemande = async (req, res) => {
     try {
         const { product_id, quantite } = req.body;
         const newDemande = new Demande({
+            user_id: req.user._id,
             product_id,
             quantite,
-            region,
-            user_id: req.user._id,
             status: 'PENDING'
         });
         await newDemande.save();
@@ -21,7 +20,7 @@ exports.getAllDemandes = async (req, res) => {
     try {
         const demandes = await Demande.find()
             .populate('product_id', 'nom libelle')
-            .populate('region_id', 'nom')
+            .populate('user_id', 'nom')
             .sort({ date: -1 });
         res.json(demandes);
     } catch (error) {
@@ -33,7 +32,7 @@ exports.getDemandeById = async (req, res) => {
     try {
         const demande = await Demande.findById(req.params.id)
             .populate('product_id')
-            .populate('region_id');
+            .populate('user_id');
         if (!demande) return res.status(404).json({ message: "Demande non trouvée" });
         res.json(demande);
     } catch (error) {

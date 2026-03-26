@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const regions = require("../utils/region");
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -17,33 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     region: {
         type: String,
-        enum:
-            [
-                'tunis',
-                'sfax',
-                'sousse',
-                'monastir',
-                'nabeul',
-                'beja',
-                'bizerte',
-                'gabes',
-                'gafsa',
-                'jendouba',
-                'kasserine',
-                'kairouan',
-                'kebili',
-                'ariana',
-                'kef',
-                'mahdia',
-                'manouba',
-                'medenine',
-                'sidi bouzid',
-                'siliana',
-                'tozeur',
-                'zaghouan',
-                'tataouine',
-                'ben arous',
-            ],
+        enum: regions,
         required: function () {
             return this.role === "responsable region";
         }

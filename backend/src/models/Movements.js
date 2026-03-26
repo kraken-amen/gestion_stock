@@ -1,22 +1,36 @@
 const mongoose = require('mongoose');
 const MovementSchema = new mongoose.Schema({
-    stock_id: {
+    commande_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Stock",
-        required: [true, "Le produit est obligatoire"]
+        ref: "Commande",
+        required: true
     },
+
+    from: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false
+    },
+    to: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+
     quantite: {
         type: Number,
-        required: [true, "La quantité est obligatoire"]
+        required: true
     },
+
     type: {
         type: String,
         enum: ["entree", "sortie"],
-        required: [true, "Le type est obligatoire"]
+        required: true
     },
+
     dateMovement: {
         type: Date,
         default: Date.now
-    }
-})
+    },
+});
 module.exports = mongoose.model("Movement", MovementSchema);

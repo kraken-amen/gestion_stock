@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
-
-const demandeSchema = new mongoose.Schema({
-  user_id: {
+const commandeSchema = new mongoose.Schema({
+  demande_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Demande",
     required: true
   },
   items: [
@@ -19,13 +18,11 @@ const demandeSchema = new mongoose.Schema({
       }
     }
   ],
-
   status: {
     type: String,
-    enum: ["PENDING", "APPROVED", "REJECTED", "COMPLETED"],
-    default: "PENDING"
+    enum: ["PREPARING", "SHIPPED", "DELIVERED"],
+    default: "PREPARING"
   },
-
   createdAt: {
     type: Date,
     default: Date.now
@@ -33,4 +30,4 @@ const demandeSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model("Demande", demandeSchema);
+module.exports = mongoose.model("Commande", commandeSchema);
