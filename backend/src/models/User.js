@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const regions = require("../utils/region");
+const regions = require("../utils/regions");
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
