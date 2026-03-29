@@ -30,7 +30,7 @@ const MovementSchema = new mongoose.Schema({
 
     type: {
         type: String,
-        enum: ["entree", "sortie"],
+        enum: ["ENTREE", "SORTIE"],
         required: true
     },
 

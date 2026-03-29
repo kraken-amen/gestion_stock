@@ -9,7 +9,7 @@ router.post('/',authorizeRoles("responsable region"), createDemande);
 router.get('/',authorizeRoles("responsable region","administrateur"), getAllDemandes);
 router.get('/:id',authorizeRoles("responsable region","administrateur"), getDemandeById);
 
-router.patch('/approve/:requestId', authorizeRoles('administrateur'), approveRequest);
+router.patch('/approve/:id', authorizeRoles('administrateur'), approveRequest);
 router.patch('/reject/:id', authorizeRoles('administrateur'), rejectDemande);
 
 module.exports = router;

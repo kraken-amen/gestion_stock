@@ -7,8 +7,8 @@ const commandeSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["PREPARING", "SHIPPED", "DELIVERED"],
-    default: "PREPARING"
+    enum: ["EN_PREPARATION", "EXPEDIEE", "LIVREE"],
+    default: "EN_PREPARATION"
   },
   createdAt: {
     type: Date,

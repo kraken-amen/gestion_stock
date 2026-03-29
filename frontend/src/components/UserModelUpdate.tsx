@@ -3,6 +3,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import { updateUser } from '../services/userService';
 import type { PropsUpdate } from '../types';
 import { useToast } from '../context/ToastContext';
+import Select from 'react-select';
+import customSelectStyles from './ui/selectStyles';
 
 /**
  * Composant de mise à jour des informations utilisateur.
@@ -12,11 +14,38 @@ import { useToast } from '../context/ToastContext';
  * @param user - Les données de l'utilisateur à modifier.
  */
 const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) => {
+    const options = [
+        { value: 'Tunis', label: 'Tunis' },
+        { value: 'Sfax', label: 'Sfax' },
+        { value: 'Sousse', label: 'Sousse' },
+        { value: 'Monastir', label: 'Monastir' },
+        { value: 'Nabeul', label: 'Nabeul' },
+        { value: 'Beja', label: 'Beja' },
+        { value: 'Bizerte', label: 'Bizerte' },
+        { value: 'Gabes', label: 'Gabes' },
+        { value: 'Gafsa', label: 'Gafsa' },
+        { value: 'Jendouba', label: 'Jendouba' },
+        { value: 'Kasserine', label: 'Kasserine' },
+        { value: 'Kairouan', label: 'Kairouan' },
+        { value: 'Kebili', label: 'Kebili' },
+        { value: 'Ariana', label: 'Ariana' },
+        { value: 'Kef', label: 'Kef' },
+        { value: 'Mahdia', label: 'Mahdia' },
+        { value: 'Manouba', label: 'Manouba' },
+        { value: 'Medenine', label: 'Medenine' },
+        { value: 'Sidi Bouzid', label: 'Sidi Bouzid' },
+        { value: 'Siliana', label: 'Siliana' },
+        { value: 'Tozeur', label: 'Tozeur' },
+        { value: 'Zaghouan', label: 'Zaghouan' },
+        { value: 'Tataouine', label: 'Tataouine' },
+        { value: 'Ben Arous', label: 'Ben Arous' }
+    ];
     // État local pour gérer les données du formulaire
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        role: 'utilisateur'
+        role: 'utilisateur',
+        region: ''
     });
     const { addToast } = useToast();
     const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +60,8 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
             setFormData({
                 email: user.email || '',
                 password: '', // Le mot de passe reste vide par défaut (sécurité)
-                role: user.role || 'utilisateur'
+                role: user.role || 'utilisateur',
+                region: user.region || ''
             });
         }
     }, [user, isOpen]);
@@ -57,13 +87,11 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
         setLoading(true);
         try {
             // Appel au service de mise à jour
-            await updateUser(user._id,formData.email, formData.password, formData.role);
-            
+            await updateUser(user._id, formData.email, formData.password, formData.role, formData?.region);
             // Notification au composant parent pour rafraîchir la liste
-            onUserUpdated(); 
-            
+            onUserUpdated();
             // Fermeture du modal
-            onClose();      
+            onClose();
         } catch (error) {
             console.error("Erreur lors de la mise à jour:", error);
         } finally {
@@ -85,8 +113,8 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Arrière-plan sombre avec effet de flou */}
-            <div 
-                className="absolute inset-0 bg-slate-950/70 backdrop-blur-md" 
+            <div
+                className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
                 onClick={onClose}
             ></div>
 
@@ -95,7 +123,7 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
                 <h2 className="text-2xl font-bold text-white mb-6">Modifier l'utilisateur</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    
+
                     {/* Champ Email (Désactivé car c'est souvent l'identifiant unique) */}
                     <div>
                         <label className="block text-sm font-semibold text-white/90 mb-2">Adresse Email</label>
@@ -137,12 +165,26 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) 
                             value={formData.role}
                             onChange={handleInputChange}
                             className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/20 rounded-xl px-4 py-3 text-white focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium appearance-none cursor-pointer ">
-                                <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
-                                <option value="responsable region" className="bg-slate-900">Responsable Region</option>
-                                <option value="administrateur" className="bg-slate-900">Administrateur</option>
-                            </select>
+                            <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
+                            <option value="responsable region" className="bg-slate-900">Responsable Region</option>
+                            <option value="administrateur" className="bg-slate-900">Administrateur</option>
+                        </select>
                     </div>
+                    {/* Region */}
+                    {formData.role === "responsable region" && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
 
+                            <Select
+                                options={options}
+                                placeholder="Choisir une region"
+                                isSearchable={true}
+                                classNamePrefix="my-react-select"
+                                styles={customSelectStyles}
+                                onChange={(option) => setFormData({ ...formData, region: option?.value || '' })}
+                            />
+                        </div>
+                    )}
                     {/* Actions : Annuler ou Enregistrer */}
                     <div className="flex gap-3 mt-8 pt-4 border-t border-white/10">
                         <button

@@ -31,15 +31,15 @@ exports.confirmReceipt = async (req, res) => {
                 product_id: item.product_id,
                 to: req.user._id,
                 quantite: item.quantite,
-                type: 'entree'
+                type: 'ENTREE'
             }], { session });
         }
 
-        livraison.status = "DELIVERED";
+        livraison.status = "LIVREE";
         await livraison.save({ session });
         
-        await Commande.findByIdAndUpdate(livraison.commande_id, { status: "DELIVERED" }, { session });
-        await Demande.findByIdAndUpdate(demande._id, { status: "COMPLETED" }, { session });
+        await Commande.findByIdAndUpdate(livraison.commande_id, { status: "LIVREE" }, { session });
+        await Demande.findByIdAndUpdate(demande._id, { status: "ACCEPTEE" }, { session });
 
         await session.commitTransaction();
         res.json({ message: "Livraison confirmée et Stock mis à jour !" });

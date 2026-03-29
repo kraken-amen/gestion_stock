@@ -168,24 +168,35 @@ exports.verifyCode = async (req, res) => {
 //  Modification User (Update)
 exports.updateUser = async (req, res) => {
   try {
-    const { email, role, password, region, isActive } = req.body;
-    let updateData = { email, role, region, isActive };
-    if (role === "responsable region") {
-      if (!region) {
-        return res.status(400).json({ message: "Region est obligatoire pour responsable region" });
+    const { email, role, password, region } = req.body;
+    let updateData = {};
+    if (email) updateData.email = email;
+    if (role) {
+      updateData.role = role;
+      if (role === "responsable region") {
+        if (!region) {
+          return res.status(400).json({ message: "Region est obligatoire pour responsable region" });
+        }
+        updateData.region = region;
+      } else {
+        updateData.$unset = { region: 1 }; 
       }
-      updateData.region = region;
-    } else {
-      updateData.region = null;
     }
     if (password && password.trim() !== "") {
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Le mot de passe doit contenir au moins 8 caractères" });
+      }
       const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(password, salt);
     }
     const user = await User.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true, runValidators: true }
+      { 
+        new: true, 
+        runValidators: true, 
+        context: 'query'
+      }
     ).select("-password");
 
     if (!user) {
@@ -195,6 +206,9 @@ exports.updateUser = async (req, res) => {
     res.json({ message: "Utilisateur mis à jour avec succès", user });
 
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Cet email est déjà utilisé" });
+    }
     res.status(500).json({ message: "Erreur update: " + error.message });
   }
 };

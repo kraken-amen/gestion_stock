@@ -9,8 +9,8 @@ const livraisonSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["IN_TRANSIT", "DELIVERED"],
-    default: "IN_TRANSIT"
+    enum: ["EN_TRANSIT", "LIVREE"],
+    default: "EN_TRANSIT"
   },
 
   shippedAt: {

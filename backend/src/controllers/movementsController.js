@@ -9,7 +9,7 @@ exports.handleMovement = async (req, res) => {
   try {
     const { commande_id, quantite, type, from, to } = req.body;
     // validate type
-    if (!["entree", "sortie"].includes(type)) {
+    if (!["ENTREE", "SORTIE"].includes(type)) {
       await session.abortTransaction();
       return res.status(400).json({ message: "Type invalide" });
     }
@@ -34,7 +34,7 @@ exports.handleMovement = async (req, res) => {
     }
 
     const newQuantity =
-      type === "entree"
+      type === "ENTREE"
         ? stock.quantite + change
         : stock.quantite - change;
 

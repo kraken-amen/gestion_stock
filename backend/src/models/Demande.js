@@ -22,8 +22,8 @@ const demandeSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["PENDING", "APPROVED", "REJECTED", "COMPLETED"],
-    default: "PENDING"
+    enum: ["EN_ATTENTE", "APPROUVE", "REJETEE", "ACCEPTEE"],
+    default: "EN_ATTENTE"
   },
 
   createdAt: {

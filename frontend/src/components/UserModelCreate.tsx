@@ -8,30 +8,30 @@ import Select from 'react-select';
 import customSelectStyles from './ui/selectStyles';
 const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
     const options = [
-        { value: 'tunis', label: 'Tunis' },
-        { value: 'sfax', label: 'Sfax' },
-        { value: 'sousse', label: 'Sousse' },
-        { value: 'monastir', label: 'Monastir' },
-        { value: 'nabeul', label: 'Nabeul' },
-        { value: 'beja', label: 'Beja' },
-        { value: 'bizerte', label: 'Bizerte' },
-        { value: 'gabes', label: 'Gabes' },
-        { value: 'gafsa', label: 'Gafsa' },
-        { value: 'jendouba', label: 'Jendouba' },
-        { value: 'kasserine', label: 'Kasserine' },
-        { value: 'kairouan', label: 'Kairouan' },
-        { value: 'kebili', label: 'Kebili' },
-        { value: 'ariana', label: 'Ariana' },
-        { value: 'kef', label: 'Kef' },
-        { value: 'mahdia', label: 'Mahdia' },
-        { value: 'manouba', label: 'Manouba' },
-        { value: 'medenine', label: 'Medenine' },
-        { value: 'sidi bouzid', label: 'Sidi Bouzid' },
-        { value: 'siliana', label: 'Siliana' },
-        { value: 'tozeur', label: 'Tozeur' },
-        { value: 'zaghouan', label: 'Zaghouan' },
-        { value: 'tataouine', label: 'Tataouine' },
-        { value: 'ben arous', label: 'Ben Arous' }
+        { value: 'Tunis', label: 'Tunis' },
+        { value: 'Sfax', label: 'Sfax' },
+        { value: 'Sousse', label: 'Sousse' },
+        { value: 'Monastir', label: 'Monastir' },
+        { value: 'Nabeul', label: 'Nabeul' },
+        { value: 'Beja', label: 'Beja' },
+        { value: 'Bizerte', label: 'Bizerte' },
+        { value: 'Gabes', label: 'Gabes' },
+        { value: 'Gafsa', label: 'Gafsa' },
+        { value: 'Jendouba', label: 'Jendouba' },
+        { value: 'Kasserine', label: 'Kasserine' },
+        { value: 'Kairouan', label: 'Kairouan' },
+        { value: 'Kebili', label: 'Kebili' },
+        { value: 'Ariana', label: 'Ariana' },
+        { value: 'Kef', label: 'Kef' },
+        { value: 'Mahdia', label: 'Mahdia' },
+        { value: 'Manouba', label: 'Manouba' },
+        { value: 'Medenine', label: 'Medenine' },
+        { value: 'Sidi Bouzid', label: 'Sidi Bouzid' },
+        { value: 'Siliana', label: 'Siliana' },
+        { value: 'Tozeur', label: 'Tozeur' },
+        { value: 'Zaghouan', label: 'Zaghouan' },
+        { value: 'Tataouine', label: 'Tataouine' },
+        { value: 'Ben Arous', label: 'Ben Arous' }
     ];
     const [formData, setFormData] = useState({
         email: '',
@@ -185,7 +185,8 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
                                     <Select
                                         options={options}
                                         placeholder="Choisir une region"
-                                        isSearchable={true}                                        classNamePrefix="my-react-select"
+                                        isSearchable={true}                                        
+                                        classNamePrefix="my-react-select"
                                         styles={customSelectStyles}
                                         onChange={(option) => setFormData({ ...formData, region: option?.value || '' })}
                                     />
