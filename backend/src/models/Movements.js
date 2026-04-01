@@ -28,11 +28,6 @@ const MovementSchema = new mongoose.Schema({
         required: true
     },
 
-    type: {
-        type: String,
-        enum: ["ENTREE", "SORTIE"],
-        required: true
-    },
 
     dateMovement: {
         type: Date,

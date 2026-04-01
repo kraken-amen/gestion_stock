@@ -106,7 +106,7 @@ exports.approveRequest = async (req, res) => {
                 from: req.user._id,
                 to: demande.user_id,
                 quantite: item.quantite,
-                type: 'SORTIE',
+                dateMovement: Date.now()
             }], { session });
         }
 
