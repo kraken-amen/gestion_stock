@@ -1,7 +1,7 @@
 const Livraison = require('../models/Livraison');
 const Commande = require('../models/Commande');
 const Demande = require('../models/Demande');
-const Stock = require('../models/Stock');
+const Product = require('../models/Product');
 const Movement = require('../models/Movements');
 const mongoose = require('mongoose');
 
@@ -43,7 +43,9 @@ exports.getDemandeById = async (req, res) => {
 
 exports.rejectDemande = async (req, res) => {
     try {
-        const demande = await Demande.findByIdAndUpdate(
+        const demande = await Demande.findById(req.params.id);
+        if (demande.status !== 'EN_ATTENTE') throw new Error("Cette demande est déjà traitée");
+        await Demande.findByIdAndUpdate(
             req.params.id,
             { status: 'REJETEE' },
             { new: true }
@@ -84,20 +86,24 @@ exports.approveRequest = async (req, res) => {
             commande_id: newCommande._id,
             status: "EN_TRANSIT"
         }], { session });
-        for (let item of demande.items) {
-            const centraleStock = await Stock.findOne({
-                product_id: item.product_id,
-                region: "Centrale"
-            }).session(session);
 
-            if (!centraleStock || centraleStock.quantite < item.quantite) {
-                throw new Error(`Stock insuffisant pour le produit: ${item.quantite}`);
+        for (let item of demande.items) {
+            const product = await Product.findById(item.product_id).session(session);
+            if (!product) {
+                throw new Error(`Produit avec ID ${item.product_id} non trouvé`);
             }
-            centraleStock.quantite -= item.quantite;
-            await centraleStock.save({ session });
+
+            if (product.quantite < item.quantite) {
+                throw new Error(`Stock insuffisant pour ${product.libelle}. Disponible: ${product.quantite}`);
+            }
+
+            product.quantite -= item.quantite;
+            await product.save({ session });
+
             await Movement.create([{
+                commande_id: newCommande._id,
                 product_id: item.product_id,
-                from: User.user._id,
+                from: req.user._id,
                 to: demande.user_id,
                 quantite: item.quantite,
                 type: 'SORTIE',
@@ -108,7 +114,8 @@ exports.approveRequest = async (req, res) => {
         await demande.save({ session });
 
         await session.commitTransaction();
-        res.json({ message: "Demande approuvée. Stock central mis à jour." });
+        res.json({ message: "Demande approuvée." });
+
     } catch (error) {
         await session.abortTransaction();
         res.status(400).json({ message: error.message });

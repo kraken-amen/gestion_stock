@@ -22,7 +22,7 @@ const demandeSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["EN_ATTENTE", "APPROUVE", "REJETEE", "ACCEPTEE"],
+    enum: ["EN_ATTENTE", "REJETEE", "ACCEPTEE"],
     default: "EN_ATTENTE"
   },
 

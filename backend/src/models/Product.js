@@ -12,7 +12,10 @@ const ProductSchema = new mongoose.Schema({
     required: [true, "Le libellé est obligatoire"],
     trim: true
   },
-
+  quantite: {
+    type: Number,
+    required: [true, "La quantité est obligatoire"]
+  },
   unite: {
     type: String,
     default: "Pièce"
