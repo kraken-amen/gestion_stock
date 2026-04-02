@@ -16,10 +16,6 @@ const livraisonSchema = new mongoose.Schema({
   shippedAt: {
     type: Date,
     default: Date.now
-  },
-
-  deliveredAt: {
-    type: Date
   }
 
 }, { timestamps: true });

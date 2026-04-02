@@ -1,15 +1,19 @@
 const mongoose = require('mongoose');
 const Region = require('../utils/Region');
 const StockSchema = new mongoose.Schema({
-  product_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    required: [true, "Le produit est obligatoire"]
-  },
-  quantite: {
-    type: Number,
-    default: 0
-  },
+  items: [
+      {
+        product_id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        quantite: {
+          type: Number,
+          required: true
+        }
+      }
+    ],
   region: {
     type: String,
     enum: Region,
