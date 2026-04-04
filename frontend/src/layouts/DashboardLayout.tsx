@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { BarChart3, ShoppingCart, Package, Settings, LogOut, Menu, X, Users } from 'lucide-react';
+import { PermissionGate } from '../components/PermissionGate';
+import { useAuth } from '../hooks/useAuth';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
-
+  const { user } = useAuth() 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -50,6 +52,9 @@ const DashboardLayout = () => {
         <nav className="space-y-1.5 flex-1">
           <NavItem icon={<BarChart3 size={20} />} label="Tableau de Bord" to="/dashboard" />
           <NavItem icon={<Package size={20} />} label="Stocks" to="/map" />
+          <PermissionGate role={user?.role} permission="VIEW_DEMANDE">
+            <NavItem icon={<Package size={20} />} label="Demandes" to="/demandes" />
+          </PermissionGate>
           <NavItem icon={<ShoppingCart size={20} />} label="Commandes" to="/commandes" />
           <NavItem icon={<Users size={20} />} label="Utilisateurs" to="/users" />
           <NavItem icon={<Settings size={20} />} label="Paramètres" to="/settings" />
