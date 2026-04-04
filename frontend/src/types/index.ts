@@ -99,3 +99,15 @@ export interface TopItem {
     revenue: number;
     growth: number;
 }
+export interface Demande {
+    id: string;
+    reference: string;
+    client: string;
+    email: string;
+    region: string;
+    status: 'pending' | 'approved' | 'rejected' | 'in_progress';
+    quantity: number;
+    createdAt: string;
+    dueDate: string;
+    description: string;
+}

@@ -3,7 +3,7 @@ import { TrendingUp, Package, Activity, X as CloseIcon, AlertCircle, Check, Bell
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Button } from './ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card';
-import { Input } from './ui/input';
+import { Input } from './ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/Badge';
