@@ -1,11 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Search, Filter, Plus, ArrowLeft, Power, Edit2, Trash2, Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Filter, Plus, ArrowLeft, Edit2, Trash2, Clock, CheckCircle, FileText, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
-import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from '../components/ui/Select';
 import type { Demande } from '../types';
 
 // Données mock
@@ -74,40 +69,34 @@ const MOCK_DEMANDES: Demande[] = [
 
 export default function DemandesPage() {
     const navigate = useNavigate();
+    // Remplacer MOCK_DEMANDES par votre source de données réelle
     const [demandes, setDemandes] = useState<Demande[]>(MOCK_DEMANDES);
+    const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [orderBy, setOrderBy] = useState('all');
 
-    // Filtrer les demandes
+    // Filtrage des demandes
     const filteredDemandes = demandes.filter(demande => {
         const matchesSearch =
-            demande.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            demande.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            demande.email.toLowerCase().includes(searchTerm.toLowerCase());
+            demande.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            demande.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            demande.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            demande.region?.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesStatus = filterStatus === 'all' || demande.status === filterStatus;
 
         return matchesSearch && matchesStatus;
     });
 
-    // Fonctions pour les statuts
-    const getStatusIcon = (status: string) => {
+    // Helpers pour le design
+    const getStatusStyles = (status: string) => {
         switch (status) {
-            case 'approved': return <CheckCircle size={16} className="text-emerald-400" />;
-            case 'pending': return <Clock size={16} className="text-amber-400" />;
-            case 'rejected': return <AlertCircle size={16} className="text-red-400" />;
-            case 'in_progress': return <TrendingUp size={16} className="text-blue-400" />;
-            default: return null;
-        }
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'approved': return 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50';
-            case 'pending': return 'bg-amber-500/20 text-amber-400 border-amber-400/50';
-            case 'rejected': return 'bg-red-500/20 text-red-400 border-red-400/50';
-            case 'in_progress': return 'bg-blue-500/20 text-blue-400 border-blue-400/50';
-            default: return 'bg-white/10 text-white/70';
+            case 'approved': return 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/50';
+            case 'pending': return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
+            case 'rejected': return 'bg-red-500/20 text-red-400 border border-red-400/50';
+            case 'in_progress': return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
+            default: return 'bg-white/10 text-white/70 border border-white/20';
         }
     };
 
@@ -120,132 +109,160 @@ export default function DemandesPage() {
             default: return status;
         }
     };
+
     return (
-        <div className="min-h-screen overflow-hidden relative font-sans bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 p-6">
-            {/* Background Effects */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-600 via-blue-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse"></div>
-                <div className="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-tr from-purple-600 via-purple-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="min-h-screen relative font-sans text-white">
+            {/* Background identique au code 1 */}
+            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900">
+                <div className="absolute top-20 right-10 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 left-10 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="mb-8 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+            <div className="relative z-10">
+                {/* Header Responsive */}
+                <div className="backdrop-blur-xl bg-white/5 border-b border-white/10 sticky top-0 z-30">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button onClick={() => navigate('/dashboard')} className="p-2 rounded-lg hover:bg-white/10 text-white/70 transition-all">
+                                <ArrowLeft size={24} />
+                            </button>
+                            <div>
+                                <h1 className="text-xl md:text-3xl font-black drop-shadow-lg">Gestion des Demandes</h1>
+                                <p className="text-white/60 text-xs hidden md:block">Suivi et administration des requêtes clients</p>
+                            </div>
+                        </div>
                         <button
-                            onClick={() => navigate('/dashboard')}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/70 hover:text-white"
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95"
                         >
-                            <ArrowLeft size={24} />
+                            <Plus size={18} /> Nouvelle Demande
                         </button>
-                        <div>
-                            <h1 className="text-4xl font-black text-white drop-shadow-lg">Gestion des Demandes</h1>
-                            <p className="text-white/70 text-sm font-medium mt-1">Administration et suivi des demandes</p>
+                    </div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+
+                    {/* Stats rapides (optionnel, mais garde l'esprit du code 1 avec le bloc Mon Compte) */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {[
+                            { label: 'Total', value: demandes.length, color: 'text-white' },
+                            { label: 'En attente', value: demandes.filter(d => d.status === 'pending').length, color: 'text-amber-400' },
+                            { label: 'En cours', value: demandes.filter(d => d.status === 'in_progress').length, color: 'text-blue-400' },
+                            { label: 'Approuvées', value: demandes.filter(d => d.status === 'approved').length, color: 'text-emerald-400' },
+                        ].map((stat, i) => (
+                            <div key={i} className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center">
+                                <span className="text-white/50 text-[10px] uppercase font-black mb-1">{stat.label}</span>
+                                <span className={`text-2xl font-black ${stat.color}`}>{stat.value}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Filters Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div className="md:col-span-2 relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                            <input
+                                type="text"
+                                placeholder="Rechercher par référence, email, client..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
+                            />
+                        </div>
+
+                        <div className="relative">
+                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                            <select
+                                value={orderBy}
+                                onChange={(e) => setOrderBy(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
+                            >
+                                <option value="all" className="bg-slate-900">Trier par</option>
+                                <option value="quantite" className="bg-slate-900">Quantité</option>
+                                <option value="date" className="bg-slate-900">Date</option>
+                                <option value="reference" className="bg-slate-900">Référence</option>
+                            </select>
+                        </div>
+
+                        <div className="relative">
+                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
+                            >
+                                <option value="all" className="bg-slate-900">Tous les statuts</option>
+                                <option value="pending" className="bg-slate-900">En attente</option>
+                                <option value="in_progress" className="bg-slate-900">En cours</option>
+                                <option value="approved" className="bg-slate-900">Approuvé</option>
+                                <option value="rejected" className="bg-slate-900">Rejeté</option>
+                            </select>
                         </div>
                     </div>
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 px-6">
-                        <Plus size={18} className="mr-2" />
-                        Nouvelle Demande
-                    </Button>
-                </div>
 
-                {/* Filters Section */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    {/* Search */}
-                    <div className="md:col-span-2 relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                        <Input
-                            type="text"
-                            placeholder="Rechercher par référence, client ou email..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-12 pr-4 bg-white/5 border-white/20 focus:border-white/50 text-white placeholder:text-white/40"
-                        />
-                    </div>
-
-                    {/* Status Filter */}
-                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                        <SelectTrigger className="bg-white/5 border-white/20 focus:border-white/50 text-white">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-900 border-white/10">
-                            <SelectItem value="all">Tous les statuts</SelectItem>
-                            <SelectItem value="pending">En attente</SelectItem>
-                            <SelectItem value="in_progress">En cours</SelectItem>
-                            <SelectItem value="approved">Approuvée</SelectItem>
-                            <SelectItem value="rejected">Rejetée</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* Table */}
-                <Card className="bg-slate-900/80 border-white/20 shadow-2xl">
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
+                    {/* Table Container */}
+                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
+                        {loading ? (
+                            <div className="py-20 flex flex-col items-center gap-4 text-white/50">
+                                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <p>Chargement des demandes...</p>
+                            </div>
+                        ) : (
+                            <table className="w-full text-left min-w-[800px]">
                                 <thead>
-                                    <tr className="border-b border-white/10 bg-white/5">
-                                        <th className="px-6 py-4 text-left text-xs font-black text-white/80 uppercase tracking-wider">Référence</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-white/80 uppercase tracking-wider">Client</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-white/80 uppercase tracking-wider">Région</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-white/80 uppercase tracking-wider">Statut</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-white/80 uppercase tracking-wider">Quantité</th>
-                                        <th className="px-6 py-4 text-center text-xs font-black text-white/80 uppercase tracking-wider">Actions</th>
+                                    <tr className="bg-white/5 border-b border-white/10">
+                                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Client</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Région / Date</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Référence / Qté</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
+                                        <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/10">
+                                <tbody className="divide-y divide-white/5">
                                     {filteredDemandes.map((demande) => (
                                         <tr key={demande.id} className="hover:bg-white/5 transition-colors group">
-                                            {/* Reference */}
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-white font-bold text-sm">{demande.reference}</span>
-                                                    <span className="text-white/70 text-xs mt-1">{demande.createdAt}</span>
-                                                </div>
-                                            </td>
-
-                                            {/* Client */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white text-sm">
-                                                        {demande.client.charAt(0)}
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-lg border border-white/20">
+                                                        {demande.client?.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-white font-bold text-sm">{demande.client}</span>
-                                                        <span className="text-white/70 text-xs">{demande.email}</span>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="font-bold text-sm truncate max-w-[150px]">{demande.client}</span>
+                                                        <span className="text-white/50 text-xs flex items-center gap-1 truncate">
+                                                            <Mail size={12} /> {demande.email}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>
-
-                                            {/* Region */}
                                             <td className="px-6 py-4">
-                                                <span className="text-white/70 text-sm font-medium">{demande.region}</span>
-                                            </td>
-                                            {/* Status */}
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    {getStatusIcon(demande.status)}
-                                                    <Badge className={`${getStatusColor(demande.status)} border`}>
-                                                        {getStatusLabel(demande.status)}
-                                                    </Badge>
+                                                <div className="flex flex-col">
+                                                    <span className="text-white/80 text-sm font-bold">{demande.region}</span>
+                                                    <span className="text-white/50 text-xs flex items-center gap-1">
+                                                        <Clock size={12} /> {demande.createdAt}
+                                                    </span>
                                                 </div>
                                             </td>
-
-                                            {/* Quantity */}
                                             <td className="px-6 py-4">
-                                                <span className="text-blue-300 font-bold text-sm">{demande.quantity.toLocaleString()}</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-sm text-blue-400">#{demande.reference}</span>
+                                                    <span className="text-red-300/70 text-xs font-black tracking-tighter">
+                                                        {demande.quantity.toLocaleString()} UNITÉS
+                                                    </span>
+                                                </div>
                                             </td>
-
-                                            {/* Actions */}
                                             <td className="px-6 py-4">
+                                                <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase whitespace-nowrap ${getStatusStyles(demande.status)}`}>
+                                                    {getStatusLabel(demande.status)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
                                                 <div className="flex items-center justify-center gap-2">
-                                                    <button className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all border border-blue-400/50">
+                                                    <button className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all border border-blue-400/30">
                                                         <Edit2 size={16} />
                                                     </button>
-                                                    <button className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 transition-all border border-emerald-400/50">
+                                                    <button className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 transition-all border border-emerald-400/30">
                                                         <CheckCircle size={16} />
                                                     </button>
-                                                    <button className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all border border-red-400/50">
+                                                    <button className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all border border-red-400/30">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </div>
@@ -254,60 +271,15 @@ export default function DemandesPage() {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
-
-                        {filteredDemandes.length === 0 && (
-                            <div className="py-20 text-center">
-                                <p className="text-white/70 font-medium mb-2">Aucune demande trouvée</p>
-                                <p className="text-white/50 text-sm">Essayez de modifier vos filtres</p>
+                        )}
+                        {!loading && filteredDemandes.length === 0 && (
+                            <div className="py-20 text-center text-white/40">
+                                <FileText className="mx-auto mb-4 opacity-20" size={60} />
+                                <p className="font-bold">Aucune demande trouvée.</p>
+                                <p className="text-xs">Modifiez vos critères de recherche.</p>
                             </div>
                         )}
-                    </CardContent>
-                </Card>
-
-                {/* Summary Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-                    <Card className="bg-slate-900/80 border-white/20">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-white/70 text-sm font-semibold">Total Demandes</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-black text-white drop-shadow-lg">{demandes.length}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-slate-900/80 border-white/20">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-white/70 text-sm font-semibold">En attente</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-black text-amber-400 drop-shadow-lg">
-                                {demandes.filter(d => d.status === 'pending').length}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-slate-900/80 border-white/20">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-white/70 text-sm font-semibold">En cours</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-black text-blue-400 drop-shadow-lg">
-                                {demandes.filter(d => d.status === 'in_progress').length}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-slate-900/80 border-white/20">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-white/70 text-sm font-semibold">Approuvées</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-3xl font-black text-emerald-400 drop-shadow-lg">
-                                {demandes.filter(d => d.status === 'approved').length}
-                            </p>
-                        </CardContent>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </div>

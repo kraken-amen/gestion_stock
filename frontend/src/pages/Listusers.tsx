@@ -100,7 +100,7 @@ export default function UsersListPage() {
               onClick={() => setIsModalOpenCreate(true)}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95"
             >
-              <Plus size={18} /> Nouveau User
+              <Plus size={18} /> Nouveau
             </button>
           </div>
         </div>
