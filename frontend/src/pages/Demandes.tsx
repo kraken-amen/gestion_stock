@@ -7,60 +7,55 @@ import type { Demande } from '../types';
 const MOCK_DEMANDES: Demande[] = [
     {
         id: '1',
-        reference: 'DEM-2024-001',
         client: 'Mohamed Ahmed',
         email: 'med.ahmed@gmail.com',
         region: 'Tunis',
         status: 'pending',
-        quantity: 500,
+        item: [{ quantity: 500, reference: 'DEM-2024-001' }, { quantity: 250, reference: 'DEM-2024-002' }],
         createdAt: '2024-03-08',
         dueDate: '2024-03-15',
         description: 'Demande de stock iPhone 15 Pro'
     },
     {
         id: '2',
-        reference: 'DEM-2024-002',
         client: 'Fatima Bousselmi',
         email: 'fatima.b@gmail.com',
         region: 'Sfax',
         status: 'in_progress',
-        quantity: 250,
+        item: [{ quantity: 250, reference: 'DEM-2024-002' }],
         createdAt: '2024-03-07',
         dueDate: '2024-03-12',
         description: 'Demande de service installation'
     },
     {
         id: '3',
-        reference: 'DEM-2024-003',
         client: 'Ali Mansour',
         email: 'ali.mansour@gmail.com',
         region: 'Sousse',
         status: 'approved',
-        quantity: 1000,
+        item: [{ quantity: 1000, reference: 'DEM-2024-003' }],
         createdAt: '2024-03-06',
         dueDate: '2024-03-10',
         description: 'Demande de stock Samsung Galaxy'
     },
     {
         id: '4',
-        reference: 'DEM-2024-004',
         client: 'Zahra Khalifa',
         email: 'zahra.k@gmail.com',
         region: 'Kairouan',
         status: 'rejected',
-        quantity: 100,
+        item: [{ quantity: 100, reference: 'DEM-2024-004' }],
         createdAt: '2024-03-05',
         dueDate: '2024-03-09',
         description: 'Demande de maintenance'
     },
     {
         id: '5',
-        reference: 'DEM-2024-005',
         client: 'Omar Trabelsi',
         email: 'omar.t@gmail.com',
         region: 'Gafsa',
         status: 'pending',
-        quantity: 350,
+        item: [{ quantity: 350, reference: 'DEM-2024-005' }],
         createdAt: '2024-03-04',
         dueDate: '2024-03-11',
         description: 'Demande de stock Accessoires'
@@ -79,7 +74,7 @@ export default function DemandesPage() {
     // Filtrage des demandes
     const filteredDemandes = demandes.filter(demande => {
         const matchesSearch =
-            demande.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            demande.item[0].reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             demande.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             demande.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             demande.region?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -138,7 +133,6 @@ export default function DemandesPage() {
                         </button>
                     </div>
                 </div>
-
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
 
                     {/* Stats rapides (optionnel, mais garde l'esprit du code 1 avec le bloc Mon Compte) */}
@@ -222,7 +216,7 @@ export default function DemandesPage() {
                                         <tr key={demande.id} className="hover:bg-white/5 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-lg border border-white/20">
+                                                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg bg-amber-500/20 text-amber-400 border border-amber-400/50">
                                                         {demande.client?.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
@@ -242,12 +236,12 @@ export default function DemandesPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-sm text-blue-400">#{demande.reference}</span>
+                                                {demande.item.map((item, index)=>(<div className="flex flex-col">
+                                                    <span className="font-bold text-sm text-blue-400">#{item.reference}</span>
                                                     <span className="text-red-300/70 text-xs font-black tracking-tighter">
-                                                        {demande.quantity.toLocaleString()} UNITÉS
+                                                        {item.quantity.toLocaleString()} UNITÉS
                                                     </span>
-                                                </div>
+                                                </div>))}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase whitespace-nowrap ${getStatusStyles(demande.status)}`}>
