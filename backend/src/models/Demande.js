@@ -19,7 +19,10 @@ const demandeSchema = new mongoose.Schema({
       }
     }
   ],
-
+  description: {
+    type: String,
+    required: false
+  },
   status: {
     type: String,
     enum: ["EN_ATTENTE", "REJETEE", "ACCEPTEE"],

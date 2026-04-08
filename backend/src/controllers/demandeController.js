@@ -10,6 +10,7 @@ exports.createDemande = async (req, res) => {
         const newDemande = await Demande.create({
             user_id: req.user._id,
             items: req.body.items,
+            description: req.body.description || "",
             status: "EN_ATTENTE"
         });
         res.status(201).json(newDemande);
@@ -21,7 +22,7 @@ exports.getAllDemandes = async (req, res) => {
     try {
         const demandes = await Demande.find()
             .populate('items.product_id', 'codeArticle libelle prix')
-            .populate('user_id', 'email role region')
+            .populate('user_id', 'email role region description')
             .sort({ createdAt: -1 });
         res.json(demandes);
     } catch (error) {
@@ -33,7 +34,7 @@ exports.getDemandeById = async (req, res) => {
     try {
         const demande = await Demande.findById(req.params.id)
             .populate('items.product_id', 'codeArticle libelle prix')
-            .populate('user_id', 'email role region');
+            .populate('user_id', 'email role region description');
         if (!demande) return res.status(404).json({ message: "Demande non trouvée" });
         res.json(demande);
     } catch (error) {
@@ -58,10 +59,6 @@ exports.rejectDemande = async (req, res) => {
 
 exports.deleteDemande = async (req, res) => {
     try {
-        const demande = await Demande.findById(req.params.id);
-        if (demande.status !== 'EN_ATTENTE') {
-            return res.status(400).json({ message: "Impossible de supprimer une demande déjà traitée" });
-        }
         await Demande.findByIdAndDelete(req.params.id);
         res.json({ message: "Demande supprimée avec succès" });
     } catch (error) {

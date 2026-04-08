@@ -67,6 +67,7 @@ export interface RegionStock {
 }
 export interface Product {
     _id: string;
+    codeArticle: string;
     libelle: string;
     prix: number;
 }
@@ -100,13 +101,9 @@ export interface TopItem {
     growth: number;
 }
 export interface Demande {
-    id: string;
-    client: string;
-    email: string;
-    region: string;
-    status: 'pending' | 'approved' | 'rejected' | 'in_progress';
-    item: { quantity: number; reference: string }[];
+    _id: string;
+    user_id: User;
+    status: 'EN_ATTENTE' | 'REJETEE' | 'ACCEPTEE';
+    items: { quantite: number; product_id: Product }[];
     createdAt: string;
-    dueDate: string;
-    description: string;
 }
