@@ -1,8 +1,8 @@
-export type Role = 'administrateur' | 'resbonsable region' | 'utilisateur';
+export type Role = 'administrateur' | 'responsable region' | 'utilisateur';
 
 export const rolePermissions: Record<Role, string[]> = {
   utilisateur: ["VIEW_STOCK"],
-  "resbonsable region": ["VIEW_STOCK", "MANAGE_STOCK", "VIEW_DEMANDE", "CREATE_DEMANDE", "VIEW_ALERTS"],
+  "responsable region": ["VIEW_STOCK", "MANAGE_STOCK", "VIEW_DEMANDE", "CREATE_DEMANDE", "VIEW_ALERTS"],
   administrateur: ["VIEW_STOCK", "MANAGE_STOCK", "VIEW_DEMANDE", "VIEW_ALERTS", "MANAGE_USERS", "APPROVE_DEMANDE"]
 };
 

@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, ArrowLeft, Trash2, Clock, FileText, Mail, Eye, Check, X } from 'lucide-react';
+import { Search, Plus, ArrowLeft, Trash2, Clock, FileText, Mail, Eye, Check, X, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Demande } from '../types';
 import { getDemandes, deleteDemande, approveDemande, rejectDemande } from '../services/demandeService';
+import DemandeModelCreate from '../components/DemandeModelCreate';
+// import DemandeModelUpdate from '../components/DemandeModelUpdate';
+// import DemandeModelView from '../components/DemandeModelView';
 
 export default function DemandesPage() {
     const navigate = useNavigate();
@@ -10,30 +13,34 @@ export default function DemandesPage() {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
+    const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
+    const [isModalOpenView, setIsModalOpenView] = useState(false);
+    const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
     const [orderBy, setOrderBy] = useState('all');
     const fetchDemandes = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/');
-                return;
-            }
-            try {
-                setLoading(true);
-                const res = await getDemandes() as any;
-                const data = res.data || res || [];
-                setDemandes(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error("Erreur:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/');
+            return;
+        }
+        try {
+            setLoading(true);
+            const res = await getDemandes() as any;
+            const data = res.data || res || [];
+            setDemandes(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Erreur:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
         const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/');
-                return;
-            }
+        if (!token) {
+            navigate('/');
+            return;
+        }
         fetchDemandes();
     }, [navigate]);
 
@@ -137,7 +144,7 @@ export default function DemandesPage() {
 
                             </div>
                         </div>
-                        <button onClick={() => navigate('/demandes/nouvelle')} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95">
+                        <button onClick={() => setIsModalOpenCreate(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95">
                             <Plus size={18} /> Nouvelle Demande
                         </button>
                     </div>
@@ -240,20 +247,27 @@ export default function DemandesPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-2">
                                                 {
-                                                    demande.status === 'EN_ATTENTE' && (
+                                                    demande.status === 'EN_ATTENTE' && demande.user_id?.region === demande.user_id?.region && (
+                                                        <button onClick={() => setIsModalOpenUpdate(true)} className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 border border-yellow-400/30">
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                    )
+                                                }
+                                                {
+                                                    demande.status === 'EN_ATTENTE' && demande.user_id?.role === "administrateur" && (
                                                         <button onClick={() => handleApprove(demande._id)} className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30">
                                                             <Check size={16} />
                                                         </button>
                                                     )
                                                 }
                                                 {
-                                                    demande.status === 'EN_ATTENTE' && (
+                                                    demande.status === 'EN_ATTENTE' && demande.user_id?.role === "administrateur" && (
                                                         <button onClick={() => handleReject(demande._id)} className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30">
                                                             <X size={16} />
                                                         </button>
                                                     )
                                                 }
-                                                <button onClick={() => navigate(`/demandes/view/${demande._id}`)} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 border border-blue-400/30">
+                                                <button onClick={() => setIsModalOpenView(true)} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 border border-blue-400/30">
                                                     <Eye size={16} />
                                                 </button>
                                                 <button onClick={() => handleDelete(demande._id)} className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30">
@@ -276,6 +290,28 @@ export default function DemandesPage() {
                     </div>
                 </div>
             </div>
+            {/* <DemandeModelCreate
+                isOpen={isModalOpenCreate}
+                onClose={() => setIsModalOpenCreate(false)}
+                onDemandeCreated={fetchDemandes}
+            /> */}
+            {/* {
+                isModalOpenUpdate && selectedDemande &&
+                <DemandeModelUpdate
+                    isOpen={isModalOpenUpdate}
+                    onClose={() => setIsModalOpenUpdate(false)}
+                    onDemandeUpdated={fetchDemandes}
+                    selectedDemande={selectedDemande}
+                />
+            } */}
+            {/* {
+                isModalOpenView && selectedDemande &&
+                <DemandeModelView
+                    isOpen={isModalOpenView}
+                    onClose={() => setIsModalOpenView(false)}
+                    selectedDemande={selectedDemande}
+                />
+            } */}
         </div>
     );
 }
