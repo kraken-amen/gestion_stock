@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Eye, EyeOff } from 'lucide-react';
 import { updateUser } from '../services/userService';
-import type { PropsUpdate } from '../types';
+import type { PropsUserUpdate } from '../types';
 import { useToast } from '../context/ToastContext';
 import Select from 'react-select';
 import customSelectStyles from './ui/selectStyles';
@@ -13,7 +13,7 @@ import customSelectStyles from './ui/selectStyles';
  * @param onUserUpdated - Callback après une mise à jour réussie.
  * @param user - Les données de l'utilisateur à modifier.
  */
-const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) => {
+const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUserUpdate) => {
     const options = [
         { value: 'Tunis', label: 'Tunis' },
         { value: 'Sfax', label: 'Sfax' },

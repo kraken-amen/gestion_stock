@@ -18,8 +18,8 @@ export const getDemandeById = async (id: string): Promise<Demande> => {
     const response = await api.get<Demande>(`/demande/${id}`);
     return response.data;
 };
-export const createDemande = async (demande: Demande): Promise<Demande> => {
-    const response = await api.post<Demande>('/demande/create', demande);
+export const createDemande = async (demande: any): Promise<Demande> => {
+    const response = await api.post<Demande>('/demande', demande);
     return response.data;
 };
 export const updateDemande = async (id: string, demande: Demande): Promise<Demande> => {

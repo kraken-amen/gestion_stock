@@ -2,11 +2,11 @@ import React from 'react'
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { createUser } from '../services/userService';
-import type { Props } from '../types';
+import type { PropsUser } from '../types';
 import { useToast } from '../context/ToastContext';
 import Select from 'react-select';
 import customSelectStyles from './ui/selectStyles';
-const UserModelCreate = ({ isOpen, onClose, onUserCreated }: Props) => {
+const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
     const options = [
         { value: 'Tunis', label: 'Tunis' },
         { value: 'Sfax', label: 'Sfax' },

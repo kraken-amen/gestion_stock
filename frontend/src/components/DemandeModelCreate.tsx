@@ -1,384 +1,180 @@
 import React, { useState } from 'react';
-import { Plus, X, Trash2, ArrowLeft, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
+import { createDemande } from '../services/demandeService';
 import type { PropsDemande } from '../types';
+import { useToast } from '../context/ToastContext';
+import Select from 'react-select';
+import { Plus, X } from 'lucide-react'; 
+import customSelectStyles from './ui/selectStyles';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-}
-
-interface CartItem extends Product {
-  quantite: number;
-}
-
-// Produits disponibles (mock data)
-const AVAILABLE_PRODUCTS: Product[] = [
-  { id: '1', name: 'iPhone 15 Pro', category: 'Téléphone', price: 1299, stock: 500 },
-  { id: '2', name: 'Samsung Galaxy S24', category: 'Téléphone', price: 999, stock: 350 },
-  { id: '3', name: 'AirPods Pro', category: 'Accessoire', price: 249, stock: 200 },
-  { id: '4', name: 'iPad Air', category: 'Tablette', price: 599, stock: 150 },
-  { id: '5', name: 'Apple Watch', category: 'Montre', price: 399, stock: 100 },
-  { id: '6', name: 'Cable USB-C', category: 'Accessoire', price: 29, stock: 1000 },
-  { id: '7', name: 'Chargeur Rapide', category: 'Accessoire', price: 49, stock: 500 },
-  { id: '8', name: 'Coque Protection', category: 'Accessoire', price: 19, stock: 800 },
+const productOptions = [
+    { value: '69cd0644e41ff6c6ff03427c', label: 'Câble Fibre Optique 100m' },
+    { value: '69cd064fe41ff6c6ff03427f', label: 'Modem VDSL TP-Link' },
+    { value: '69cd0658e41ff6c6ff034282', label: 'Téléphone IP Cisco' },
 ];
 
-export default function CreateDemandePage() {
-  const navigate = useNavigate();
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [description, setDescription] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showAddProduct, setShowAddProduct] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+const DemandeModelCreate = ({ isOpen, onClose, onDemandeCreated }: PropsDemande) => {
+    const { addToast } = useToast();
+    const [loading, setLoading] = useState(false);
 
-  // Produits filtrés
-  const filteredProducts = AVAILABLE_PRODUCTS.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    const [formData, setFormData] = useState({
+        items: [{ product_id: '', quantite: '' }],
+        description: ''
+    });
 
-  // Catégories uniques
-  const categories = ['all', ...new Set(AVAILABLE_PRODUCTS.map(p => p.category))];
+    const addItem = () => {
+        setFormData(prev => ({
+            ...prev,
+            items: [...prev.items, { product_id: '', quantite: '' }]
+        }));
+    };
 
-  // Ajouter un produit au panier
-  const handleAddToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.id === product.id);
-    
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item.id === product.id
-          ? { ...item, quantite: item.quantite + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantite: 1 }]);
-    }
-    setShowAddProduct(false);
-    setSearchTerm('');
-  };
+    const removeItem = (index: number) => {
+        if (formData.items.length > 1) {
+            setFormData(prev => ({
+                ...prev,
+                items: prev.items.filter((_, i) => i !== index)
+            }));
+        }
+    };
 
-  // Mettre à jour la quantité
-  const handleQuantityChange = (productId: string, quantite: number) => {
-    if (quantite <= 0) {
-      handleRemoveFromCart(productId);
-      return;
-    }
+    const updateItem = (index: number, field: string, value: string) => {
+        setFormData(prev => {
+            const newItems = [...prev.items];
+            newItems[index] = { ...newItems[index], [field]: value };
+            return { ...prev, items: newItems };
+        });
+    };
 
-    const product = AVAILABLE_PRODUCTS.find(p => p.id === productId);
-    if (product && quantite > product.stock) {
-      return;
-    }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    setCart(cart.map(item =>
-      item.id === productId
-        ? { ...item, quantite }
-        : item
-    ));
-  };
+        const isValid = formData.items.every(item => item.product_id && item.quantite);
+        if (!isValid) {
+            addToast('Veuillez remplir tous les produits et quantités', 'error');
+            return;
+        }
 
-  // Supprimer du panier
-  const handleRemoveFromCart = (productId: string) => {
-    setCart(cart.filter(item => item.id !== productId));
-  };
+        setLoading(true);
+        try {
+            const payload = {
+                items: formData.items.map(item => ({
+                    product_id: item.product_id,
+                    quantite: Number(item.quantite)
+                })),
+                description: formData.description
+            };
 
-  // Soumettre la demande
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+            await createDemande(payload);
+            addToast('Demande créée avec succès', 'success');
+            onDemandeCreated();
+            handleClose();
+        } catch (error: any) {
+            addToast(error.response?.data?.message || 'Erreur lors de la création', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    if (cart.length === 0) {
-      alert('Veuillez ajouter au moins un produit');
-      return;
-    }
+    const handleClose = () => {
+        setFormData({ items: [{ product_id: '', quantite: '' }], description: '' });
+        onClose();
+    };
 
-    if (!description.trim()) {
-      alert('Veuillez entrer une description');
-      return;
-    }
+    return (
+        <div className="font-sans">
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-md" onClick={handleClose}></div>
 
-    setLoading(true);
-    try {
-      // Appel API pour créer la demande
-      const demandeData = {
-        items: cart.map(item => ({
-          product_id: item.id,
-          quantite: item.quantite
-        })),
-        description: description,
-        status: 'EN_ATTENTE'
-      };
+                    <div className="relative w-full max-w-lg bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 border border-white/20 rounded-2xl p-8 shadow-2xl overflow-hidden max-h-[95vh] flex flex-col">
+                        
+                        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
 
-      console.log('Demande créée:', demandeData);
-      
-      // Simuler l'appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Demande créée avec succès!');
-      navigate('/demandes');
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de la création de la demande');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Calcul du total
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantite), 0);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantite, 0);
-
-  return (
-    <div className="min-h-screen overflow-hidden relative font-sans bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 p-6">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-600 via-blue-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-tr from-purple-600 via-purple-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <button
-            onClick={() => navigate('/demandes')}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/70 hover:text-white"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <div>
-            <h1 className="text-4xl font-black text-white drop-shadow-lg">Créer une Demande</h1>
-            <p className="text-white/70 text-sm font-medium mt-1">Remplissez le formulaire pour soumettre une nouvelle demande</p>
-          </div>
-        </div>
-
-        {/* Main Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Form Section */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Description Card */}
-            <Card className="bg-slate-900/80 border-white/20 shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-white">Description de la Demande</CardTitle>
-                <CardDescription className="text-white/70">Décrivez le contenu et l'objectif de votre demande</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Entrez la description de votre demande..."
-                  className="w-full bg-white/5 border-2 border-white/20 focus:border-white/50 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none transition-all font-medium h-32"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Products List */}
-            <Card className="bg-slate-900/80 border-white/20 shadow-2xl">
-              <CardHeader className="border-b border-white/10">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white">Panier ({totalItems} articles)</CardTitle>
-                  <Button
-                    onClick={() => setShowAddProduct(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-4"
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Ajouter Produit
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {cart.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <p className="text-white/70 font-medium mb-2">Aucun produit ajouté</p>
-                    <p className="text-white/50 text-sm">Cliquez sur "Ajouter Produit" pour commencer</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-white/10">
-                    {cart.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-6 hover:bg-white/5 transition-colors group">
-                        <div className="flex-1">
-                          <h3 className="text-white font-bold">{item.name}</h3>
-                          <p className="text-white/70 text-sm">{item.category}</p>
+                        <div className="flex justify-between items-center mb-6 relative z-10">
+                            <h2 className="text-2xl font-bold text-white">Nouvelle Demande</h2>
+                            <button 
+                                type="button"
+                                onClick={addItem}
+                                className="flex items-center gap-2 text-xs bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                            >
+                                <Plus size={16} /> Ajouter Produit
+                            </button>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                          {/* Prix unitaire */}
-                          <div className="text-right">
-                            <p className="text-white/70 text-sm">Prix</p>
-                            <p className="text-blue-300 font-bold">{item.price}€</p>
-                          </div>
+                        <form onSubmit={handleSubmit} className="space-y-6 relative z-10 overflow-y-auto pr-2 custom-scrollbar">
+                            
+                            <div className="space-y-4">
+                                {formData.items.map((item, index) => (
+                                    <div key={index} className="relative p-4 bg-white/5 border border-white/10 rounded-xl space-y-3">
+                                        {formData.items.length > 1 && (
+                                            <button 
+                                                type="button"
+                                                onClick={() => removeItem(index)}
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg z-20"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                        
+                                        <div>
+                                            <label className="block text-xs font-semibold text-white/70 mb-1.5">Produit #{index + 1}</label>
+                                            <Select
+                                                options={productOptions}
+                                                placeholder="Choisir un article..."
+                                                styles={customSelectStyles}
+                                                value={productOptions.find(opt => opt.value === item.product_id)}
+                                                onChange={(option) => updateItem(index, 'product_id', option?.value || '')}
+                                            />
+                                        </div>
 
-                          {/* Quantité */}
-                          <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2 border border-white/20">
-                            <button
-                              onClick={() => handleQuantityChange(item.id, item.quantite - 1)}
-                              className="w-8 h-8 rounded-lg hover:bg-white/20 transition-colors text-white/70 hover:text-white flex items-center justify-center"
-                            >
-                              −
-                            </button>
-                            <input
-                              type="number"
-                              value={item.quantite}
-                              onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 0)}
-                              className="w-12 bg-transparent text-center text-white font-bold outline-none"
-                              min="1"
-                            />
-                            <button
-                              onClick={() => handleQuantityChange(item.id, item.quantite + 1)}
-                              disabled={item.quantite >= item.stock}
-                              className="w-8 h-8 rounded-lg hover:bg-white/20 transition-colors text-white/70 hover:text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              +
-                            </button>
-                          </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-white/70 mb-1.5">Quantité</label>
+                                            <input
+                                                type="number"
+                                                value={item.quantite}
+                                                onChange={(e) => updateItem(index, 'quantite', e.target.value)}
+                                                placeholder="Ex: 500"
+                                                className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/20 focus:border-white/40 focus:outline-none transition-all text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
 
-                          {/* Sous-total */}
-                          <div className="text-right">
-                            <p className="text-white/70 text-sm">Sous-total</p>
-                            <p className="text-emerald-300 font-bold">{(item.price * item.quantite).toLocaleString()}€</p>
-                          </div>
+                            <div className="pt-2">
+                                <label className="block text-sm font-semibold text-white/90 mb-2">Description (Optionnel)</label>
+                                <textarea
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    placeholder="Remarques éventuelles..."
+                                    rows={2}
+                                    className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-white/50 focus:outline-none transition-all font-medium resize-none text-sm"
+                                />
+                            </div>
 
-                          {/* Bouton Supprimer */}
-                          <button
-                            onClick={() => handleRemoveFromCart(item.id)}
-                            className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all border border-red-400/50 opacity-0 group-hover:opacity-100"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Summary & Modal Section */}
-          <div className="space-y-6">
-            {/* Résumé */}
-            <Card className="bg-slate-900/80 border-white/20 shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-white">Résumé</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <span className="text-white/70">Articles</span>
-                  <span className="text-white font-bold">{totalItems}</span>
-                </div>
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <span className="text-white/70">Total</span>
-                  <span className="text-2xl font-black text-blue-300">{total.toLocaleString()}€</span>
-                </div>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={loading || cart.length === 0}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold h-11"
-                >
-                  {loading ? 'Création en cours...' : 'Créer la Demande'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Add Product Modal */}
-            {showAddProduct && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                {/* Overlay */}
-                <div
-                  className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
-                  onClick={() => setShowAddProduct(false)}
-                ></div>
-
-                {/* Modal */}
-                <div className="relative w-full max-w-2xl bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 border border-white/20 rounded-2xl p-8 shadow-2xl overflow-hidden">
-                  {/* Background Effects */}
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
-
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setShowAddProduct(false)}
-                    className="absolute top-6 right-6 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                  >
-                    <X size={24} />
-                  </button>
-
-                  {/* Content */}
-                  <div className="relative z-10">
-                    <h2 className="text-2xl font-bold text-white mb-6">Sélectionner un Produit</h2>
-
-                    {/* Search Bar */}
-                    <div className="mb-6 relative">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                      <Input
-                        type="text"
-                        placeholder="Rechercher un produit..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-12 bg-white/5 border-white/20 focus:border-white/50 text-white placeholder:text-white/40"
-                      />
+                            <div className="flex gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-transparent backdrop-blur-sm">
+                                <button
+                                    type="button"
+                                    onClick={handleClose}
+                                    className="flex-1 py-3 rounded-xl font-bold text-white/70 hover:bg-white/5 border border-white/10 transition-all"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50"
+                                >
+                                    {loading ? 'Envoi...' : 'Envoyer'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    {/* Categories */}
-                    <div className="mb-6 flex gap-2 flex-wrap">
-                      {categories.map(category => (
-                        <button
-                          key={category}
-                          onClick={() => setSelectedCategory(category)}
-                          className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
-                            selectedCategory === category
-                              ? 'bg-blue-600 text-white border border-blue-400'
-                              : 'bg-white/10 text-white/70 border border-white/20 hover:bg-white/20 hover:text-white'
-                          }`}
-                        >
-                          {category === 'all' ? 'Tous' : category}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Products Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-                      {filteredProducts.map(product => (
-                        <button
-                          key={product.id}
-                          onClick={() => handleAddToCart(product)}
-                          className="p-4 rounded-lg bg-white/5 border border-white/20 hover:border-white/40 hover:bg-white/10 transition-all text-left group"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="text-white font-bold group-hover:text-blue-300">{product.name}</h3>
-                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-400/50">
-                              {product.category}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-blue-300 font-bold">{product.price}€</span>
-                            <span className="text-white/70 text-sm">
-                              Stock: <span className="text-white font-bold">{product.stock}</span>
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {filteredProducts.length === 0 && (
-                      <div className="py-12 text-center">
-                        <p className="text-white/70 font-medium">Aucun produit trouvé</p>
-                      </div>
-                    )}
-                  </div>
                 </div>
-              </div>
             )}
-          </div>
         </div>
-      </div>
-    </div>
-  );
-}
+    );
+};
+
+export default DemandeModelCreate;

@@ -53,23 +53,23 @@ export interface PropsDemandeUpdate {
     demande: Demande;
 }
 //props for user model create
-export interface Props {
+export interface PropsUser {
     isOpen: boolean;
     onClose: () => void;
     onUserCreated: () => void; 
+}
+//props for user model update
+export interface PropsUserUpdate {
+    isOpen: boolean;
+    onClose: () => void;
+    onUserUpdated: () => void; 
+    user: User;
 }
 //props for dashboard
 export interface PropsDashboard {
   role: Role;
   permission: string;
   children: React.ReactNode;
-}
-//props for user model update
-export interface PropsUpdate {
-    isOpen: boolean;
-    onClose: () => void;
-    onUserUpdated: () => void; 
-    user: User;
 }
 //region interface
 export interface RegionStock {

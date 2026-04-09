@@ -144,9 +144,11 @@ export default function DemandesPage() {
 
                             </div>
                         </div>
-                        <button onClick={() => setIsModalOpenCreate(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95">
-                            <Plus size={18} /> Nouvelle Demande
-                        </button>
+                        {JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && (
+                            <button onClick={() => setIsModalOpenCreate(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95">
+                                <Plus size={18} /> Nouvelle Demande
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -179,7 +181,6 @@ export default function DemandesPage() {
                             />
                         </div>
                         <select value={orderBy} onChange={(e) => setOrderBy(e.target.value)} className="w-full px-4 py-3 rounded-lg bg-white/5 border-2 border-white/20 focus:outline-none text-white appearance-none cursor-pointer">
-                            <option value="all" className="bg-slate-900">Trier par</option>
                             <option value="quantite" className="bg-slate-900">Quantité</option>
                             <option value="date" className="bg-slate-900">Date</option>
                             <option value="reference" className="bg-slate-900">Code Article</option>
@@ -247,21 +248,21 @@ export default function DemandesPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-2">
                                                 {
-                                                    demande.status === 'EN_ATTENTE' && demande.user_id?.region === demande.user_id?.region && (
+                                                    demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && (
                                                         <button onClick={() => setIsModalOpenUpdate(true)} className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 border border-yellow-400/30">
                                                             <Edit2 size={16} />
                                                         </button>
                                                     )
                                                 }
                                                 {
-                                                    demande.status === 'EN_ATTENTE' && demande.user_id?.role === "administrateur" && (
+                                                    demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <button onClick={() => handleApprove(demande._id)} className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30">
                                                             <Check size={16} />
                                                         </button>
                                                     )
                                                 }
                                                 {
-                                                    demande.status === 'EN_ATTENTE' && demande.user_id?.role === "administrateur" && (
+                                                    demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <button onClick={() => handleReject(demande._id)} className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30">
                                                             <X size={16} />
                                                         </button>
@@ -290,11 +291,11 @@ export default function DemandesPage() {
                     </div>
                 </div>
             </div>
-            {/* <DemandeModelCreate
+            <DemandeModelCreate
                 isOpen={isModalOpenCreate}
                 onClose={() => setIsModalOpenCreate(false)}
                 onDemandeCreated={fetchDemandes}
-            /> */}
+            />
             {/* {
                 isModalOpenUpdate && selectedDemande &&
                 <DemandeModelUpdate
