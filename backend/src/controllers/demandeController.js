@@ -29,7 +29,18 @@ exports.getAllDemandes = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
+exports.updateDemande = async (req, res) => {
+    try {
+        const demande = await Demande.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        res.json(demande);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
 exports.getDemandeById = async (req, res) => {
     try {
         const demande = await Demande.findById(req.params.id)

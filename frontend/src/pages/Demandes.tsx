@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import type { Demande } from '../types';
 import { getDemandes, deleteDemande, approveDemande, rejectDemande } from '../services/demandeService';
 import DemandeModelCreate from '../components/DemandeModelCreate';
-// import DemandeModelUpdate from '../components/DemandeModelUpdate';
-// import DemandeModelView from '../components/DemandeModelView';
+import DemandeModelUpdate from '../components/DemandeModelUpdate';
+import DemandeModelView from '../components/DemandeModelView';
 
 export default function DemandesPage() {
     const navigate = useNavigate();
@@ -24,6 +24,7 @@ export default function DemandesPage() {
             navigate('/');
             return;
         }
+        console.log(isModalOpenUpdate,isModalOpenCreate);
         try {
             setLoading(true);
             const res = await getDemandes() as any;
@@ -249,7 +250,7 @@ export default function DemandesPage() {
                                             <div className="flex items-center justify-center gap-2">
                                                 {
                                                     demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && (
-                                                        <button onClick={() => setIsModalOpenUpdate(true)} className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 border border-yellow-400/30">
+                                                        <button onClick={() => { setSelectedDemande(demande); setIsModalOpenUpdate(true); }} className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 border border-yellow-400/30">
                                                             <Edit2 size={16} />
                                                         </button>
                                                     )
@@ -268,7 +269,7 @@ export default function DemandesPage() {
                                                         </button>
                                                     )
                                                 }
-                                                <button onClick={() => setIsModalOpenView(true)} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 border border-blue-400/30">
+                                                <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 border border-blue-400/30">
                                                     <Eye size={16} />
                                                 </button>
                                                 <button onClick={() => handleDelete(demande._id)} className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30">
@@ -296,23 +297,23 @@ export default function DemandesPage() {
                 onClose={() => setIsModalOpenCreate(false)}
                 onDemandeCreated={fetchDemandes}
             />
-            {/* {
+            {
                 isModalOpenUpdate && selectedDemande &&
                 <DemandeModelUpdate
                     isOpen={isModalOpenUpdate}
-                    onClose={() => setIsModalOpenUpdate(false)}
+                    onClose={() => { setIsModalOpenUpdate(false); setSelectedDemande(null) }}
                     onDemandeUpdated={fetchDemandes}
-                    selectedDemande={selectedDemande}
+                    demande={selectedDemande}
                 />
-            } */}
-            {/* {
+            }
+            {
                 isModalOpenView && selectedDemande &&
                 <DemandeModelView
                     isOpen={isModalOpenView}
-                    onClose={() => setIsModalOpenView(false)}
-                    selectedDemande={selectedDemande}
+                    onClose={() => { setIsModalOpenView(false); setSelectedDemande(null) }}
+                    demande={selectedDemande}
                 />
-            } */}
+            }
         </div>
     );
 }

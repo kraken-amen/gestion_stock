@@ -118,5 +118,6 @@ export interface Demande {
     user_id: User;
     status: 'EN_ATTENTE' | 'REJETEE' | 'ACCEPTEE';
     items: { quantite: number; product_id: Product }[];
+    description: string;
     createdAt: string;
 }

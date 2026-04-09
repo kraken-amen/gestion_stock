@@ -22,8 +22,8 @@ export const createDemande = async (demande: any): Promise<Demande> => {
     const response = await api.post<Demande>('/demande', demande);
     return response.data;
 };
-export const updateDemande = async (id: string, demande: Demande): Promise<Demande> => {
-    const response = await api.put<Demande>(`/demande/${id}`, demande);
+export const updateDemande = async (id: string, demandeData: any): Promise<Demande> => {
+    const response = await api.put<Demande>(`/demande/${id}`, demandeData);
     return response.data;
 };
 export const deleteDemande = async (id: string): Promise<void> => {
