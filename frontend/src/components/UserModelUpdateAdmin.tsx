@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Eye, EyeOff } from 'lucide-react';
 import { updateUser } from '../services/userService';
-import type { PropsUpdate } from '../types';
+import type { PropsUserUpdate } from '../types';
 import { useToast } from '../context/ToastContext';
 
 /**
@@ -11,7 +11,7 @@ import { useToast } from '../context/ToastContext';
  * @param onUserUpdated - Callback après une mise à jour réussie.
  * @param user - Les données de l'utilisateur à modifier.
  */
-const UserModelUpdateAdmin = ({ isOpen, onClose, onUserUpdated, user }: PropsUpdate) => {
+const UserModelUpdateAdmin = ({ isOpen, onClose, onUserUpdated, user }: PropsUserUpdate) => {
     // État local pour gérer les données du formulaire
     const [formData, setFormData] = useState({
         email: '',

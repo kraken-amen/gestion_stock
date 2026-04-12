@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["administrateur", "responsable region", "utilisateur"],
+        enum: ["administrateur", "responsable region", "utilisateur", "Gestionnaire de Stock"],
         default: "utilisateur"
     },
     region: {

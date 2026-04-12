@@ -7,14 +7,35 @@ const mongoose = require('mongoose');
 
 exports.createDemande = async (req, res) => {
     try {
-        const newDemande = await Demande.create({
-            user_id: req.user._id,
-            items: req.body.items,
-            description: req.body.description || "",
-            status: "EN_ATTENTE"
+        const userId = req.user._id;
+        const { items, description } = req.body;
+
+        let existingDemande = await Demande.findOne({ 
+            user_id: userId, 
+            status: "EN_ATTENTE" 
         });
-        res.status(201).json(newDemande);
+
+        if (existingDemande) {
+            existingDemande.items = [...existingDemande.items, ...items];
+            
+            if (description) {
+                existingDemande.description = description; 
+            }
+
+            await existingDemande.save();
+            return res.status(200).json(existingDemande);
+        } else {
+            const newDemande = await Demande.create({
+                user_id: userId,
+                items: items,
+                description: description || "",
+                status: "EN_ATTENTE"
+            });
+            return res.status(201).json(newDemande);
+        }
+
     } catch (error) {
+        console.error("Error in createDemande:", error);
         res.status(400).json({ message: error.message });
     }
 };

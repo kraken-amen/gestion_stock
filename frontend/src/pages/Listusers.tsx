@@ -71,6 +71,7 @@ export default function UsersListPage() {
     switch (role) {
       case 'administrateur': return 'bg-red-500/20 text-red-400 border border-red-400/50';
       case 'responsable region': return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
+      case 'Gestionnaire de Stock': return 'bg-green-500/20 text-green-400 border border-green-400/50';
       default: return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
     }
   };
@@ -164,6 +165,7 @@ export default function UsersListPage() {
                 <option value="administrateur" className="bg-slate-900">Administrateur</option>
                 <option value="responsable region" className="bg-slate-900">Responsable Région</option>
                 <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
+                <option value="Gestionnaire de Stock" className="bg-slate-900">Gestionnaire de Stock</option>
               </select>
             </div>
 

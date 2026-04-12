@@ -109,9 +109,9 @@ export default function DemandesPage() {
 
     const getStatusStyles = (status: string) => {
         switch (status) {
-            case 'ACCEPTEE': return 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]';
-            case 'EN_ATTENTE': return 'bg-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.4)]';
-            case 'REJETEE': return 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]';
+            case 'ACCEPTEE': return 'bg-green-500/20 text-green-400 border border-green-400/50';
+            case 'EN_ATTENTE': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/50';
+            case 'REJETEE': return 'bg-red-500/20 text-red-400 border border-red-400/50';
             default: return 'bg-white/10 text-white/70';
         }
     };
@@ -163,7 +163,7 @@ export default function DemandesPage() {
                             { label: 'Approuvées', value: demandes.filter(d => d.status === 'ACCEPTEE').length, color: 'text-emerald-400' },
                         ].map((stat, i) => (
                             <div key={i} className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center">
-                                <span className="text-white/50 text-[10px] uppercase font-black mb-1">{stat.label}</span>
+                                <span className="text-white/50 text-[20px] uppercase font-black mb-1">{stat.label}</span>
                                 <span className={`text-2xl font-black ${stat.color}`}>{stat.value}</span>
                             </div>
                         ))}

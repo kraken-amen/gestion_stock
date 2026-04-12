@@ -6,33 +6,8 @@ import type { PropsUser } from '../types';
 import { useToast } from '../context/ToastContext';
 import Select from 'react-select';
 import customSelectStyles from './ui/selectStyles';
+import { Region } from '../utils/region';
 const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
-    const options = [
-        { value: 'Tunis', label: 'Tunis' },
-        { value: 'Sfax', label: 'Sfax' },
-        { value: 'Sousse', label: 'Sousse' },
-        { value: 'Monastir', label: 'Monastir' },
-        { value: 'Nabeul', label: 'Nabeul' },
-        { value: 'Beja', label: 'Beja' },
-        { value: 'Bizerte', label: 'Bizerte' },
-        { value: 'Gabes', label: 'Gabes' },
-        { value: 'Gafsa', label: 'Gafsa' },
-        { value: 'Jendouba', label: 'Jendouba' },
-        { value: 'Kasserine', label: 'Kasserine' },
-        { value: 'Kairouan', label: 'Kairouan' },
-        { value: 'Kebili', label: 'Kebili' },
-        { value: 'Ariana', label: 'Ariana' },
-        { value: 'Kef', label: 'Kef' },
-        { value: 'Mahdia', label: 'Mahdia' },
-        { value: 'Manouba', label: 'Manouba' },
-        { value: 'Medenine', label: 'Medenine' },
-        { value: 'Sidi Bouzid', label: 'Sidi Bouzid' },
-        { value: 'Siliana', label: 'Siliana' },
-        { value: 'Tozeur', label: 'Tozeur' },
-        { value: 'Zaghouan', label: 'Zaghouan' },
-        { value: 'Tataouine', label: 'Tataouine' },
-        { value: 'Ben Arous', label: 'Ben Arous' }
-    ];
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -175,6 +150,7 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
                                     <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
                                     <option value="responsable region" className="bg-slate-900">Responsable Region</option>
                                     <option value="administrateur" className="bg-slate-900">Administrateur</option>
+                                    <option value="Gestionnaire de Stock" className="bg-slate-900">Gestionnaire de Stock</option>
                                 </select>
                             </div>
                             {/* Region */}
@@ -183,7 +159,7 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
                                     <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
 
                                     <Select
-                                        options={options}
+                                        options={Region}
                                         placeholder="Choisir une region"
                                         isSearchable={true}                                        
                                         classNamePrefix="my-react-select"
