@@ -16,14 +16,23 @@ exports.createDemande = async (req, res) => {
         });
 
         if (existingDemande) {
-            existingDemande.items = [...existingDemande.items, ...items];
-            
-            if (description) {
-                existingDemande.description = description; 
-            }
+            items.forEach(newItem => {
+                const itemIndex = existingDemande.items.findIndex(
+                    item => item.product_id.toString() === newItem.product_id.toString()
+                );
+
+                if (itemIndex > -1) {
+                    existingDemande.items[itemIndex].quantite += Number(newItem.quantite);
+                } else {
+                    existingDemande.items.push(newItem);
+                }
+            });
+
+            if (description) existingDemande.description = description;
 
             await existingDemande.save();
             return res.status(200).json(existingDemande);
+
         } else {
             const newDemande = await Demande.create({
                 user_id: userId,

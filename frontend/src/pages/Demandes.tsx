@@ -18,13 +18,15 @@ export default function DemandesPage() {
     const [isModalOpenView, setIsModalOpenView] = useState(false);
     const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
     const [orderBy, setOrderBy] = useState('all');
+    const savedUser = localStorage.getItem('user');
+    const current = savedUser ? JSON.parse(savedUser) : null;
     const fetchDemandes = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
             navigate('/');
             return;
         }
-        console.log(isModalOpenUpdate,isModalOpenCreate);
+        console.log(otherDemandes, myDemandes);
         try {
             setLoading(true);
             const res = await getDemandes() as any;
@@ -75,24 +77,50 @@ export default function DemandesPage() {
             }
         }
     };
+    const myDemandes = useMemo(() => {
+        if (!demandes || !current) return [];
 
-    const processedDemandes = useMemo(() => {
-        if (!demandes) return [];
+        let result = demandes.filter(d => {
+            const userId = typeof d.user_id === 'object' ? d.user_id._id : d.user_id;
 
-        let result = demandes.filter(demande => {
-            const email = demande.user_id?.email || '';
-            const region = demande.user_id?.region || '';
+            const isMine = userId === current._id;
 
-            const matchesItems = demande.items?.some(item =>
+            if (!isMine) return false;
+
+            const email = d.user_id?.email || '';
+            const matchesItems = d.items?.some(item =>
                 item.product_id?.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase())
             );
 
             const matchesSearch =
-                email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                email.toLowerCase().includes(searchTerm.toLowerCase()) || matchesItems;
+
+            const matchesStatus =
+                filterStatus === 'all' || d.status === filterStatus;
+
+            return matchesSearch && matchesStatus;
+        });
+
+        return result;
+    }, [demandes, current, searchTerm, filterStatus]);
+
+    const otherDemandes = useMemo(() => {
+        if (!demandes) return [];
+
+        let result = demandes.filter(d => {
+            const isNotMine = d.user_id?._id !== current?._id && d.user_id !== current?._id;
+            if (!isNotMine) return false;
+
+            const email = d.user_id?.email || '';
+            const region = d.user_id?.region || '';
+            const matchesItems = d.items?.some(item =>
+                item.product_id?.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            const matchesSearch = email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 region.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 matchesItems;
+            const matchesStatus = filterStatus === 'all' || d.status === filterStatus;
 
-            const matchesStatus = filterStatus === 'all' || demande.status === filterStatus;
             return matchesSearch && matchesStatus;
         });
 
@@ -105,7 +133,7 @@ export default function DemandesPage() {
             });
         }
         return result;
-    }, [demandes, searchTerm, filterStatus, orderBy]);
+    }, [demandes, current, searchTerm, filterStatus, orderBy]);
 
     const getStatusStyles = (status: string) => {
         switch (status) {
@@ -124,7 +152,6 @@ export default function DemandesPage() {
         };
         return labels[status] || status.toUpperCase();
     };
-
     return (
         <div className="min-h-screen relative font-sans text-white">
             <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900">
@@ -158,7 +185,7 @@ export default function DemandesPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                         {[
                             { label: 'Total', value: demandes.length, color: 'text-white' },
-                            { label: 'En attente', value: demandes.filter(d => d.status === 'EN_ATTENTE').length, color: 'text-amber-400' },
+                            { label: 'attente', value: demandes.filter(d => d.status === 'EN_ATTENTE').length, color: 'text-amber-400' },
                             { label: 'Rejetées', value: demandes.filter(d => d.status === 'REJETEE').length, color: 'text-red-400' },
                             { label: 'Approuvées', value: demandes.filter(d => d.status === 'ACCEPTEE').length, color: 'text-emerald-400' },
                         ].map((stat, i) => (
@@ -193,7 +220,51 @@ export default function DemandesPage() {
                             <option value="ACCEPTEE" className="bg-slate-900">Approuvé</option>
                         </select>
                     </div>
+                    {myDemandes.length > 0 && (
+                        <div className="mb-10">
+                            <h3 className="text-white/70 text-sm font-bold mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                Mes Demandes Personnel
+                            </h3>
 
+                            <div className="space-y-4">
+                                {myDemandes.map((demande) => (
+                                    <div key={demande._id} className="backdrop-blur-xl bg-blue-600/10 border border-blue-500/30 rounded-2xl p-4 md:p-6 shadow-2xl flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ring-4 ring-blue-500/10 bg-blue-500/20 text-blue-400">
+                                                {current?.email?.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-white">Ma Demande</span>
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${demande.status === 'EN_ATTENTE' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'
+                                                        }`}>
+                                                        {demande.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-white/40 text-xs">Créée le {new Date(demande.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => { setSelectedDemande(demande); setIsModalOpenUpdate(true); }}
+                                                className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
+                                            >
+                                                <Edit2 size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(demande._id)}
+                                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {/* Table Section */}
                     <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
                         <table className="w-full text-left min-w-[800px]">
@@ -207,7 +278,7 @@ export default function DemandesPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {processedDemandes.map((demande) => (
+                                {otherDemandes.map((demande) => (
                                     <tr key={demande._id} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
@@ -249,13 +320,6 @@ export default function DemandesPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-2">
                                                 {
-                                                    demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && (
-                                                        <button onClick={() => { setSelectedDemande(demande); setIsModalOpenUpdate(true); }} className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 border border-yellow-400/30">
-                                                            <Edit2 size={16} />
-                                                        </button>
-                                                    )
-                                                }
-                                                {
                                                     demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <button onClick={() => handleApprove(demande._id)} className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30">
                                                             <Check size={16} />
@@ -272,9 +336,13 @@ export default function DemandesPage() {
                                                 <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 border border-blue-400/30">
                                                     <Eye size={16} />
                                                 </button>
-                                                <button onClick={() => handleDelete(demande._id)} className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30">
-                                                    <Trash2 size={16} />
-                                                </button>
+                                                {
+                                                    JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                                        <button onClick={() => handleDelete(demande._id)} className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )
+                                                }
 
                                             </div>
                                         </td>
@@ -283,7 +351,7 @@ export default function DemandesPage() {
                             </tbody>
                         </table>
 
-                        {!loading && processedDemandes.length === 0 && (
+                        {!loading && otherDemandes.length === 0 && (
                             <div className="py-20 text-center text-white/40">
                                 <FileText className="mx-auto mb-4 opacity-20" size={60} />
                                 <p className="font-bold">Aucune demande trouvée.</p>
