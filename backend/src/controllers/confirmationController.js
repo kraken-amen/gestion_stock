@@ -2,6 +2,17 @@ const mongoose = require('mongoose');
 const Livraison = require('../models/Livraison');
 const Commande = require('../models/Commande');
 const Stock = require('../models/Stock');
+exports.getConfirmReceipt = async (req, res) => {
+    try {
+        const livraisons = await Livraison.find().populate({
+            path: 'commande_id',
+            populate: { path: 'demande_id',populate: { path: 'user_id' ,populate: { path: 'region' }}}
+        });
+        res.json(livraisons);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 exports.confirmReceipt = async (req, res) => {
     const { livraisonId } = req.params;
     const session = await mongoose.startSession();

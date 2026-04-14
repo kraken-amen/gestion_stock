@@ -135,7 +135,7 @@ const DemandeModelCreate = ({ isOpen, onClose, onDemandeCreated }: PropsDemande)
                                         <div>
                                             <label className="block text-xs font-semibold text-white/70 mb-1.5">Produit #{index + 1}</label>
                                             <Select
-                                                options={products} // <--- Testa3mel el state jdid hne
+                                                options={products} 
                                                 placeholder="Choisir un article..."
                                                 styles={customSelectStyles}
                                                 value={products.find(opt => opt.value === item.product_id)}

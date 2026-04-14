@@ -10,6 +10,7 @@ import TunisiaMap from "../pages/TunisiaMap"
 import RegionPage from "../pages/Region"
 import Demandes from "../pages/Demandes"
 import Products from "../pages/Product"
+import Commande from "../pages/Commande"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -25,6 +26,7 @@ const AppRouter = () => {
             <Route path="/demandes" element={<Demandes />} />
             <Route path="/users" element={<Users />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/commandes" element={<Commande />} />
             <Route path="/map" element={<TunisiaMap />} />
             <Route path="/region/:name" element={<RegionPage />} />
           </Route>

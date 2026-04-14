@@ -54,15 +54,15 @@ export default function ProductListPage() {
     return products.filter(product => {
       if (!product) return false;
 
-      const matchesSearch = product.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            product.libelle?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = product.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.libelle?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStock = filterStock === 'all' || 
+      const matchesStock = filterStock === 'all' ||
         (filterStock === 'rupture' && product.quantite === 0) ||
         (filterStock === 'alerte' && product.quantite > 0 && product.quantite <= 100) ||
         (filterStock === 'disponible' && product.quantite > 100);
 
-      const matchesPrice = filterPriceRange === 'all' || 
+      const matchesPrice = filterPriceRange === 'all' ||
         (filterPriceRange === 'low' && product.prix < 50) ||
         (filterPriceRange === 'mid' && product.prix >= 50 && product.prix <= 200) ||
         (filterPriceRange === 'high' && product.prix > 200);
@@ -197,22 +197,25 @@ export default function ProductListPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => { setSelectedProduct(product); setIsModalOpenUpdate(true); }}
-                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product._id!)}
-                            className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 transition-all"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
+                      {
+                        JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => { setSelectedProduct(product); setIsModalOpenUpdate(true); }}
+                                className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(product._id!)}
+                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
                     </tr>
                   ))}
                 </tbody>

@@ -128,6 +128,12 @@ export interface ProductProps {
     onClose: () => void;
     onProductCreated: () => void; 
 }
+export interface Commande {
+    _id: string;
+    demande_id: Demande;
+    status: 'EN_PREPARATION' | 'EXPEDIEE' | 'LIVREE';
+    createdAt: string;
+}
 export interface ProductPropsUpdate {
     isOpen: boolean;
     onClose: () => void;
