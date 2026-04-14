@@ -1,13 +1,13 @@
 import api from "./api";
 export const getConfirmReceipts = async () => {
-        const response = await api.get(`/confirm-receipt`);
+        const response = await api.get(`/confirmation`);
         return response.data;
 };
 // 2. Confirm receipt (Admin only)
 export const confirmReceipt = async (livraisonId: string) => {
-        // PATCH /confirm-receipt/:livraisonId
+        // PATCH /:livraisonId
         const response = await api.patch(
-            `/confirm-receipt/${livraisonId}`, 
+            `/confirmation/${livraisonId}`, 
             {},
         );
         return response.data;
@@ -17,7 +17,7 @@ export const confirmReceipt = async (livraisonId: string) => {
 export const toggleEnregistered = async (stockId: string) => {
         // PATCH /enregistered/:stockId
         const response = await api.patch(
-            `/enregistered/${stockId}`, 
+            `/confirmation/enregistered/${stockId}`, 
             {}, 
             
         );

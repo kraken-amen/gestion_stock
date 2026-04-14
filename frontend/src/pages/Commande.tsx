@@ -28,7 +28,8 @@ export default function CommandePage() {
         try {
             setLoading(true);
             const res = await getConfirmReceipts();
-            setCommandes(res.data || []);
+            const dataToSet = Array.isArray(res) ? res : (res?.data || []);
+            setCommandes(dataToSet);
         } catch (error) {
             console.error("Erreur fetching commandes:", error);
         } finally {
@@ -48,21 +49,20 @@ export default function CommandePage() {
 
     // Filter logic updated for Commande Status and Demande Reference
     const filteredCommandes = useMemo(() => {
-        if (!commandes) return [];
+    if (!Array.isArray(commandes)) return [];
 
-        return commandes.filter(cmd => {
-            if (!cmd) return false;
+    return commandes.filter(cmd => {
+        const matchesStatus = filterStatus === 'all' || cmd.status === filterStatus;
 
-            // Search by Demande ID/Reference or Description if available
-            const matchesSearch = cmd.demande_id?._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                 cmd.status?.toLowerCase().includes(searchTerm.toLowerCase());
+        const refId = typeof cmd.demande_id === 'object' ? cmd.demande_id?._id : cmd.demande_id;
+        
+        const matchesSearch = 
+            (refId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (cmd.status?.toLowerCase().includes(searchTerm.toLowerCase()));
 
-            // Match Status Enum: EN_PREPARATION, EXPEDIEE, LIVREE
-            const matchesStatus = filterStatus === 'all' || cmd.status === filterStatus;
-
-            return matchesSearch && matchesStatus;
-        });
-    }, [commandes, searchTerm, filterStatus]);
+        return matchesSearch && matchesStatus;
+    });
+}, [commandes, searchTerm, filterStatus]);
 
     // Helper for status badges colors
     const getStatusStyles = (status: string) => {
@@ -160,9 +160,9 @@ export default function CommandePage() {
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-sm truncate max-w-[150px]">
-                                                            ID: {commande.demande_id?._id?.substring(0, 8)}...
+                                                            {commande.demande_id?.user_id?.email}
                                                         </span>
-                                                        <span className="text-white/50 text-xs">Origin: Demande Resource</span>
+                                                        <span className="text-white/50 text-xs"></span>
                                                     </div>
                                                 </div>
                                             </td>
