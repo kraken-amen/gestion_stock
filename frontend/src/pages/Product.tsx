@@ -1,16 +1,17 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Edit2, Plus, Filter, Mail, Power, ArrowLeft, Loader2, UserCircle, Trash2, Box } from 'lucide-react';
-import { getProducts,createProduct, updateProduct, deleteProduct } from "../services/productService";
+import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, Box } from 'lucide-react';
+import { getProducts, deleteProduct } from "../services/productService";
 import { useNavigate } from 'react-router-dom';
 import type { Product } from "../types";
-// import ProductModelCreate from '../components/ProductModelCreate';
-// import ProductModelUpdate from '../components/ProductModelUpdate';
+import ProductModelCreate from '../components/ProductModelCreate';
+import ProductModelUpdate from '../components/ProductModelUpdate';
+
 export default function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState();
-  const [filterStatus, setFilterStatus] = useState();
+  const [filterStock, setFilterStock] = useState('all');
+  const [filterPriceRange, setFilterPriceRange] = useState('all');
   const navigate = useNavigate();
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
@@ -22,7 +23,6 @@ export default function ProductListPage() {
       navigate('/');
       return;
     }
-    console.log(filteredProducts);
     fetchProducts();
   }, [navigate]);
 
@@ -37,7 +37,9 @@ export default function ProductListPage() {
       setLoading(false);
     }
   };
+
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Voulez-vous supprimer ce produit ?")) return;
     try {
       await deleteProduct(id);
       fetchProducts();
@@ -46,32 +48,37 @@ export default function ProductListPage() {
     }
   };
 
- const filteredProducts = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     if (!products) return [];
 
     return products.filter(product => {
-        if (!product) return false;
+      if (!product) return false;
 
-        const matchesSearch = product.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = product.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            product.libelle?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesStatus = filterStatus === 'all' || product.quantite === filterStatus;
+      const matchesStock = filterStock === 'all' || 
+        (filterStock === 'rupture' && product.quantite === 0) ||
+        (filterStock === 'alerte' && product.quantite > 0 && product.quantite <= 100) ||
+        (filterStock === 'disponible' && product.quantite > 100);
 
-        return matchesSearch && matchesStatus;
+      const matchesPrice = filterPriceRange === 'all' || 
+        (filterPriceRange === 'low' && product.prix < 50) ||
+        (filterPriceRange === 'mid' && product.prix >= 50 && product.prix <= 200) ||
+        (filterPriceRange === 'high' && product.prix > 200);
+
+      return matchesSearch && matchesStock && matchesPrice;
     });
-}, [products, searchTerm, filterStatus]);
+  }, [products, searchTerm, filterStock, filterPriceRange]);
 
-const Products = filteredProducts;
+  const Products = filteredProducts;
 
   const getQuantiteColor = (quantite: number) => {
-    if (quantite<=100) {
-      return 'bg-red-500/20 text-red-400 border border-red-400/50';
-    } else if (quantite<=500) {
-      return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
-    } else if (quantite<=1000) {
-      return 'bg-green-500/20 text-green-400 border border-green-400/50';
-    } else {
-      return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
-    }
+    if (quantite === 0) return 'bg-red-600/20 text-red-500 border border-red-500/50';
+    if (quantite <= 100) return 'bg-red-400/20 text-red-400 border border-red-400/50';
+    if (quantite <= 500) return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
+    if (quantite <= 1000) return 'bg-green-500/20 text-green-400 border border-green-400/50';
+    return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
   };
 
   return (
@@ -92,7 +99,7 @@ const Products = filteredProducts;
               </button>
               <div>
                 <h1 className="text-xl md:text-3xl font-black drop-shadow-lg">Gestion des Produits</h1>
-                <p className="text-white/60 text-xs hidden md:block">Administration et gestion des produits</p>
+                <p className="text-white/60 text-xs hidden md:block">Administration et gestion de l'inventaire</p>
               </div>
             </div>
             <button
@@ -107,91 +114,86 @@ const Products = filteredProducts;
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
           {/* Filters Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {/* Barre de recherche */}
             <div className="md:col-span-2 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <input
                 type="text"
-                placeholder="Rechercher par email..."
+                placeholder="Rechercher par code ou libellé..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
               />
             </div>
 
-            {/* Sélecteur de rôle */}
             <div className="relative">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <select
-                value={filterRole}
-                // onChange={(e) => setFilterRole(e.target.value)}
+                value={filterStock}
+                onChange={(e) => setFilterStock(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
               >
-                <option value="all" className="bg-slate-900">Tous les produits</option>
-                <option value="administrateur" className="bg-slate-900">Produits en stock</option>
-                <option value="responsable region" className="bg-slate-900">Produits en rupture</option>
-                <option value="utilisateur" className="bg-slate-900">Produits en alerte</option>
-                <option value="Gestionnaire de Stock" className="bg-slate-900">Produits en surstock</option>
+                <option value="all" className="bg-slate-900">Tous les stocks</option>
+                <option value="disponible" className="bg-slate-900">En stock</option>
+                <option value="alerte" className="bg-slate-900">En alerte</option>
+                <option value="rupture" className="bg-slate-900">En rupture</option>
               </select>
             </div>
 
-            {/* Sélecteur de statut */}
             <div className="relative">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <select
-                value={filterStatus}
-                // onChange={(e) => setFilterStatus(e.target.value)}
+                value={filterPriceRange}
+                onChange={(e) => setFilterPriceRange(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
               >
-                <option value="all" className="bg-slate-900">Tous les statuts</option>
-                <option value="true" className="bg-slate-900">Actif</option>
-                <option value="false" className="bg-slate-900">Bloqué</option>
+                <option value="all" className="bg-slate-900">Tous les prix</option>
+                <option value="low" className="bg-slate-900">Moins de 50 DT</option>
+                <option value="mid" className="bg-slate-900">50 DT - 200 DT</option>
+                <option value="high" className="bg-slate-900">Plus de 200 DT</option>
               </select>
             </div>
           </div>
 
-          {/* Table Container - Mobile Responsive */}
           <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
             {loading ? (
               <div className="py-20 flex flex-col items-center gap-4 text-white/50">
                 <Loader2 className="animate-spin" size={40} />
-                <p>Chargement des utilisateurs...</p>
+                <p>Chargement des produits...</p>
               </div>
             ) : (
               <table className="w-full text-left min-w-[700px]">
                 <thead>
                   <tr className="bg-white/5 border-b border-white/10">
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Utilisateur</th>
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Rôle</th>
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Produit</th>
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Quantité</th>
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Prix Unitaire</th>
                     <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {Products.map((product) => (
-
                     <tr key={product._id} className="hover:bg-white/5 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${getQuantiteColor(product.quantite)}`}>
-                            <Box size={12} />
+                            <Box size={18} />
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-bold text-sm truncate max-w-[150px]">{product.codeArticle}</span>
-                            <span className="text-white/50 text-xs flex items-center gap-1"><Box size={12} /> {product.libelle}</span>
+                            <span className="font-bold text-sm truncate max-w-[150px]">#{product.codeArticle}</span>
+                            <span className="text-white/50 text-xs truncate max-w-[200px]">{product.libelle}</span>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap ${getQuantiteColor(product.quantite)}`}>
-                          {product.quantite}
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap ${getQuantiteColor(product.quantite)}`}>
+                          {product.quantite} {product.unite}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${product.prix ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-500'}`} />
-                          <span className={`text-xs font-bold ${product.prix ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {product.prix}
+                          <div className={`w-2 h-2 rounded-full ${product.prix > 0 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-red-500'}`} />
+                          <span className={`text-xs font-bold ${product.prix > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {product.prix.toLocaleString()} DT
                           </span>
                         </div>
                       </td>
@@ -199,13 +201,13 @@ const Products = filteredProducts;
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => { setSelectedProduct(product); setIsModalOpenUpdate(true); }}
-                            className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40"
+                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
                           >
                             <Edit2 size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(product._id!)}
-                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40"
+                            className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 transition-all"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -218,36 +220,28 @@ const Products = filteredProducts;
             )}
             {!loading && Products.length === 0 && (
               <div className="py-20 text-center text-white/40">
-                <UserCircle className="mx-auto mb-4 opacity-20" size={60} />
-                <p>Aucun utilisateur trouvé.</p>
+                <Box className="mx-auto mb-4 opacity-20" size={60} />
+                <p>Aucun produit trouvé.</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* <ProductModelCreate
+      <ProductModelCreate
         isOpen={isModalOpenCreate}
         onClose={() => setIsModalOpenCreate(false)}
-        onUserCreated={fetchProducts}
+        onProductCreated={fetchProducts}
       />
 
-      {isModalOpenUpdate && selectedUser && (
+      {isModalOpenUpdate && selectedProduct && (
         <ProductModelUpdate
           isOpen={isModalOpenUpdate}
-          onClose={() => { setIsModalOpenUpdate(false); setSelectedUser(null); }}
-          onUserUpdated={fetchProducts}
-          user={selectedUser}
+          onClose={() => { setIsModalOpenUpdate(false); setSelectedProduct(null); }}
+          onProductUpdated={fetchProducts}
+          product={selectedProduct}
         />
       )}
-      {isModalOpenUpdateAdmin && selectedUser && (
-        <ProductModelUpdateAdmin
-          isOpen={isModalOpenUpdateAdmin}
-          onClose={() => { setIsModalOpenUpdateAdmin(false); setSelectedUser(null); }}
-          onUserUpdated={fetchProducts}
-          user={selectedUser}
-        />
-      )} */}
     </div>
   );
 }
