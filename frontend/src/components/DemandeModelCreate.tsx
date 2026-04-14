@@ -1,25 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createDemande } from '../services/demandeService';
-import type { PropsDemande } from '../types';
+import { getAllProducts } from '../services/productService';
+import type { PropsDemande, Product } from '../types'; 
 import { useToast } from '../context/ToastContext';
 import Select from 'react-select';
 import { Plus, X } from 'lucide-react'; 
 import customSelectStyles from './ui/selectStyles';
 
-const productOptions = [
-    { value: '69cd0644e41ff6c6ff03427c', label: 'Câble Fibre Optique 100m' },
-    { value: '69cd064fe41ff6c6ff03427f', label: 'Modem VDSL TP-Link' },
-    { value: '69cd0658e41ff6c6ff034282', label: 'Téléphone IP Cisco' },
-];
-
 const DemandeModelCreate = ({ isOpen, onClose, onDemandeCreated }: PropsDemande) => {
     const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [products, setProducts] = useState<{ value: string; label: string }[]>([]);
 
     const [formData, setFormData] = useState({
         items: [{ product_id: '', quantite: '' }],
         description: ''
     });
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await getAllProducts();
+                const options = data.map((p: Product) => ({
+                    value: p._id,
+                    label: p.libelle
+                }));
+                setProducts(options);
+            } catch (error) {
+                console.error("Erreur fetch products:", error);
+            }
+        };
+
+        if (isOpen) {
+            fetchProducts();
+        }
+    }, [isOpen]);
 
     const addItem = () => {
         setFormData(prev => ({
@@ -120,10 +135,10 @@ const DemandeModelCreate = ({ isOpen, onClose, onDemandeCreated }: PropsDemande)
                                         <div>
                                             <label className="block text-xs font-semibold text-white/70 mb-1.5">Produit #{index + 1}</label>
                                             <Select
-                                                options={productOptions}
+                                                options={products} // <--- Testa3mel el state jdid hne
                                                 placeholder="Choisir un article..."
                                                 styles={customSelectStyles}
-                                                value={productOptions.find(opt => opt.value === item.product_id)}
+                                                value={products.find(opt => opt.value === item.product_id)}
                                                 onChange={(option) => updateItem(index, 'product_id', option?.value || '')}
                                             />
                                         </div>

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { updateProduct } from '../services/productService';
-import type { ProductPropsUpdate } from '../types';
+import React from 'react'
+import { useState } from 'react';
+import { createProduct } from '../services/productService';
+import type { ProductProps } from '../types';
 import { useToast } from '../context/ToastContext';
-import { Box, Hash, Type, Info, DollarSign } from 'lucide-react';
+import { Box, Hash, Type, Info } from 'lucide-react';
 
-
-const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: ProductPropsUpdate) => {
+const ProductModelCreate = ({ isOpen, onClose, onProductCreated }: ProductProps) => {
     const [formData, setFormData] = useState({
         codeArticle: '',
         libelle: '',
@@ -17,38 +17,43 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
     const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (product) {
-            setFormData({
-                codeArticle: product.codeArticle,
-                libelle: product.libelle,
-                quantite: product.quantite,
-                unite: product.unite,
-                prix: product.prix
-            });
-        }
-    }, [product, isOpen]);
-
-    const handleClose = () => {
-        onClose();
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!product?._id) return;
+
+        // Validation simple
+        if (!formData.codeArticle.trim() || !formData.libelle.trim()) {
+            addToast('Veuillez remplir les champs obligatoires', 'error');
+            return;
+        }
+
+        if (formData.quantite < 0 || formData.prix < 0) {
+            addToast('La quantité et le prix ne peuvent pas être négatifs', 'error');
+            return;
+        }
 
         setLoading(true);
         try {
-            await updateProduct(product._id, formData);
-            onProductUpdated();
+            await createProduct(formData);
+            onProductCreated();
             handleClose();
-            addToast('Produit mis à jour avec succès', 'success');
+            addToast('Produit ajouté avec succès', 'success');
         } catch (error) {
             console.error("Erreur:", error);
-            addToast('Erreur lors de la mise à jour', 'error');
+            addToast('Erreur lors de l\'ajout du produit', 'error');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleClose = () => {
+        setFormData({
+            codeArticle: '',
+            libelle: '',
+            quantite: 0,
+            unite: 'Pièce',
+            prix: 0
+        });
+        onClose();
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -63,21 +68,26 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
         <div className="relative font-sans">
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Dark Overlay */}
                     <div
                         className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
                         onClick={handleClose}
                     ></div>
 
+                    {/* Modal Content */}
                     <div className="relative w-full max-w-md bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 border border-white/20 rounded-2xl p-8 shadow-2xl overflow-hidden">
+                        {/* Background Effects */}
                         <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
 
                         <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                             <Box size={24} className="text-blue-400" />
-                            Modifier le produit
+                            Ajouter un produit
                         </h2>
 
                         <form className="space-y-4" onSubmit={handleSubmit}>
+
+                            {/* Code Article */}
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-semibold text-white/90 mb-2">
                                     <Hash size={14} /> Code Article
@@ -87,10 +97,12 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
                                     name="codeArticle"
                                     value={formData.codeArticle}
                                     onChange={handleInputChange}
+                                    placeholder="Ex: MOD-TT-01"
                                     className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium"
                                 />
                             </div>
 
+                            {/* Libelle */}
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-semibold text-white/90 mb-2">
                                     <Type size={14} /> Libellé
@@ -100,11 +112,13 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
                                     name="libelle"
                                     value={formData.libelle}
                                     onChange={handleInputChange}
+                                    placeholder="Désignation du produit"
                                     className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium"
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
+                                {/* Quantité */}
                                 <div>
                                     <label className="flex items-center gap-2 text-sm font-semibold text-white/90 mb-2">
                                         <Info size={14} /> Quantité
@@ -112,12 +126,13 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
                                     <input
                                         type="number"
                                         name="quantite"
-                                        value={formData.quantite}
+                                        placeholder='0'
                                         onChange={handleInputChange}
                                         className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium"
                                     />
                                 </div>
 
+                                {/* Unite */}
                                 <div>
                                     <label className="flex items-center gap-2 text-sm font-semibold text-white/90 mb-2">
                                         Unité
@@ -135,24 +150,26 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
                                 </div>
                             </div>
 
+                            {/* Prix */}
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-semibold text-white/90 mb-2">
-                                    <DollarSign size={14} /> Prix (DT)
+                                    Prix (DT)
                                 </label>
                                 <input
                                     type="number"
                                     name="prix"
-                                    value={formData.prix}
                                     onChange={handleInputChange}
+                                    placeholder="0.000"
                                     className="w-full bg-white/5 backdrop-blur-sm border-2 border-white/10 rounded-xl px-4 py-3 text-white focus:border-white/50 focus:bg-white/10 focus:outline-none transition-all font-medium"
                                 />
                             </div>
 
+                            {/* Buttons */}
                             <div className="flex gap-3 mt-8 pt-4 border-t border-white/10">
                                 <button
                                     type="button"
                                     onClick={handleClose}
-                                    className="flex-1 py-3 rounded-xl font-bold text-white/70 hover:bg-white/5 border border-white/10 transition-all"
+                                    className="relative flex-1 py-3 rounded-xl font-bold text-white/70 hover:bg-white/5 border border-white/10 transition-all"
                                 >
                                     Annuler
                                 </button>
@@ -161,7 +178,7 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
                                     disabled={loading}
                                     className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50"
                                 >
-                                    {loading ? 'Mise à jour...' : 'Modifier'}
+                                    {loading ? 'Ajout en cours...' : 'Ajouter'}
                                 </button>
                             </div>
                         </form>
@@ -172,4 +189,4 @@ const ProductModelUpdate = ({ isOpen, onClose, onProductUpdated, product }: Prod
     )
 }
 
-export default ProductModelUpdate;
+export default ProductModelCreate;
