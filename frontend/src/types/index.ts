@@ -82,6 +82,8 @@ export interface Product {
     _id: string;
     codeArticle: string;
     libelle: string;
+    quantite: number;
+    unite: string;
     prix: number;
 }
 
@@ -120,4 +122,15 @@ export interface Demande {
     items: { quantite: number; product_id: Product }[];
     description: string;
     createdAt: string;
+}
+export interface ProductProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onProductCreated: () => void; 
+}
+export interface ProductPropsUpdate {
+    isOpen: boolean;
+    onClose: () => void;
+    onProductUpdated: () => void; 
+    product: Product;
 }

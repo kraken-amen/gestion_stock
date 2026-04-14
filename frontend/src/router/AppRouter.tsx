@@ -9,6 +9,7 @@ import DashboardLayout from "../layouts/DashboardLayout"
 import TunisiaMap from "../pages/TunisiaMap"
 import RegionPage from "../pages/Region"
 import Demandes from "../pages/Demandes"
+import Products from "../pages/Product"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -23,6 +24,7 @@ const AppRouter = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/demandes" element={<Demandes />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/products" element={<Products />} />
             <Route path="/map" element={<TunisiaMap />} />
             <Route path="/region/:name" element={<RegionPage />} />
           </Route>

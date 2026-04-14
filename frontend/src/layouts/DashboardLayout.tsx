@@ -59,6 +59,7 @@ const DashboardLayout = () => {
           <PermissionGate role={user?.role} permission="MANAGE_USERS">
             <NavItem icon={<Users size={20} />} label="Utilisateurs" to="/users" />
           </PermissionGate>
+          <NavItem icon={<Package size={20} />} label="Produits" to="/products" />
           <NavItem icon={<Settings size={20} />} label="Paramètres" to="/settings" />
         </nav>
 
