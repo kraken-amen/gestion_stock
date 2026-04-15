@@ -159,7 +159,7 @@ export default function CommandePage() {
                                                         <ClipboardList size={18} />
                                                     </div>
                                                     <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
-                                                        {commande.demande_id?.items?.slice(0, 4).map((item, index) => (
+                                                        {commande.demande_id?.items?.slice(0, 2).map((item, index) => (
                                                             <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
                                                                 <Box size={10}/>
                                                                 {/* El Code Article */}
@@ -174,9 +174,9 @@ export default function CommandePage() {
                                                             </div>
                                                         ))}
 
-                                                        {commande.demande_id?.items?.length > 3 && (
+                                                        {commande.demande_id?.items?.length > 2 && (
                                                             <span className="text-white/40 text-xs font-bold mt-1">
-                                                                ... et {commande.demande_id.items.length - 3} autres
+                                                                ... et {commande.demande_id.items.length - 2} autres
                                                             </span>
                                                         )}
                                                     </div>

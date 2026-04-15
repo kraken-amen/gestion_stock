@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { BarChart3, ShoppingCart, Package, Settings, LogOut, Menu, X, Users } from 'lucide-react';
+import { BarChart3, ShoppingCart, Package, Settings, LogOut, Menu, X, Users,Warehouse, FileText } from 'lucide-react';
 import { PermissionGate } from '../components/PermissionGate';
 import { useAuth } from '../hooks/useAuth';
 
@@ -51,15 +51,15 @@ const DashboardLayout = () => {
         {/* Navigation Links */}
         <nav className="space-y-1.5 flex-1">
           <NavItem icon={<BarChart3 size={20} />} label="Tableau de Bord" to="/dashboard" />
-          <NavItem icon={<Package size={20} />} label="Stocks" to="/map" />
+          <NavItem icon={<Package size={20} />} label="Produits" to="/products" />
+          <NavItem icon={<Warehouse size={20} />} label="Stocks" to="/map" />
           <PermissionGate role={user?.role} permission="VIEW_DEMANDE">
-            <NavItem icon={<Package size={20} />} label="Demandes" to="/demandes" />
+            <NavItem icon={<FileText size={20} />} label="Demandes" to="/demandes" />
           </PermissionGate>
           <NavItem icon={<ShoppingCart size={20} />} label="Commandes" to="/commandes" />
           <PermissionGate role={user?.role} permission="MANAGE_USERS">
             <NavItem icon={<Users size={20} />} label="Utilisateurs" to="/users" />
           </PermissionGate>
-          <NavItem icon={<Package size={20} />} label="Produits" to="/products" />
           <NavItem icon={<Settings size={20} />} label="Paramètres" to="/settings" />
         </nav>
 

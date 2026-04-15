@@ -303,7 +303,7 @@ export default function DemandesPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {demande.items?.slice(0, 4).map((item, index) => (
+                                            {demande.items?.slice(0, 2).map((item, index) => (
                                                             <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
                                                                 {/* El Code Article */}
                                                                 <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
@@ -317,9 +317,9 @@ export default function DemandesPage() {
                                                             </div>
                                                         ))}
 
-                                                        {demande?.items?.length > 3 && (
+                                                        {demande?.items?.length > 2 && (
                                                             <span className="text-white/40 text-xs font-bold mt-1">
-                                                                ... et {demande.items.length - 3} autres
+                                                                ... et {demande.items.length - 2} autres
                                                             </span>
                                                         )}
                                         </td>
