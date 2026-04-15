@@ -167,7 +167,12 @@ export default function ProductListPage() {
                     <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Produit</th>
                     <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Quantité</th>
                     <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Prix Unitaire</th>
-                    <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                    {
+                      JSON.parse(localStorage.getItem('role') || '""') === "administrateur" &&
+                      (
+                        <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                      )
+                    }
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">

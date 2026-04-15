@@ -303,14 +303,25 @@ export default function DemandesPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {demande.items?.map((item, index) => (
-                                                <div key={index} className="flex flex-col mb-1 last:mb-0">
-                                                    <span className="font-bold text-sm text-blue-400">#{item.product_id?.codeArticle || 'N/A'}</span>
-                                                    <span className="text-red-300/70 text-[10px] font-black">
-                                                        {item?.quantite} UNITÉS
-                                                    </span>
-                                                </div>
-                                            ))}
+                                            {demande.items?.slice(0, 4).map((item, index) => (
+                                                            <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
+                                                                {/* El Code Article */}
+                                                                <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
+                                                                    #{item?.product_id?.codeArticle}
+                                                                </span>
+
+                                                                {/* El Quantité same line*/}
+                                                                <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
+                                                                    / {item?.quantite} UNITÉS
+                                                                </span>
+                                                            </div>
+                                                        ))}
+
+                                                        {demande?.items?.length > 3 && (
+                                                            <span className="text-white/40 text-xs font-bold mt-1">
+                                                                ... et {demande.items.length - 3} autres
+                                                            </span>
+                                                        )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${getStatusStyles(demande.status)}`}>

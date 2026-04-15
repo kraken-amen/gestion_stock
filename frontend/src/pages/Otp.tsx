@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, RefreshCcw, X, Send } from 'lucide-react';
-import { verifyOTP, resendOTP } from '../services/otpServidce'; 
+import { verifyOTP, resendOTP } from '../services/otpService'; 
 import { useAuth } from '../hooks/useAuth';
 
 export default function Otp() {

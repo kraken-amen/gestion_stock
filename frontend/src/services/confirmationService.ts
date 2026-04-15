@@ -1,8 +1,4 @@
 import api from "./api";
-export const getConfirmReceipts = async () => {
-        const response = await api.get(`/confirmation`);
-        return response.data;
-};
 // 2. Confirm receipt (Admin only)
 export const confirmReceipt = async (livraisonId: string) => {
         // PATCH /:livraisonId

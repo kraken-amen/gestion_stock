@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle } from 'lucide-react';
-import { getConfirmReceipts } from "../services/confirmationService"; 
+import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box } from 'lucide-react';
+import { getCommandes } from "../services/commandeService";
 import { useNavigate } from 'react-router-dom';
-import type { Commande } from "../types"; 
+import type { Commande } from "../types";
 import DemandeModelView from '../components/DemandeModelView';
 
 export default function CommandePage() {
@@ -27,7 +27,7 @@ export default function CommandePage() {
     const fetchCommandes = async () => {
         try {
             setLoading(true);
-            const res = await getConfirmReceipts();
+            const res = await getCommandes();
             const dataToSet = Array.isArray(res) ? res : (res?.data || []);
             setCommandes(dataToSet);
         } catch (error) {
@@ -49,20 +49,20 @@ export default function CommandePage() {
 
     // Filter logic updated for Commande Status and Demande Reference
     const filteredCommandes = useMemo(() => {
-    if (!Array.isArray(commandes)) return [];
+        if (!Array.isArray(commandes)) return [];
 
-    return commandes.filter(cmd => {
-        const matchesStatus = filterStatus === 'all' || cmd.status === filterStatus;
+        return commandes.filter(cmd => {
+            const matchesStatus = filterStatus === 'all' || cmd.status === filterStatus;
 
-        const refId = typeof cmd.demande_id === 'object' ? cmd.demande_id?._id : cmd.demande_id;
-        
-        const matchesSearch = 
-            (refId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (cmd.status?.toLowerCase().includes(searchTerm.toLowerCase()));
+            const refId = typeof cmd.demande_id === 'object' ? cmd.demande_id?._id : cmd.demande_id;
 
-        return matchesSearch && matchesStatus;
-    });
-}, [commandes, searchTerm, filterStatus]);
+            const matchesSearch =
+                (refId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (cmd.status?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+            return matchesSearch && matchesStatus;
+        });
+    }, [commandes, searchTerm, filterStatus]);
 
     // Helper for status badges colors
     const getStatusStyles = (status: string) => {
@@ -144,8 +144,8 @@ export default function CommandePage() {
                             <table className="w-full text-left min-w-[700px]">
                                 <thead>
                                     <tr className="bg-white/5 border-b border-white/10">
-                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Référence Demande</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Date Création</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">commande/Qté</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
                                         <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -158,18 +158,37 @@ export default function CommandePage() {
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getStatusStyles(commande.status)}`}>
                                                         <ClipboardList size={18} />
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-sm truncate max-w-[150px]">
-                                                            {commande.demande_id?.user_id?.email}
-                                                        </span>
-                                                        <span className="text-white/50 text-xs"></span>
+                                                    <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
+                                                        {commande.demande_id?.items?.slice(0, 4).map((item, index) => (
+                                                            <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
+                                                                <Box size={10}/>
+                                                                {/* El Code Article */}
+                                                                <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
+                                                                    #{item?.product_id?.codeArticle}
+                                                                </span>
+
+                                                                {/* El Quantité same line*/}
+                                                                <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
+                                                                    / {item?.quantite} UNITÉS
+                                                                </span>
+                                                            </div>
+                                                        ))}
+
+                                                        {commande.demande_id?.items?.length > 3 && (
+                                                            <span className="text-white/40 text-xs font-bold mt-1">
+                                                                ... et {commande.demande_id.items.length - 3} autres
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm text-white/70 font-medium">
-                                                    {new Date(commande.createdAt).toLocaleDateString()}
-                                                </span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-white/80 text-sm font-bold">{commande.demande_id?.user_id?.region}</span>
+                                                    <span className="text-white/50 text-xs flex items-center gap-1">
+                                                        <Clock size={12} /> {commande.createdAt ? new Date(commande.createdAt).toLocaleDateString() : '-'}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap flex items-center gap-2 w-fit ${getStatusStyles(commande.status)}`}>
@@ -188,7 +207,7 @@ export default function CommandePage() {
                                                     >
                                                         <Search size={16} />
                                                     </button>
-                                                    
+
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <>
                                                             <button
