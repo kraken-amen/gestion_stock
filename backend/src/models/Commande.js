@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 const commandeSchema = new mongoose.Schema({
   demande_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Demande",
-    required: true
+    ref: "Demande"
   },
   status: {
     type: String,

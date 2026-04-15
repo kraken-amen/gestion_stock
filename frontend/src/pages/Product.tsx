@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, Box } from 'lucide-react';
+import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, Box, Package2, Package, Ruler } from 'lucide-react';
 import { getProducts, deleteProduct } from "../services/productService";
 import { useNavigate } from 'react-router-dom';
 import type { Product } from "../types";
@@ -72,13 +72,22 @@ export default function ProductListPage() {
   }, [products, searchTerm, filterStock, filterPriceRange]);
 
   const Products = filteredProducts;
-
+  const getProductImage = (product: Product) => {
+    switch (product.unite) {
+      case "Rouleau":
+        return <Package2 size={16} />;
+      case "Mètre":
+        return <Ruler size={16} />;
+      default:
+        return <Package size={16} />;
+    }
+  };
   const getQuantiteColor = (quantite: number) => {
-    if (quantite === 0) return 'bg-red-600/20 text-red-500 border border-red-500/50';
-    if (quantite <= 100) return 'bg-red-400/20 text-red-400 border border-red-400/50';
-    if (quantite <= 500) return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
-    if (quantite <= 1000) return 'bg-green-500/20 text-green-400 border border-green-400/50';
-    return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
+    if (quantite === 0) return 'bg-gray-500/20 text-gray-500 border border-gray-500/50';
+    if (quantite <= 100) return 'bg-red-500/20 text-red-500 border border-red-500/50';
+    if (quantite <= 500) return 'bg-amber-500/20 text-amber-500 border border-amber-500/50';
+    if (quantite <= 1000) return 'bg-green-500/20 text-green-500 border border-green-500/50';
+    return 'bg-blue-500/20 text-blue-500 border border-blue-500/50';
   };
 
   return (
@@ -181,7 +190,7 @@ export default function ProductListPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${getQuantiteColor(product.quantite)}`}>
-                            <Box size={18} />
+                            {getProductImage(product)}
                           </div>
                           <div className="flex flex-col">
                             <span className="font-bold text-sm truncate max-w-[150px]">#{product.codeArticle}</span>

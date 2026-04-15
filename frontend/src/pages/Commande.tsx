@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box } from 'lucide-react';
-import { getCommandes } from "../services/commandeService";
+import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box, Eye } from 'lucide-react';
+import { getCommandes, deleteCommande } from "../services/commandeService";
+import CommandeModelCreate from '../components/CommandeModelCreate';
 import { useNavigate } from 'react-router-dom';
 import type { Commande } from "../types";
 import DemandeModelView from '../components/DemandeModelView';
@@ -12,6 +13,7 @@ export default function CommandePage() {
     const [filterStatus, setFilterStatus] = useState('all'); // Updated filter for Status enum
     const navigate = useNavigate();
     const [isModalOpenView, setIsModalOpenView] = useState(false);
+    const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [selectedCommande, setSelectedCommande] = useState<Commande | null>(null);
 
     useEffect(() => {
@@ -37,15 +39,15 @@ export default function CommandePage() {
         }
     };
 
-    // const handleDelete = async (id: string) => {
-    //     if (!window.confirm("Voulez-vous supprimer cette commande ?")) return;
-    //     try {
-    //         await deleteCommande(id);
-    //         fetchCommandes();
-    //     } catch (error) {
-    //         alert("Erreur lors de la suppression");
-    //     }
-    // };
+    const handleDelete = async (id: string) => {
+        if (!window.confirm("Voulez-vous supprimer cette commande ?")) return;
+        try {
+            await deleteCommande(id);
+            fetchCommandes();
+        } catch (error) {
+            alert("Erreur lors de la suppression");
+        }
+    };
 
     // Filter logic updated for Commande Status and Demande Reference
     const filteredCommandes = useMemo(() => {
@@ -97,7 +99,7 @@ export default function CommandePage() {
                         </div>
                         {/* Note: Create button usually redirects to a selection of Demande first */}
                         <button
-                            onClick={() => navigate('/commandes/new')}
+                            onClick={() => setIsModalOpenCreate(true)}
                             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95"
                         >
                             <Plus size={18} /> Nouvelle Commande
@@ -205,7 +207,7 @@ export default function CommandePage() {
                                                         className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
                                                         title="Voir Détails"
                                                     >
-                                                        <Search size={16} />
+                                                        <Eye size={16} />
                                                     </button>
 
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
@@ -216,7 +218,7 @@ export default function CommandePage() {
                                                                 <Edit2 size={16} />
                                                             </button>
                                                             <button
-                                                                // onClick={() => handleDelete(commande._id!)}
+                                                                onClick={() => handleDelete(commande._id!)}
                                                                 className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
                                                             >
                                                                 <Trash2 size={16} />
@@ -246,6 +248,13 @@ export default function CommandePage() {
                     isOpen={isModalOpenView}
                     onClose={() => { setIsModalOpenView(false); setSelectedCommande(null) }}
                     demande={selectedCommande.demande_id} // Passing the referenced Demande
+                />
+            )}
+            {isModalOpenCreate && (
+                <CommandeModelCreate
+                    isOpen={isModalOpenCreate}
+                    onClose={() => setIsModalOpenCreate(false)}
+                    onCommandeCreated={fetchCommandes}
                 />
             )}
         </div>

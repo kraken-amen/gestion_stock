@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getCommandes } = require('../controllers/commandeController');
-const { protect } = require('../middleware/authMiddleware');
+const { getCommandes, createCommande, deleteCommande, updateCommande } = require('../controllers/commandeController');
+const { protect,authorizeRoles} = require('../middleware/authMiddleware');
 router.use(protect);
 router.get('/', getCommandes);
+router.post('/',authorizeRoles("administrateur"), createCommande);
+router.delete('/:id',authorizeRoles("administrateur"), deleteCommande);
+router.put('/:id',authorizeRoles("administrateur"), updateCommande);
 module.exports = router;

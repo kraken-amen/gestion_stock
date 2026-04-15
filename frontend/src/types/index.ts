@@ -39,6 +39,12 @@ export interface Toast {
 export interface ToastContextType {
   addToast: (message: string, type?: 'success' | 'error') => void;
 }
+//props for commande model create
+export interface PropsCommande {
+    isOpen: boolean;
+    onClose: () => void;
+    onCommandeCreated: () => void; 
+}
 //props for demande model create
 export interface PropsDemande {
     isOpen: boolean;

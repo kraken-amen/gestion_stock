@@ -344,7 +344,9 @@ export default function DemandesPage() {
                                                         </button>
                                                     )
                                                 }
-                                                <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 border border-blue-400/30">
+                                                <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }}
+                                                    className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
+                                                    title="Voir Détails">
                                                     <Eye size={16} />
                                                 </button>
                                                 {
