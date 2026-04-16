@@ -9,6 +9,22 @@ const commandeSchema = new mongoose.Schema({
     enum: ["EN_PREPARATION", "EXPEDIEE", "LIVREE"],
     default: "EN_PREPARATION"
   },
+  description: {
+    type: String,
+    default: ""
+  },
+  items: [
+    {
+      product_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product"
+      },
+      quantite: {
+        type: Number,
+        required: true
+      }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now

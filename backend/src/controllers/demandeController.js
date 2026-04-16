@@ -117,6 +117,8 @@ exports.approveRequest = async (req, res) => {
         if (demande.status !== 'EN_ATTENTE') throw new Error("Cette demande est déjà traitée");
         const [newCommande] = await Commande.create([{
             demande_id: demande._id,
+            items: demande.items,
+            description: demande.description,
             status: "EN_PREPARATION"
         }], { session });
 

@@ -23,10 +23,7 @@ const CommandeModelCreate = ({ isOpen, onClose, onCommandeCreated }: PropsComman
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [prodRes, regRes] = await Promise.all([
-                    getAllProducts(),
-                    Region
-                ]);
+                const prodRes = await getAllProducts();
 
                 const prodData = prodRes.data || prodRes;
                 setProducts(prodData.map((p: Product) => ({
@@ -34,19 +31,17 @@ const CommandeModelCreate = ({ isOpen, onClose, onCommandeCreated }: PropsComman
                     label: p.libelle
                 })));
 
-                // const regData: Region[] = regRes.data || regRes;
-                // setRegions(regData.map((r: Region) => ({
-                //     value: r._id,
-                //     label: r.nom
-                // })));
+                setRegions(Region.map((r: { value: string; label: string }) => ({
+                    value: r.value,
+                    label: r.label
+                })));
+
             } catch (error) {
-                console.error("Erreur fetching data:", error);
+                console.error(error);
             }
         };
 
-        if (isOpen) {
-            fetchData();
-        }
+        if (isOpen) fetchData();
     }, [isOpen]);
 
     const addItem = () => {
