@@ -30,8 +30,8 @@ export const deleteDemande = async (id: string): Promise<void> => {
     await api.delete(`/demande/${id}`);
     return;
 };
-export const approveDemande = async (id: string): Promise<void> => {
-    await api.patch(`/demande/approve/${id}`);
+export const approveDemande = async (id: string, data: { region?: string } = {}): Promise<void> => {
+    await api.patch(`/demande/approve/${id}`, data); 
     return;
 };
 export const rejectDemande = async (id: string): Promise<void> => {

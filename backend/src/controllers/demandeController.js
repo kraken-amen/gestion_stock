@@ -112,13 +112,22 @@ exports.approveRequest = async (req, res) => {
     session.startTransaction();
 
     try {
-        const demande = await Demande.findById(id).session(session);
+        const demande = await Demande.findById(id)
+            .populate({ path: 'user_id', populate: { path: 'region' } })
+            .session(session);
+
         if (!demande) throw new Error("Demande non trouvée");
         if (demande.status !== 'EN_ATTENTE') throw new Error("Cette demande est déjà traitée");
+
+        const regionName = demande.user_id?.region;
+
         const [newCommande] = await Commande.create([{
             demande_id: demande._id,
-            items: demande.items,
-            description: demande.description,
+            region: regionName, 
+            items: demande.items.map(item => ({
+                product_id: item.product_id,
+                quantite: item.quantite
+            })),
             status: "EN_PREPARATION"
         }], { session });
 
@@ -129,12 +138,10 @@ exports.approveRequest = async (req, res) => {
 
         for (let item of demande.items) {
             const product = await Product.findById(item.product_id).session(session);
-            if (!product) {
-                throw new Error(`Produit avec ID ${item.product_id} non trouvé`);
-            }
+            if (!product) throw new Error(`Produit ${item.product_id} non trouvé`);
 
             if (product.quantite < item.quantite) {
-                throw new Error(`Stock insuffisant pour ${product.libelle}. Disponible: ${product.quantite}`);
+                throw new Error(`Stock insuffisant pour ${product.libelle}.`);
             }
 
             product.quantite -= item.quantite;
@@ -143,8 +150,8 @@ exports.approveRequest = async (req, res) => {
             await Movement.create([{
                 commande_id: newCommande._id,
                 product_id: item.product_id,
-                from: req.user._id,
-                to: demande.user_id,
+                from: req.user._id, // Admin
+                to: demande.user_id._id,
                 quantite: item.quantite,
                 dateMovement: Date.now()
             }], { session });
@@ -154,8 +161,7 @@ exports.approveRequest = async (req, res) => {
         await demande.save({ session });
 
         await session.commitTransaction();
-        res.json({ message: "Demande approuvée." });
-
+        res.json({ message: "Demande approuvée et commande créée." });
     } catch (error) {
         await session.abortTransaction();
         res.status(400).json({ message: error.message });

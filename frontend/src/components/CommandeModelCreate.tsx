@@ -70,22 +70,12 @@ const CommandeModelCreate = ({ isOpen, onClose, onCommandeCreated }: PropsComman
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!formData.region) {
-            addToast('Veuillez sélectionner une région', 'error');
-            return;
-        }
-
-        const isValid = formData.items.every(item => item.product_id && item.quantite);
-        if (!isValid) {
-            addToast('Veuillez remplir tous les produits et quantités', 'error');
-            return;
-        }
+        // ... validations ...
 
         setLoading(true);
         try {
             const payload = {
-                region: formData.region,
+                region: formData.region, // Doit être un string
                 items: formData.items.map(item => ({
                     product_id: item.product_id,
                     quantite: Number(item.quantite)
@@ -94,11 +84,11 @@ const CommandeModelCreate = ({ isOpen, onClose, onCommandeCreated }: PropsComman
             };
 
             await createCommande(payload);
-            addToast('Commande créée avec succès', 'success');
+            addToast('Commande directe créée', 'success');
             onCommandeCreated();
             handleClose();
         } catch (error: any) {
-            addToast(error.response?.data?.message || 'Erreur lors de la création', 'error');
+            addToast(error.response?.data?.message || 'Erreur', 'error');
         } finally {
             setLoading(false);
         }

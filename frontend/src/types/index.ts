@@ -137,6 +137,8 @@ export interface ProductProps {
 export interface Commande {
     _id: string;
     demande_id: Demande;
+    items: { quantite: number; product_id: Product }[];
+    region: string;
     status: 'EN_PREPARATION' | 'EXPEDIEE' | 'LIVREE';
     createdAt: string;
 }

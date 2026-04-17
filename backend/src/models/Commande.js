@@ -13,6 +13,10 @@ const commandeSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  region: {
+    type: String,
+    required: true
+  },
   items: [
     {
       product_id: {

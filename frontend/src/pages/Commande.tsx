@@ -75,7 +75,14 @@ export default function CommandePage() {
             default: return 'bg-slate-500/20 text-slate-400 border border-slate-400/50';
         }
     };
-
+    const getdemande = (demande_id: any) => {
+        if (demande_id) {
+            return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
+        }
+        else {
+            return 'bg-red-500/20 text-red-400 border border-red-400/50';
+        }
+    };
     return (
         <div className="min-h-screen relative font-sans text-white">
             {/* Background - Kept Original */}
@@ -157,11 +164,11 @@ export default function CommandePage() {
                                         <tr key={commande._id} className="hover:bg-white/5 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getStatusStyles(commande.status)}`}>
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getdemande(commande.demande_id)}`}>
                                                         <ClipboardList size={18} />
                                                     </div>
                                                     <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
-                                                        {commande.demande_id?.items?.slice(0, 2).map((item, index) => (
+                                                        {commande.items?.slice(0, 2).map((item, index) => (
                                                             <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
                                                                 <Box size={10}/>
                                                                 {/* El Code Article */}
@@ -176,9 +183,9 @@ export default function CommandePage() {
                                                             </div>
                                                         ))}
 
-                                                        {commande.demande_id?.items?.length > 2 && (
+                                                        {commande.items?.length > 2 && (
                                                             <span className="text-white/40 text-xs font-bold mt-1">
-                                                                ... et {commande.demande_id.items.length - 2} autres
+                                                                ... et {commande.items.length - 2} autres
                                                             </span>
                                                         )}
                                                     </div>
@@ -186,7 +193,7 @@ export default function CommandePage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="text-white/80 text-sm font-bold">{commande.demande_id?.user_id?.region}</span>
+                                                    <span className="text-white/80 text-sm font-bold">{commande.region}</span>
                                                     <span className="text-white/50 text-xs flex items-center gap-1">
                                                         <Clock size={12} /> {commande.createdAt ? new Date(commande.createdAt).toLocaleDateString() : '-'}
                                                     </span>

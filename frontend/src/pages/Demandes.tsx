@@ -6,6 +6,7 @@ import { getDemandes, deleteDemande, approveDemande, rejectDemande } from '../se
 import DemandeModelCreate from '../components/DemandeModelCreate';
 import DemandeModelUpdate from '../components/DemandeModelUpdate';
 import DemandeModelView from '../components/DemandeModelView';
+import { useToast } from '../context/ToastContext';
 
 export default function DemandesPage() {
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function DemandesPage() {
     const [isModalOpenView, setIsModalOpenView] = useState(false);
     const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
     const [orderBy, setOrderBy] = useState('all');
+    const { addToast } = useToast();
     const savedUser = localStorage.getItem('user');
     const current = savedUser ? JSON.parse(savedUser) : null;
     const fetchDemandes = async () => {
@@ -57,24 +59,24 @@ export default function DemandesPage() {
             }
         }
     };
+    // Exemple correct dans Demandes.tsx
     const handleApprove = async (id: string) => {
-        if (window.confirm('Voulez-vous vraiment approuver cette demande ?')) {
-            try {
-                await approveDemande(id);
-                fetchDemandes();
-            } catch (error) {
-                console.error("Erreur approbation:", error);
-            }
+        try {
+            // Si ton API n'a besoin de rien d'autre que l'ID dans l'URL
+            await approveDemande(id, { region: current.region });
+            addToast("Demande approuvée", "success");
+            fetchDemandes();
+        } catch (error) {
+            console.error("Erreur approbation:", error);
         }
     };
     const handleReject = async (id: string) => {
-        if (window.confirm('Voulez-vous vraiment rejeter cette demande ?')) {
-            try {
-                await rejectDemande(id);
-                fetchDemandes();
-            } catch (error) {
-                console.error("Erreur rejection:", error);
-            }
+        try {
+            await rejectDemande(id);
+            addToast("Demande rejetée", "error");
+            fetchDemandes();
+        } catch (error) {
+            console.error("Erreur rejection:", error);
         }
     };
     const myDemandes = useMemo(() => {
@@ -304,24 +306,24 @@ export default function DemandesPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             {demande.items?.slice(0, 2).map((item, index) => (
-                                                            <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
-                                                                {/* El Code Article */}
-                                                                <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
-                                                                    #{item?.product_id?.codeArticle}
-                                                                </span>
+                                                <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
+                                                    {/* El Code Article */}
+                                                    <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
+                                                        #{item?.product_id?.codeArticle}
+                                                    </span>
 
-                                                                {/* El Quantité same line*/}
-                                                                <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
-                                                                    / {item?.quantite} UNITÉS
-                                                                </span>
-                                                            </div>
-                                                        ))}
+                                                    {/* El Quantité same line*/}
+                                                    <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
+                                                        / {item?.quantite} UNITÉS
+                                                    </span>
+                                                </div>
+                                            ))}
 
-                                                        {demande?.items?.length > 2 && (
-                                                            <span className="text-white/40 text-xs font-bold mt-1">
-                                                                ... et {demande.items.length - 2} autres
-                                                            </span>
-                                                        )}
+                                            {demande?.items?.length > 2 && (
+                                                <span className="text-white/40 text-xs font-bold mt-1">
+                                                    ... et {demande.items.length - 2} autres
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${getStatusStyles(demande.status)}`}>
