@@ -60,7 +60,7 @@ const DashboardLayout = () => {
           <PermissionGate role={user?.role} permission="MANAGE_USERS">
             <NavItem icon={<Users size={20} />} label="Utilisateurs" to="/users" />
           </PermissionGate>
-          <NavItem icon={<Settings size={20} />} label="Paramètres" to="/settings" />
+          <NavItem icon={<Settings size={20} />} label="Paramètres" to="/parametres" />
         </nav>
 
         {/* Bottom Section - Logout */}
