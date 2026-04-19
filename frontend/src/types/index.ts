@@ -27,8 +27,8 @@ export interface LoginResponse {
 export interface OtpResponse {
   message: string;
   token: string;
-  role: 'administrateur' | 'responsable region' | 'utilisateur';
-  email: string;
+  role: 'administrateur' | 'responsable region' | 'utilisateur' | 'Gestionnaire de Stock';
+  region?: string;
 }
 //toast
 export interface Toast {

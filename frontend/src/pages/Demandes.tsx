@@ -18,6 +18,7 @@ export default function DemandesPage() {
     const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
     const [isModalOpenView, setIsModalOpenView] = useState(false);
     const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
+    const userRegion = JSON.parse(localStorage.getItem('region') || '""');
     const [orderBy, setOrderBy] = useState('all');
     const { addToast } = useToast();
     const savedUser = localStorage.getItem('user');
@@ -59,10 +60,8 @@ export default function DemandesPage() {
             }
         }
     };
-    // Exemple correct dans Demandes.tsx
     const handleApprove = async (id: string) => {
         try {
-            // Si ton API n'a besoin de rien d'autre que l'ID dans l'URL
             await approveDemande(id, { region: current.region });
             addToast("Demande approuvée", "success");
             fetchDemandes();
@@ -80,62 +79,69 @@ export default function DemandesPage() {
         }
     };
     const myDemandes = useMemo(() => {
-        if (!demandes || !current) return [];
+        if (!demandes || !userRegion) return [];
 
-        let result = demandes.filter(d => {
-            const userId = typeof d.user_id === 'object' ? d.user_id._id : d.user_id;
+        return demandes.filter(d => {
+            const demandeRegion = d.user_id?.region;
+            const isMyRegion = demandeRegion === userRegion;
 
-            const isMine = userId === current._id;
+            if (!isMyRegion) return false;
 
-            if (!isMine) return false;
-
+            if (d.status !== 'EN_ATTENTE') return false;
             const email = d.user_id?.email || '';
             const matchesItems = d.items?.some(item =>
                 item.product_id?.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase())
             );
 
-            const matchesSearch =
-                email.toLowerCase().includes(searchTerm.toLowerCase()) || matchesItems;
+            const matchesSearch = email.toLowerCase().includes(searchTerm.toLowerCase()) || matchesItems;
 
-            const matchesStatus =
-                filterStatus === 'all' || d.status === filterStatus;
-
-            return matchesSearch && matchesStatus;
+            return matchesSearch;
         });
-
-        return result;
-    }, [demandes, current, searchTerm, filterStatus]);
+    }, [demandes, userRegion, searchTerm]);
 
     const otherDemandes = useMemo(() => {
         if (!demandes) return [];
 
         let result = demandes.filter(d => {
-            const isNotMine = d.user_id?._id !== current?._id && d.user_id !== current?._id;
-            if (!isNotMine) return false;
+            const demandeRegion = d.user_id?.region;
+
+            const isNotMyRegion = demandeRegion !== userRegion;
+
+            const isMyRegionButHandled = (demandeRegion === userRegion) && (d.status !== 'EN_ATTENTE');
+
+            if (!isNotMyRegion && !isMyRegionButHandled) return false;
 
             const email = d.user_id?.email || '';
             const region = d.user_id?.region || '';
             const matchesItems = d.items?.some(item =>
                 item.product_id?.codeArticle?.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            const matchesSearch = email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+
+            const matchesSearch =
+                email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 region.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 matchesItems;
+
             const matchesStatus = filterStatus === 'all' || d.status === filterStatus;
 
             return matchesSearch && matchesStatus;
         });
 
+        // Sorting logic
         if (orderBy !== 'all') {
             result = [...result].sort((a, b) => {
+                if (orderBy === 'date') return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
                 if (orderBy === 'reference') return (a.items?.[0]?.product_id?.codeArticle || "").localeCompare(b.items?.[0]?.product_id?.codeArticle || "");
-                if (orderBy === 'date') return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
-                if (orderBy === 'quantite') return (b.items?.[0]?.quantite || 0) - (a.items?.[0]?.quantite || 0);
+                if (orderBy === 'quantite') {
+                    const qteA = a.items?.reduce((sum, i) => sum + (i.quantite || 0), 0) || 0;
+                    const qteB = b.items?.reduce((sum, i) => sum + (i.quantite || 0), 0) || 0;
+                    return qteB - qteA;
+                }
                 return 0;
             });
         }
         return result;
-    }, [demandes, current, searchTerm, filterStatus, orderBy]);
+    }, [demandes, userRegion, searchTerm, filterStatus, orderBy]);
 
     const getStatusStyles = (status: string) => {
         switch (status) {
@@ -197,7 +203,105 @@ export default function DemandesPage() {
                             </div>
                         ))}
                     </div>
+                    {myDemandes.length > 0 && (
+                        <div className="mb-10">
+                            <h3 className="text-white/70 text-sm font-bold mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                Mes Demandes En Attente
+                            </h3>
 
+                            <div className="space-y-4">
+                                {myDemandes.map((demande) => {
+                                    const totalMontant = demande.items?.reduce((sum, item) =>
+                                        sum + (item.quantite * (item.product_id?.prix || 0)), 0
+                                    );
+                                    const isStockAvailable = demande.items?.every(item => {
+                                        const stockDispo = item.product_id?.quantite || 0;
+                                        return stockDispo >= item.quantite;
+                                    });
+                                    const myFirstArticleCode = demande.items?.[0]?.product_id?.codeArticle;
+                                    const myFirststatus = demande.status;
+                                    const countSameArticle = demandes.filter(d =>
+                                        d.items?.some(item => item.product_id?.codeArticle === myFirstArticleCode && d.status === myFirststatus)
+                                    ).length - 1;
+
+                                    return (
+                                        <div key={demande._id} className="backdrop-blur-xl bg-blue-600/10 border border-blue-500/30 rounded-2xl p-5 md:p-6 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+
+                                            {/* Section 1: User & Info de base */}
+                                            <div className="flex items-center gap-4 min-w-[200px]">
+                                                <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-500/20">
+                                                    <span className="text-xl font-black">{countSameArticle}</span>
+
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        {demande.items?.slice(0, 2).map((item, idx) => (
+                                                            <span key={idx} className="text-[10px] bg-white/5 px-2 py-0.5 rounded border border-white/5 text-blue-300">
+                                                                {item.product_id?.codeArticle}
+                                                            </span>
+                                                        ))}
+                                                        {demande.items?.length > 2 && <span className="text-[10px] text-white/40">+{demande.items.length - 2}</span>}
+                                                    </div>
+                                                    <p className="text-white/40 text-[11px] font-medium">{demande.user_id?.email.split('@')[0]}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Section 2: Details (Date, Articles, Total) - GRID RESPONSIVE */}
+                                            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 w-full border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6">
+                                                <div>
+                                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-tighter mb-1">Date d'envoi</p>
+                                                    <p className="text-xs font-semibold text-white/80">{new Date(demande.createdAt).toLocaleDateString()}</p>
+                                                </div>
+
+                                                {/* Section Articles Label -> Affichage Disponibilité Stock */}
+                                                <div className="flex flex-col items-start">
+                                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-tighter mb-1">Disponibilité</p>
+
+                                                    {isStockAvailable ? (
+                                                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-tight">En Stock</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                            <span className="text-[10px] font-black text-red-400 uppercase tracking-tight">Stock Insuffisant</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="col-span-2 md:col-span-1">
+                                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-tighter mb-1">Montant Total</p>
+                                                    <p className="text-sm font-black text-emerald-400 italic">
+                                                        {totalMontant?.toLocaleString()} <span className="text-[10px]">TND</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Section 3: Actions */}
+                                            <div className="flex gap-2 w-full md:w-auto justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
+                                                <button
+                                                    onClick={() => { setSelectedDemande(demande); setIsModalOpenUpdate(true); }}
+                                                    className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-all border border-amber-500/20"
+                                                    title="Modifier"
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(demande._id)}
+                                                    className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
+                                                    title="Supprimer"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                     {/* Filters Section */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         <div className="md:col-span-2 relative">
@@ -222,51 +326,6 @@ export default function DemandesPage() {
                             <option value="ACCEPTEE" className="bg-slate-900">Approuvé</option>
                         </select>
                     </div>
-                    {myDemandes.length > 0 && (
-                        <div className="mb-10">
-                            <h3 className="text-white/70 text-sm font-bold mb-4 flex items-center gap-2 uppercase tracking-widest">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                                Mes Demandes Personnel
-                            </h3>
-
-                            <div className="space-y-4">
-                                {myDemandes.map((demande) => (
-                                    <div key={demande._id} className="backdrop-blur-xl bg-blue-600/10 border border-blue-500/30 rounded-2xl p-4 md:p-6 shadow-2xl flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ring-4 ring-blue-500/10 bg-blue-500/20 text-blue-400">
-                                                {current?.email?.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-white">Ma Demande</span>
-                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${demande.status === 'EN_ATTENTE' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'
-                                                        }`}>
-                                                        {demande.status}
-                                                    </span>
-                                                </div>
-                                                <p className="text-white/40 text-xs">Créée le {new Date(demande.createdAt).toLocaleDateString()}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => { setSelectedDemande(demande); setIsModalOpenUpdate(true); }}
-                                                className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
-                                            >
-                                                <Edit2 size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(demande._id)}
-                                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                     {/* Table Section */}
                     <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
                         <table className="w-full text-left min-w-[800px]">

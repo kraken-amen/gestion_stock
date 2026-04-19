@@ -100,9 +100,9 @@ exports.resendOtp = async (req, res) => {
     // 3. Générer un nouveau code de 6 chiffres
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // 4. Mettre à jour le code et l'expiration (1 minute comme demandé)
+    // 4. Mettre à jour le code et l'expiration (10 minute comme demandé)
     user.verificationCode = newCode;
-    user.verificationCodeExpires = Date.now() + 60 * 1000; // 1 minute
+    user.verificationCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minute
     await user.save();
 
     // 5. Renvoyer l'email avec le nouveau code
@@ -149,17 +149,23 @@ exports.verifyCode = async (req, res) => {
 
     // 3. Générer le Token JWT pour la session
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, role: user.role ,region: user.region},
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({
+    const responseData = {
       message: "Authentification réussie",
       token,
       id: user._id,
       role: user.role
-    });
+    };
+
+    if (user.role === "responsable region") {
+      responseData.region = user.region;
+    }
+
+    res.status(200).json(responseData);
 
   } catch (error) {
     res.status(500).json({ message: "Server error" });

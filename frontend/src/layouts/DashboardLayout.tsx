@@ -12,6 +12,7 @@ const DashboardLayout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
+    localStorage.removeItem('region');
     navigate('/');
   };
 

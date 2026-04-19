@@ -51,7 +51,7 @@ exports.createDemande = async (req, res) => {
 exports.getAllDemandes = async (req, res) => {
     try {
         const demandes = await Demande.find()
-            .populate('items.product_id', 'codeArticle libelle prix')
+            .populate('items.product_id', 'codeArticle libelle quantite prix')
             .populate('user_id', 'email role region description')
             .sort({ createdAt: -1 });
         res.json(demandes);

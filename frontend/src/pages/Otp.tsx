@@ -91,6 +91,13 @@ export default function Otp() {
     setLoading(true);
     try {
       const data = await verifyOTP(email, code);
+
+      if (data.region) {
+        localStorage.setItem('region', JSON.stringify(data.region));
+      } else {
+        localStorage.removeItem('region');
+      }
+
       loginUser(data);
       localStorage.removeItem('otp_expiry');
       addToast('Connexion réussie !', 'success');
