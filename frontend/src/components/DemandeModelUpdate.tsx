@@ -1,25 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { updateDemande } from '../services/demandeService';
-import type { PropsDemandeUpdate } from '../types';
+import { getAllProducts } from '../services/productService';
+import type { PropsDemandeUpdate, Product } from '../types';
 import { useToast } from '../context/ToastContext';
 import Select from 'react-select';
 import { Plus, X } from 'lucide-react'; 
 import customSelectStyles from './ui/selectStyles';
 
-const productOptions = [
-    { value: '69cd0644e41ff6c6ff03427c', label: 'Câble Fibre Optique 100m' },
-    { value: '69cd064fe41ff6c6ff03427f', label: 'Modem VDSL TP-Link' },
-    { value: '69cd0658e41ff6c6ff034282', label: 'Téléphone IP Cisco' },
-];
-
 const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: PropsDemandeUpdate) => {
     const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [products, setProducts] = useState<{ value: string; label: string }[]>([]);
 
     const [formData, setFormData] = useState({
         items: [{ product_id: '', quantite: '' }],
         description: ''
     });
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await getAllProducts();
+                const options = data.map((p: Product) => ({
+                    value: p._id,
+                    label: p.libelle
+                }));
+                setProducts(options);
+            } catch (error) {
+                console.error("Erreur fetch products:", error);
+            }
+        };
+
+        if (isOpen) {
+            fetchProducts();
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen && demande) {
@@ -103,6 +118,7 @@ const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: Prop
                             <button 
                                 type="button"
                                 onClick={addItem}
+                                title="Ajouter une ligne de produit"
                                 className="flex items-center gap-2 text-xs bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-lg transition-all active:scale-95"
                             >
                                 <Plus size={16} /> Ajouter Produit
@@ -117,6 +133,7 @@ const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: Prop
                                             <button 
                                                 type="button"
                                                 onClick={() => removeItem(index)}
+                                                title="Supprimer ce produit"
                                                 className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg z-20"
                                             >
                                                 <X size={14} />
@@ -126,10 +143,10 @@ const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: Prop
                                         <div>
                                             <label className="block text-xs font-semibold text-white/70 mb-1.5">Produit #{index + 1}</label>
                                             <Select
-                                                options={productOptions}
+                                                options={products}
                                                 placeholder="Choisir un article..."
                                                 styles={customSelectStyles}
-                                                value={productOptions.find(opt => opt.value === item.product_id)}
+                                                value={products.find(opt => opt.value === item.product_id)}
                                                 onChange={(option) => updateItem(index, 'product_id', option?.value || '')}
                                             />
                                         </div>
@@ -153,6 +170,7 @@ const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: Prop
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    placeholder="Ajouter une note..."
                                     rows={2}
                                     className="w-full bg-white/5 border-2 border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-white/50 focus:outline-none transition-all font-medium resize-none text-sm"
                                 />
@@ -171,7 +189,7 @@ const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: Prop
                                     disabled={loading}
                                     className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50"
                                 >
-                                    {loading ? 'Mise à jour...' : 'Modifier'}
+                                    {loading ? 'Mise à jour...' : 'Enregistrer'}
                                 </button>
                             </div>
                         </form>

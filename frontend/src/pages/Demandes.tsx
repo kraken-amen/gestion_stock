@@ -231,7 +231,7 @@ export default function DemandesPage() {
                                             {/* Section 1: User & Info de base */}
                                             <div className="flex items-center gap-4 min-w-[200px]">
                                                 <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-500/20">
-                                                    <span className="text-xl font-black">{countSameArticle}</span>
+                                                    <span className="text-xl font-black hover:bg-blue-500/20" title='Demandes prioritaires par date'>{countSameArticle}</span>
 
                                                 </div>
                                                 <div>
@@ -288,6 +288,11 @@ export default function DemandesPage() {
                                                 >
                                                     <Edit2 size={18} />
                                                 </button>
+                                                <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }}
+                                                    className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all border border-blue-500/20"
+                                                    title="Voir Détails">
+                                                    <Eye size={16} />
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(demande._id)}
                                                     className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
@@ -328,19 +333,24 @@ export default function DemandesPage() {
                     </div>
                     {/* Table Section */}
                     <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
-                        <table className="w-full text-left min-w-[800px]">
+                        <table className="w-full text-left min-w-[700px]">
                             <thead>
                                 <tr className="bg-white/5 border-b border-white/10">
-                                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Client</th>
+                                    <th className="px-6 py-4 text-xs font-black uppercase text-center tracking-wider">Client</th>
                                     <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Région / Date</th>
                                     <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Code Article / Qté</th>
-                                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
-                                    <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                                    <th className="px-6 py-4 text-xs font-black uppercase text-center tracking-wider">Statut</th>
+                                    {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                        <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {otherDemandes.map((demande) => (
-                                    <tr key={demande._id} className="hover:bg-white/5 transition-colors">
+                                    <tr key={demande._id} className="hover:bg-white/5 transition-colors cursor-pointer"
+                                        onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }}
+                                        title="Voir les détails complets"
+                                    >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold bg-amber-500/20 text-amber-400 border border-amber-400/50">
@@ -384,40 +394,47 @@ export default function DemandesPage() {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4  text-center">
                                             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${getStatusStyles(demande.status)}`}>
                                                 {getStatusLabel(demande.status)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-2">
-                                                {
-                                                    demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                        <button onClick={() => handleApprove(demande._id)} className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30">
-                                                            <Check size={16} />
-                                                        </button>
-                                                    )
-                                                }
-                                                {
-                                                    demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                        <button onClick={() => handleReject(demande._id)} className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30">
-                                                            <X size={16} />
-                                                        </button>
-                                                    )
-                                                }
-                                                <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }}
-                                                    className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
-                                                    title="Voir Détails">
-                                                    <Eye size={16} />
-                                                </button>
-                                                {
-                                                    JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                        <button onClick={() => handleDelete(demande._id)} className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30">
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    )
-                                                }
-
+                                                {/* Bouton Accepter*/}
+                                                {demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                                    <button
+                                                        onClick={() => handleApprove(demande._id)}
+                                                        title="Accepter la demande"
+                                                        className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30 transition-all"
+                                                    >
+                                                        <Check size={16} />
+                                                    </button>
+                                                )}
+                                                {/* Bouton Refuser*/}
+                                                {demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                                    <button
+                                                        onClick={() => handleReject(demande._id)}
+                                                        title="Refuser la demande"
+                                                        className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30 transition-all"
+                                                    >
+                                                        <X size={16} />
+                                                    </button>
+                                                )}
+                                                {/* Bouton Supprimer*/}
+                                                {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Voulez-vous supprimer cette demande ?")) {
+                                                                handleDelete(demande._id);
+                                                            }
+                                                        }}
+                                                        title="Supprimer la demande"
+                                                        className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30 transition-all"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

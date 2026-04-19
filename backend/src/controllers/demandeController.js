@@ -61,12 +61,41 @@ exports.getAllDemandes = async (req, res) => {
 };
 exports.updateDemande = async (req, res) => {
     try {
-        const demande = await Demande.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
-        res.json(demande);
+        const userId = req.user._id;
+        const { items, description } = req.body;
+
+        let existingDemande = await Demande.findOne({ 
+            user_id: userId,
+            status: "EN_ATTENTE" 
+        });
+
+        if (existingDemande) {
+            items.forEach(newItem => {
+                const itemIndex = existingDemande.items.findIndex(
+                    item => item.product_id.toString() === newItem.product_id.toString()
+                );
+
+                if (itemIndex > -1) {
+                    existingDemande.items[itemIndex].quantite += Number(newItem.quantite);
+                } else {
+                    existingDemande.items.push(newItem);
+                }
+            });
+
+            if (description) existingDemande.description = description;
+
+            await existingDemande.save();
+            return res.status(200).json(existingDemande);
+
+        } else {
+            const newDemande = await Demande.create({
+                user_id: userId,
+                items: items,
+                description: description || "",
+                status: "EN_ATTENTE"
+            });
+            return res.status(201).json(newDemande);
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

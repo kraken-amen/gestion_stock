@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box, Eye } from 'lucide-react';
+import { Search, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box } from 'lucide-react';
 import { getCommandes, deleteCommande } from "../services/commandeService";
 import CommandeModelCreate from '../components/CommandeModelCreate';
 import { useNavigate } from 'react-router-dom';
@@ -157,12 +157,17 @@ export default function CommandePage() {
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
-                                        <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                                        {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                            <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {filteredCommandes.map((commande) => (
-                                        <tr key={commande._id} className="hover:bg-white/5 transition-colors group">
+                                        <tr key={commande._id} className="hover:bg-white/5 transition-colors group"
+                                            onClick={() => { setIsModalOpenView(true); setSelectedCommande(commande); }}
+                                            title="Voir les détails complets"
+                                        >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getdemande(commande.demande_id)}`}>
@@ -225,14 +230,6 @@ export default function CommandePage() {
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <div className="flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={() => { setSelectedCommande(commande); setIsModalOpenView(true); }}
-                                                        className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
-                                                        title="Voir Détails"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <>
                                                             {/* <button
@@ -243,6 +240,7 @@ export default function CommandePage() {
                                                             <button
                                                                 onClick={() => handleDelete(commande._id!)}
                                                                 className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                                                                title="Supprimer"
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>

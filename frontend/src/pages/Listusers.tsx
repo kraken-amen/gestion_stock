@@ -195,8 +195,8 @@ export default function UsersListPage() {
               <table className="w-full text-left min-w-[700px]">
                 <thead>
                   <tr className="bg-white/5 border-b border-white/10">
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Utilisateur</th>
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Rôle</th>
+                    <th className="px-6 py-4 text-xs font-black uppercase text-center tracking-wider">Utilisateur</th>
+                    <th className="px-6 py-4 text-xs font-black uppercase text-center tracking-wider">Rôle</th>
                     <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
                     <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
                   </tr>
@@ -216,7 +216,7 @@ export default function UsersListPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-center">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap ${getRoleColor(user.role)}`}>
                           {user.role === "responsable region" ? "responsable " + user.region : user.role}
                         </span>
@@ -231,21 +231,36 @@ export default function UsersListPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
+                          {/* Bouton Toggle Statut */}
                           <button
                             onClick={() => handleToggle(user._id!)}
-                            className={`p-2 rounded-lg transition-all ${user.isActive ? 'bg-red-500/20 text-red-400 hover:bg-red-500/40' : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40'}`}
+                            title={user.isActive ? "Bloquer l'utilisateur" : "Activer l'utilisateur"}
+                            className={`p-2 rounded-lg transition-all ${user.isActive
+                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/40'
+                                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40'
+                              }`}
                           >
                             <Power size={16} />
                           </button>
+
+                          {/* Bouton Modifier */}
                           <button
                             onClick={() => { setSelectedUser(user); setIsModalOpenUpdate(true); }}
-                            className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40"
+                            title="Modifier les informations"
+                            className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
                           >
                             <Edit2 size={16} />
                           </button>
+
+                          {/* Bouton Supprimer */}
                           <button
-                            onClick={() => handleDelete(user._id!)}
-                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40"
+                            onClick={() => {
+                              if (window.confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
+                                handleDelete(user._id!);
+                              }
+                            }}
+                            title="Supprimer définitivement"
+                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
                           >
                             <Trash2 size={16} />
                           </button>
