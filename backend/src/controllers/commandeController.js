@@ -43,12 +43,12 @@ exports.deleteCommande = async (req, res) => {
     }
 };
 
-exports.updateCommande = async (req, res) => {
-    try {
-        const commande = await Commande.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!commande) return res.status(404).json({ message: "Commande non trouvée" });
-        res.json(commande);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+// exports.updateCommande = async (req, res) => {
+//     try {
+//         const commande = await Commande.findByIdAndUpdate(req.params.id, req.body, { new: true });
+//         if (!commande) return res.status(404).json({ message: "Commande non trouvée" });
+//         res.json(commande);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// };

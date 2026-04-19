@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Edit2, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box, Eye } from 'lucide-react';
+import { Search, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box, Eye } from 'lucide-react';
 import { getCommandes, deleteCommande } from "../services/commandeService";
 import CommandeModelCreate from '../components/CommandeModelCreate';
 import { useNavigate } from 'react-router-dom';
 import type { Commande } from "../types";
-import DemandeModelView from '../components/DemandeModelView';
+import CommandeModelView from '../components/CommandeModelView';
 
 export default function CommandePage() {
     const [commandes, setCommandes] = useState<Commande[]>([]);
@@ -154,6 +154,7 @@ export default function CommandePage() {
                                 <thead>
                                     <tr className="bg-white/5 border-b border-white/10">
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">commande/Qté</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
                                         <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
@@ -170,7 +171,7 @@ export default function CommandePage() {
                                                     <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
                                                         {commande.items?.slice(0, 2).map((item, index) => (
                                                             <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
-                                                                <Box size={10}/>
+                                                                <Box size={10} />
                                                                 {/* El Code Article */}
                                                                 <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
                                                                     #{item?.product_id?.codeArticle}
@@ -189,6 +190,21 @@ export default function CommandePage() {
                                                             </span>
                                                         )}
                                                     </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-emerald-400 text-base font-black tracking-tight">
+                                                        {new Intl.NumberFormat('fr-TN', {
+                                                            minimumFractionDigits: 3
+                                                        }).format(commande.items?.reduce((total, item) =>
+                                                            total + (item.quantite * (item.product_id?.prix || 0)), 0)
+                                                        )}
+                                                        <span className="ml-1 text-xs font-medium text-emerald-500/70">DT</span>
+                                                    </span>
+                                                    <span className="text-white/30 text-[10px] uppercase tracking-widest mt-0.5">
+                                                        Total Net
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -219,11 +235,11 @@ export default function CommandePage() {
 
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <>
-                                                            <button
+                                                            {/* <button
                                                                 className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
                                                             >
                                                                 <Edit2 size={16} />
-                                                            </button>
+                                                            </button> */}
                                                             <button
                                                                 onClick={() => handleDelete(commande._id!)}
                                                                 className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
@@ -251,10 +267,10 @@ export default function CommandePage() {
 
             {/* Custom Modal for viewing the linked Demande details */}
             {isModalOpenView && selectedCommande && (
-                <DemandeModelView
+                <CommandeModelView
                     isOpen={isModalOpenView}
                     onClose={() => { setIsModalOpenView(false); setSelectedCommande(null) }}
-                    demande={selectedCommande.demande_id} // Passing the referenced Demande
+                    commande={selectedCommande} // Passing the referenced Demande
                 />
             )}
             {isModalOpenCreate && (

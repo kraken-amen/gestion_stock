@@ -6,5 +6,5 @@ router.use(protect);
 router.get('/', getCommandes);
 router.post('/',authorizeRoles("administrateur"), createCommande);
 router.delete('/:id',authorizeRoles("administrateur"), deleteCommande);
-router.put('/:id',authorizeRoles("administrateur"), updateCommande);
+// router.put('/:id',authorizeRoles("administrateur"), updateCommande);
 module.exports = router;
