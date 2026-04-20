@@ -6,6 +6,7 @@ import { getDemandes, deleteDemande, approveDemande, rejectDemande } from '../se
 import DemandeModelCreate from '../components/DemandeModelCreate';
 import DemandeModelUpdate from '../components/DemandeModelUpdate';
 import DemandeModelView from '../components/DemandeModelView';
+import ConfirmModal from '../components/ConfirmModel';
 import { useToast } from '../context/ToastContext';
 
 export default function DemandesPage() {
@@ -17,6 +18,8 @@ export default function DemandesPage() {
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
     const [isModalOpenView, setIsModalOpenView] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [deleteConfig, setDeleteConfig] = useState({ id: '', confirmValue: '' });
     const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
     const userRegion = JSON.parse(localStorage.getItem('region') || '""');
     const [orderBy, setOrderBy] = useState('all');
@@ -49,17 +52,6 @@ export default function DemandesPage() {
         }
         fetchDemandes();
     }, [navigate]);
-
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Voulez-vous vraiment supprimer cette demande ?')) {
-            try {
-                await deleteDemande(id);
-                fetchDemandes();
-            } catch (error) {
-                console.error("Erreur suppression:", error);
-            }
-        }
-    };
     const handleApprove = async (id: string) => {
         try {
             await approveDemande(id, { region: current.region });
@@ -151,7 +143,23 @@ export default function DemandesPage() {
             default: return 'bg-white/10 text-white/70';
         }
     };
+    const openDeleteModal = (demande: Demande) => {
+        setDeleteConfig({
+            id: demande._id!,
+            confirmValue: demande._id?.slice(-6).toUpperCase()
+        });
+        setIsConfirmOpen(true);
+    };
 
+    const executeDelete = async () => {
+        try {
+            await deleteDemande(deleteConfig.id);
+            fetchDemandes();
+            setIsConfirmOpen(false);
+        } catch (error) {
+            console.error("Erreur suppression:", error);
+        }
+    };
     const getStatusLabel = (status: string) => {
         const labels: Record<string, string> = {
             'ACCEPTEE': 'ACCEPTEE',
@@ -294,11 +302,13 @@ export default function DemandesPage() {
                                                     <Eye size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(demande._id)}
-                                                    className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
-                                                    title="Supprimer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openDeleteModal(demande);
+                                                    }}
+                                                    className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
                                                 >
-                                                    <Trash2 size={18} />
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </div>
@@ -424,13 +434,11 @@ export default function DemandesPage() {
                                                 {/* Bouton Supprimer*/}
                                                 {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                     <button
-                                                        onClick={() => {
-                                                            if (window.confirm("Voulez-vous supprimer cette demande ?")) {
-                                                                handleDelete(demande._id);
-                                                            }
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openDeleteModal(demande);
                                                         }}
-                                                        title="Supprimer la demande"
-                                                        className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 border border-gray-400/30 transition-all"
+                                                        className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 transition-all"
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
@@ -473,6 +481,16 @@ export default function DemandesPage() {
                     demande={selectedDemande}
                 />
             }
+            {isConfirmOpen && (
+                <ConfirmModal
+                    config={{
+                        title: "Supprimer la demande ?",
+                        confirmValue: deleteConfig.confirmValue,
+                        onConfirm: executeDelete
+                    }}
+                    onClose={() => setIsConfirmOpen(false)}
+                />
+            )}
         </div>
     );
 }

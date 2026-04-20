@@ -1,10 +1,13 @@
 import { AuthProvider } from "./context/AuthContext"
 import AppRouter from "./router/AppRouter"
+import { ConfirmProvider } from "./context/ConfirmContext"
 
 function App() {
   return (
     <AuthProvider>
-      <AppRouter />
+      <ConfirmProvider>
+        <AppRouter />
+      </ConfirmProvider>
     </AuthProvider>
   )
 }

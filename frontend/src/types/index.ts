@@ -148,3 +148,20 @@ export interface ProductPropsUpdate {
     onProductUpdated: () => void; 
     product: Product;
 }
+export interface ConfirmModalProps {
+    config: {
+        title: string;
+        confirmValue: string;
+        onConfirm: () => void;
+    };
+    onClose: () => void;
+}
+export interface ConfirmConfig {
+  title: string;
+  confirmValue: string;
+  onConfirm: () => void;
+}
+
+export interface ConfirmContextType {
+  showConfirm: (title: string, confirmValue: string, onConfirm: () => void) => void;
+}

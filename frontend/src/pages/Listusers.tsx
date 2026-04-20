@@ -6,6 +6,8 @@ import type { User } from "../types";
 import UserModelCreate from '../components/UserModelCreate';
 import UserModelUpdate from '../components/UserModelUpdate';
 import UserModelUpdateAdmin from '../components/UserModelUpdateAdmin';
+import { useConfirm } from "../context/ConfirmContext";
+
 export default function UsersListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +19,9 @@ export default function UsersListPage() {
   const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
   const [isModalOpenUpdateAdmin, setIsModalOpenUpdateAdmin] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
+  const { showConfirm } = useConfirm(); 
+
   const savedUser = localStorage.getItem('user');
   const currentAuthUser = savedUser ? JSON.parse(savedUser) : null;
 
@@ -40,7 +45,8 @@ export default function UsersListPage() {
       setLoading(false);
     }
   };
-  const handleDelete = async (id: string) => {
+
+  const executeDelete = async (id: string) => {
     try {
       await deleteUser(id);
       fetchUsers();
@@ -48,6 +54,7 @@ export default function UsersListPage() {
       alert("Erreur lors de la suppression");
     }
   };
+
   const handleToggle = async (id: string) => {
     try {
       await toggleUserStatus(id);
@@ -64,6 +71,7 @@ export default function UsersListPage() {
     const matchesStatus = filterStatus === 'all' || user.isActive === (filterStatus === 'true');
     return matchesSearch && matchesRole && matchesStatus;
   });
+
   const adminAccount = users.find(u => u._id === currentAuthUser?.id || u._id === currentAuthUser?._id);
   const otherUsers = filteredUsers.filter(u => u._id !== currentAuthUser?.id && u._id !== currentAuthUser?._id);
 
@@ -85,7 +93,7 @@ export default function UsersListPage() {
       </div>
 
       <div className="relative z-10">
-        {/* Header Responsive */}
+        {/* Header */}
         <div className="backdrop-blur-xl bg-white/5 border-b border-white/10 sticky top-0 z-30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -107,7 +115,7 @@ export default function UsersListPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-
+          {/* Section Admin Account (Mon profil) */}
           {adminAccount && !loading && (
             <div className="mb-8 backdrop-blur-xl bg-blue-600/10 border border-blue-500/30 rounded-2xl p-4 md:p-6 shadow-2xl flex flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3 md:gap-4">
@@ -132,16 +140,14 @@ export default function UsersListPage() {
               <button
                 onClick={() => { setSelectedUser(adminAccount); setIsModalOpenUpdateAdmin(true); }}
                 className="p-2 md:p-3 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all active:scale-95 flex-shrink-0"
-                title="Modifier mon profil"
               >
                 <Edit2 size={20} />
               </button>
             </div>
           )}
 
-          {/* Filters Grid */}
+          {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {/* Barre de recherche */}
             <div className="md:col-span-2 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <input
@@ -152,8 +158,6 @@ export default function UsersListPage() {
                 className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
               />
             </div>
-
-            {/* Sélecteur de rôle */}
             <div className="relative">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <select
@@ -168,8 +172,6 @@ export default function UsersListPage() {
                 <option value="Gestionnaire de Stock" className="bg-slate-900">Gestionnaire de Stock</option>
               </select>
             </div>
-
-            {/* Sélecteur de statut */}
             <div className="relative">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
               <select
@@ -184,7 +186,7 @@ export default function UsersListPage() {
             </div>
           </div>
 
-          {/* Table Container - Mobile Responsive */}
+          {/* Table */}
           <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
             {loading ? (
               <div className="py-20 flex flex-col items-center gap-4 text-white/50">
@@ -203,7 +205,6 @@ export default function UsersListPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {otherUsers.map((user) => (
-
                     <tr key={user._id} className="hover:bg-white/5 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -231,36 +232,29 @@ export default function UsersListPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {/* Bouton Toggle Statut */}
                           <button
                             onClick={() => handleToggle(user._id!)}
-                            title={user.isActive ? "Bloquer l'utilisateur" : "Activer l'utilisateur"}
-                            className={`p-2 rounded-lg transition-all ${user.isActive
-                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/40'
-                                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40'
-                              }`}
+                            className={`p-2 rounded-lg transition-all ${user.isActive ? 'bg-red-500/20 text-red-400 hover:bg-red-500/40' : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40'}`}
                           >
                             <Power size={16} />
                           </button>
 
-                          {/* Bouton Modifier */}
                           <button
                             onClick={() => { setSelectedUser(user); setIsModalOpenUpdate(true); }}
-                            title="Modifier les informations"
                             className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
                           >
                             <Edit2 size={16} />
                           </button>
 
-                          {/* Bouton Supprimer */}
                           <button
                             onClick={() => {
-                              if (window.confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
-                                handleDelete(user._id!);
-                              }
+                              showConfirm(
+                                "Supprimer l'utilisateur ?", 
+                                user.email?.split('@')[0] || "",
+                                () => executeDelete(user._id!)
+                              );
                             }}
-                            title="Supprimer définitivement"
-                            className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/40 transition-all"
+                            className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
                           >
                             <Trash2 size={16} />
                           </button>
