@@ -1,5 +1,6 @@
 const Commande = require('../models/Commande');
 const Product = require('../models/Product');
+const Stock = require('../models/Stock');
 const mongoose = require('mongoose');
 
 exports.getCommandes = async (req, res) => {
@@ -119,15 +120,41 @@ exports.expedierCommande = async (req, res) => {
     }
 };
 exports.livreeCommande = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        const commande = await Commande.findById(req.params.id);
-        if (!commande) return res.status(404).json({ message: "Commande non trouvée" });
-        if (commande.status === 'EXPEDIEE') {
-            commande.status = 'LIVREE';
-            await commande.save();
+        const commande = await Commande.findById(req.params.id).session(session);
+
+        if (!commande) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ message: "Commande non trouvée" });
         }
+
+        if (commande.status === 'EXPEDIEE') {
+            for (let item of commande.items) {
+                await Stock.create([{
+                    product_id: item.product_id,
+                    quantite: item.quantite,
+                    region: commande.region,
+                    date: new Date()
+                }], { session });
+            }
+
+            commande.status = 'LIVREE';
+            await commande.save({ session });
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
         res.json(commande);
+
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+
         res.status(500).json({ message: error.message });
     }
 };
