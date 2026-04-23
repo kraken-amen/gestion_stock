@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { RegionStock } from "../types";
 import { getDashboard } from "../services/dashboardService";
+import { MapPin, TrendingUp, MousePointer2 } from 'lucide-react';
 
 const TunisiaMap = () => {
     const regions = [
@@ -31,115 +32,136 @@ const TunisiaMap = () => {
         { id: 'ben arous', name: 'بن عروس', d: "M575.1 142.1l-0.1 0.2 0.1 0.1 0.1 0 0.1 0.1 0.1 0 0-0.1 0 0.1 0 0.1 0 0.1 0-0.1 0 0.1 0.1 0 0.1 0-0.1 0 0.1 0 0 0.1 0.1 0 0.1 0-0.1 0 0.1 0.1 0 0.1-0.1 0-0.1 0 0 0.1-0.1 0-0.3 0-0.1 0-0.1 0-0.1 0 0 0.1 0.1 0 0.2-0.1 0 0.1-0.1 0-0.2 0.3-0.1 0.2-0.1 0.1-0.1 0.1-0.1 0.2 0 0.2-0.2 0.4-0.1 0 0 0.1-0.1 0 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0.1 0 0 0.1 0 0.1 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0.2 0.1 0.1 0 0.1 0.1 0.1 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1-0.1 0.1 0.1 0 0 0.1 0.2 0.3 0.1 0.2 0.1 0.1 0.2 0.3 0.2 0.3 0.2 0.3 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1 0.1 0.1 0.1 0.1 0.1 0 0 0.1 0.1 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0.1 0.1 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0.1 0.1 0.1 0.1 0 0 0.1 0.1 0 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0 0.1 0.1 0.1 0 0 0.1 0.1 0 0.1 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0 0.1 0-0.1 0 0.1 0.1 0 0 0.1 0.1 0 0-0.1 0.1 0 0 0.1 0 0.1 0.1 0 0-0.1 0.1 0.1 0.1 0 0.1 0-0.1 0 0 0.1 0.1 0 0 0.1 0-0.1 0.1 0 0 0.1 0 0.1 0.2 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0-0.1 0 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0-0.1 0.1 0 0 0.1 0.1 0 0.1 0.1 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.2 0 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0-0.1 0.1 0 0.1 0 0.1 0 0.1 0 0-0.1 0.1 0 0.1 0 0.1 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1-0.1 0-0.1 0.1-0.1 0-0.1 0 0 0.1-0.1 0-0.2 0.2 0 0.1-0.1 0 0 0.1-0.4 0.5-0.2 0.2-0.1 0 0 0.1-0.1 0-0.1 0 0.1 0 0 0.1-0.2 0.2 0 0.1-0.1 0 0 0.1-0.1 0 0 0.1-0.1 0-0.2 0.2 0 0.1 0.2 0.1 0 0.4-0.3 0.7 0.1 0 0.1 0 0 0.1 0.1 0.1 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0 0.1 0 0.1 0.1 0 0.1-0.1 0.1 0 0.1 0.1-0.1 0 0 0.1 0 0.1-0.1 0 0 0.1 0.1 0.1-0.1 0.1-0.1 0 0 0.1 0 0.1-0.1 0.1 0 0.1-0.1 0 0-0.1-0.1 0 0-0.1 0 0.1-0.1 0-0.1 0 0 0.1-0.1 0.2-0.1 0.1-0.1 0 0 0.1 0.1 0 0 0.1-0.1 0.2-0.1 0 0 0.1 0.1 0.1 0 0.1-0.1 0-0.1 0.1 0 0.1-0.1 0 0 0.1 0 0.1-0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1-0.1 0 0 0.1 0.1 0-0.1 0.1-0.1 0.1 0.1 0 0 0.1 0.1 0 0 0.1-0.1 0-0.1 0.1-0.1 0 0 0.1 0.1 0 0.1 0.1-0.1 0.1-0.1 0 0 0.1 0 0.1 0.1 0 0 0.1-0.1 0.1 0 0.1 0 0.1 0 0.1 0.1 0 0 0.1-0.1 0-0.1 0-0.1 0 0 0.1 0 0.1-0.1 0 0-0.1 0-0.1-0.1-0.1 0.1 0 0-0.1-0.1 0-0.1 0-0.1-0.1 0 0.1-0.1 0-0.1 0-0.1 0 0 0.1-0.1 0-0.1 0-0.1-0.1 0-0.1-0.1 0-0.1 0-0.1 0-0.1 0-0.1-0.1 0 0.1-0.1-0.1-0.1 0-0.1 0.1-0.1 0-0.1 0 0 0.1-0.1 0 0.2 0.1 0.1 0 0.1 0 0.1 0 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0 0 0.1 0.1 0.2 0.1 0 0 0.2-0.1 0 0 0.1 0 0.1-0.1 0-0.1 0 0 0.1-0.1 0.1 0.1 0 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1-0.1 0.1 0.1 0.1 0 0.1 0 0.1 0.1 0.1-0.1 0.1 0.1 0 0 0.1-0.1 0.1 0 0.1 0.1 0 0 0.2 0 0.1-0.2 0.1 0 0.1-0.1 0.1 0 0.1-0.1 0.1 0 0.1-0.1 0.2 0 0.1 0 0.1-0.1 0.1 0 0.1 0 0.1-0.1 0.1 0 0.1-0.1 0.1-0.3 0.3-0.2 0.2-0.3 0.4-0.6 0.5-0.1 0.1-0.1 0-0.1 0.1 0 0.1-0.1 0.1-0.1 0-0.1 0.1 0 0.1-0.1 0.1-0.1 0 0 0.1 0 0.2-0.1 0.1 0 0.2 0 0.1-0.1 0.1 0 0.1 0 0.1-0.1 0.1 0 0.1-0.1 0.1 0 0.1-0.1 0.1-0.3 0.3-0.1 0.1-0.1 0.1 0 0.1 0 0.1 0 0.1 0.4 0 0.1-0.1 0.2 0 0.1 0 0.1-0.1 0.1-0.1 0.1 0 0.1-0.1 0.1 0 0-0.1 0 0.1 0-0.1 0.1 0 0-0.1 0.1 0 0 0.1 0.1 0 0.1 0 0-0.1 0.1 0 0-0.1 0.1 0.1 0.1 0 0-0.1 0.1 0 0.1 0 0.1 0 0-0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0.1 0.1 0.1 0 0.1 0 0.1 0 0.1 0.1 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0-0.1 0 0 0.1 0.1 0 0-0.1 0 0.1 0 0.1 0-0.1 0.1 0 0 0.1 0 0.1 0.1-0.1 0 0.1 0-0.1 0.1 0.1 0 0.1 0-0.1 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1 0.1 0.1 0 0.1 0 0.1-0.1 0 0 0.1-0.1 0 0 0.1 0 0.1 0 0.1 0 0.1 0 0.2 0 0.1 0 0.1-0.1 0.1 0 0.1 0 0.1-0.3 0.1 0 0.1-0.1 0.1-0.1 0.1-0.1 0.1-0.1 0.1-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0.1-0.1 0-0.1 0.1 0 0.1-0.1 0-0.1 0.1 0 0.1-0.1 0.1-0.1 0 0 0.1-0.1 0.1-0.1 0.1-0.2 0.3 0 0.1-0.1 0.1 0 0.1-0.1 0.1 0 0.1 0 0.2 0.1 0.1 0 0.1 0 0.1 0 0.1 0.1 0.1 0 0.2 0.1 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1 0 0.1 0.1 0 0 0.1-0.1 0.1-0.1 0-0.1 0-0.1 0.1-0.1 0-0.4 0.1-0.1 0.1-0.1 0.3 0 0.2-0.1 0.2 0 0.2 0 0.3 0.1 1.3 0.3 0.1 0 0.2 0.3 0.2 0.2 0.2-0.3 0.2-1.5 0.7-1 0.6-0.3 0.2-0.1 0.1-0.1 0-0.1 0-1.2 0.5-0.4 0.1-0.8 0.3-0.6 0.3-0.2 0.1-0.1 0 0 0.1-0.1 0.2-0.8 0.5 0 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1-0.1 0-0.1 0-0.1 0 0 0.1 0 0.1 0 0.1 0.1 0.1 0 0.2 0.1 0.1-0.1 0.1 0-0.1-0.1 0 0-0.1-0.1 0-0.1 0-0.1 0-0.1-0.1-0.1-0.1 0-0.1-0.1 0-0.1-0.1-0.1 0-0.1 0-0.1 0-0.1-0.1 0-0.1-0.1 0-0.1-0.1-0.1-0.1-0.1-0.1 0 0.1 0 0.1 0 0.1-0.1 0 0 0.1-0.1 0-0.1 0.2-0.2 0.1-0.1 0.1-0.1 0-0.1 0-0.2 0-0.1 0-0.1 0-0.1-0.1-0.1 0-0.1-0.1-0.1 0 0-0.1-0.1-0.1 0-0.1 0-0.1-0.1-0.1 0-0.1 0-0.4 0-0.1 0-0.1 0.1-0.1 0-0.1-0.1-0.2 0-0.1 0.1 0 0.1 0 0.1-0.1 0.1-0.1 0.1 0 0.1-0.1 0.1-0.1 0-0.1 0.1-0.1-0.1-0.1 0-0.1-0.1-0.1 0-0.1 0.1-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0.1-0.1-0.1 0 0.1-0.1 0-0.1 0-0.1 0.1 0 0-0.1 0-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0.1 0 0-0.1 0.1 0 0.1 0 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0.1-0.1-0.1 0 0.1 0 0-0.1 0.1 0 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0.1 0 0.1 0 0-0.1 0.1 0 0-0.1 0-0.1 0.1-0.1 0-0.1-0.1 0 0-0.1 0.1-0.1 0.1-0.1-0.2-0.1-0.4-0.1-0.3-0.1-0.2 0.2-0.6 0.1-0.2 0-0.3-0.1-0.3-0.2-0.4-0.1-0.8-0.5-0.7-0.5-0.4-0.4-0.7-0.5-0.1 0-0.3-0.2-0.8-0.3-0.3 0.2-0.1 0-0.1 0-0.1 0 0-0.1-0.1 0-0.1 0 0 0.1-0.1 0.1 0 0.1 0 0.1-0.1 0.1-0.1 0.1-0.1 0.1 0 0.1-0.1-0.1 0 0.1 0-0.1-0.1 0-0.1-0.1-0.1 0-0.1 0 0-0.1-0.1 0-0.1 0-0.1 0 0-0.1-0.1 0-0.1 0 0-0.1 0-0.1 0.1 0 0-0.1-0.1 0 0-0.1-0.1 0-0.1-0.1-0.1 0 0-0.1-0.1 0-0.1-0.1-0.1 0 0-0.1-0.1 0 0-0.1-0.1 0-0.1-0.2 0-0.1 0-0.1-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1-0.1-0.1-0.1 0-0.1-0.1-0.1-0.1-0.1 0-0.2 0-0.1-0.1-0.1 0-0.1-0.1-0.1 0-0.2 0-0.1 0-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0-0.1-0.1 0-0.1 0 0-0.1-0.1 0-0.1 0-0.1 0 0-0.1-0.1 0-0.1 0 0-0.1-0.1 0-0.1 0-0.1-0.1-0.1 0 0-0.1 0-0.1 0-0.1 0-0.1-0.1 0 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1-0.1 0 0-0.1 0-0.1 0-0.1-0.1-0.1 0-0.1-0.1-0.1 0-0.1 0-0.1-0.1 0 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0.1-0.3-0.2 0.1-0.1 0 0 0.1-0.1 0 0 0.1-0.1 0 0 0.1-0.1 0-0.1 0-0.1 0 0-0.3 0-0.5 0.1-0.9 0.1-0.6 0-0.6 0.1-0.3 0-0.2-0.1-0.2 0.1-0.2-0.1-0.2 0.1-0.1-0.1-0.2-0.3-0.3 0 0.1-0.1 0-0.1 0.1-0.1 0-0.1 0.2-0.1 0.1-0.1 0.1-0.1 0.1-0.1 0-0.1 0.1-0.1 0-0.1 0 0 0.1-0.1 0-0.1 0.1-0.1 0.1-0.1 0.1-0.1 0.1-0.1-0.1-0.1 0.1-0.1 0-0.1 0.1-0.1 0 0 0.1-0.4 0.3-0.1 0 0 0.1-0.3 0.2-0.1 0.1-0.2 0-0.1 0-0.1 0 0 0.1 0 0.1 0 0.1-0.1 0.1-0.2-0.1-0.2-0.1-0.1-0.1-0.1 0-0.1 0-0.1-0.1-0.1 0-0.2-0.2-0.1 0 0-0.1-0.3-0.2-0.2-0.3-0.2-0.2-0.1 0-0.1-0.1 0-0.1-0.1-0.1 0-0.1-0.1-0.1 0-0.1 0-0.1-2-0.8-0.3-0.1-0.1-0.1-0.1 0 0-0.1-0.1 0 0-0.1-0.1 0 0-0.1-0.1 0 0-0.1-0.1 0.1-0.1 0.2-0.1 0.1-0.1 0.2-0.1 0.2-0.1 0.2 0 0.1-0.1 0.1 0-0.1-0.1-0.1-0.1-0.1-0.1 0 0-0.1-0.1 0 0-0.1-0.1-0.2 0-0.3-0.1 0 0-0.1 0-0.2 0-0.1 0-0.1 0.1-0.1 0-0.1 0.1-0.1-0.1-0.1 0-0.1 0-0.1-0.1 0 0-0.1-0.1-0.1-0.1 0 0-0.1-0.1 0 0-0.1 0-0.1 0-0.1 0.1 0-0.1-0.1-0.1 0 0-0.1 0.1-0.1 0.1-0.1 0.1-0.2 0.2-0.4 0.1-0.1 0-0.1 0-0.1 0.1 0 0-0.1 0.1-0.2 0-0.1 0.1-0.1 0-0.1 0.2-0.1 0-0.1 0-0.1 0.1-0.2 0.1 0 0.1-0.2 0-0.1 0.1-0.1 0.1-0.1 0.1-0.1 0-0.1 0.1-0.1 0.3-0.4 0.1-0.2 0.1-0.1 0.1-0.1 0.1-0.1 0-0.1 0.1-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0.1-0.2 0.2-0.2 0.1-0.1 0.1 0 0-0.1 0-0.1 0.1 0 0.4-0.5 0.1-0.1 0.1-0.1 0.1-0.1 0-0.1 0.1-0.3 0.1 0 0.2-0.3 0-0.1 0-0.1 0-0.1 0-0.2 0-0.1 0-0.1 0.1-0.2 0-0.1 0.1-0.4 0.1-0.2 0-0.1 0-0.1 0.1-0.1 0-0.1 0.1-0.1 0.1-0.1 0-0.1 0-0.1 0.1-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0.1 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1-0.1 0-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0.1 0 0.1 0 0-0.1 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0.1 0.1 0 0-0.1 0-0.1 0.1-0.1 0.1-0.1 0-0.1 0.1-0.1 0.1-0.1 0.1-0.2 0.1 0 0.1-0.1 0.1 0.1-0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0.1 0-0.1 0.1 0 0-0.1 0.1-0.1 0-0.1 0.1 0 0-0.1 0.1 0-0.1 0 0-0.1 0-0.1 0.2-0.1 0.1-0.1 0.1 0 0.1-0.1 0.1-0.1 0.1 0 0.1-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0.3-0.2-0.2 0-0.1 0 0-0.1-0.1 0-0.1-0.1-0.2-0.2-0.1-0.1-0.1-0.1-0.1 0-0.1-0.1-0.1-0.1-0.1-0.1-0.1-0.1-0.1 0 0-0.1-0.2-0.1-0.1-0.2-0.1-0.1 0-0.1-0.1-0.1-0.1-0.1 0-0.1 0.1 0 0-0.1 0.1 0 0-0.1 0.1 0 0.1 0.1 0-0.1 0.1 0 0.1 0 0-0.1 0.1-0.1 0-0.1 0.2-0.1 0.1-0.2 0.1-0.1 0.3-0.3 0.1 0 0.1 0 0.1 0 0-0.1 0.1 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0.1 0 0.1 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1 0 0.1 0 0 0.1 0.1 0-0.1 0-0.1 0 0 0.1 0 0.1 0.1 0.1 0.1 0 0.1 0.1 0 0.1-0.1 0 0.1 0.1 0.1 0 0 0.1 0.2 0.1 0.1 0 0.2 0.1 0.2 0 0 0.2 0 0.1 0 0.2 0.1-0.1 0.5-0.2 0.4 0.2 0.1-0.3 0.1-0.1 0.1-0.2 0-0.1 0.1 0 0-0.1 0-0.1 0.1 0 0-0.2 0.1 0 0-0.1 0.1-0.1 0-0.1 0.1-0.1 0-0.1 0.1 0 0-0.1 0.1 0 0.2-0.1 0-0.1 0.1 0 0.1-0.1 0.1-0.1 0.1 0 0-0.1 0.1 0 0.1-0.1 0-0.1 0.1 0 0.1-0.1 0-0.1 0.1 0 0-0.1 0.1-0.1 0-0.1 0-0.1 0.1 0 0-0.1 0-0.1 0.1-0.1-0.2-0.3 0.1 0 0.1 0 0.1-0.1 0.1-0.1 0-0.2 0-0.1 0-0.1-0.1-0.3 0-0.1 0.1 0 0.1-0.1 0.2-0.2 0.1-0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0.1 0.1-0.1 0.1-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0-0.2 0-0.2 0-0.1 0-0.1-0.1 0-0.1-0.1-0.1 0-0.1-0.1-0.1 0 0-0.2 0-0.1 0-0.1-0.1 0-0.1-0.1-0.1 0 0-0.1-0.1 0 0-0.2-0.1-0.1-0.1-0.2-0.2-0.1-0.1 0-0.1-0.1 0.1 0 0.2 0 0.1 0 0-0.1 0.1 0 0-0.1 0.1-0.1 0.1 0 0.1 0-0.1 0 0-0.1 0-0.1 0.1 0 0.1-0.1 0.1 0.1 0.1 0 0-0.1 0.1 0 0.1-0.1 0-0.1 0.1 0 0-0.1 0.3-0.1 0.3-0.1 0.1 0 0.1 0 0.1 0 0.5-0.1 0.3 0 0.2 0 0.1 0 0.1 0 0.1 0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.2 0 0.1 0 0.1 0 0.2 0 0 0.1 0 0.1 0.1 0 0 0.1 0.1 0.1 0 0.1 0.1 0 0.1 0 0.1-0.1 0 0.1-0.1 0-0.1 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0.1 0 0 0.1 0 0.1 0.1 0 0 0.1 0.2 0.2 0.2 0.2 0.1 0.2 0.1 0.1 0.3-0.3 0.2-0.1 0-0.1 0.1 0 0-0.1 0-0.1 0.1-0.1-0.1 0 0-0.1 0-0.1-0.1 0 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0-0.1 0-0.2 0-0.2 0-0.1 0-0.1 0-0.3 0-0.1 0.1-0.2 0-0.1 0-0.2 0-0.1 0.1 0 0-0.1 0-0.2 0-0.1 0-0.1-0.4 0.1-0.3 0.1-0.1 0 0-0.1-0.1 0-0.2-0.9 0-0.2 0.4-0.1 0.4-0.1 0.3 0 0.5-0.1 0.6-0.1 0.6-0.1 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0 0.1 0z" }
     ];
     const navigate = useNavigate();
-
     const [hoveredRegion, setHoveredRegion] = useState<{ id: string, name: string } | null>(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [regionsData, setRegionsData] = useState<RegionStock[]>([]);
+    const [regionsData, setRegionsData] = useState<any[]>([]);
     const [totalStock, setTotalStock] = useState(0);
 
-    const handleRegionClick = (regionId: string) => {
-        navigate(`/region/${regionId.toLowerCase()}`);
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        setMousePos({
-            x: e.nativeEvent.offsetX + 15,
-            y: e.nativeEvent.offsetY - 15
-        });
-    };
     const fetchStock = async () => {
         try {
             const res = await getDashboard();
             setRegionsData(res.stockByRegion || []);
-            setTotalStock(res.totalInventoryValue);
+            setTotalStock(res.totalInventoryValue || 0);
         } catch (error) {
             console.error("Erreur:", error);
         }
     };
 
-    useEffect(() => {
-        fetchStock();
-    }, []);
+    useEffect(() => { fetchStock(); }, []);
 
     const getStockForRegion = (id: string) => {
-        const region = regionsData.find(
-            region => region._id.toLowerCase() === id.toLowerCase()
-        );
+        const region = regionsData.find(r => r._id.toLowerCase() === id.toLowerCase());
         return region ? region.totalValue : 0;
     };
 
-    const handleMouseEnter = (region: { id: string; name: string }) => {
-        setHoveredRegion(region);
-    };
-
-    const handleMouseLeave = () => {
-        setHoveredRegion(null);
+    const handleMouseMove = (e: React.MouseEvent) => {
+        setMousePos({ x: e.clientX + 20, y: e.clientY - 20 });
     };
 
     return (
-        <div className="flex flex-col items-center justify-center p-4">
-            <h2 className="text-2xl font-bold mb-6 text-white">
-                Tableau de Bord par Région
-            </h2>
+        <div className="relative min-h-screen bg-transparent p-6 flex flex-col items-center">
 
-            <div className="relative" onMouseMove={handleMouseMove}>
+            {/* Header style "Glassmorphism" */}
+            <div className="z-10 text-center mb-10">
+                <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-2 drop-shadow-lg">
+                    Distribution <span className="text-blue-500">Régionale</span>
+                </h2>
+                <div className="flex items-center justify-center gap-4 text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase">
+                    <span className="flex items-center gap-1"><MapPin size={12} /> Suivi Temps Réel</span>
+                    <span className="w-1 h-1 bg-white/20 rounded-full"></span>
+                    <span className="flex items-center gap-1"><TrendingUp size={12} /> Analyse des Stocks</span>
+                </div>
+            </div>
 
-                {/* Tooltip */}
+            {/* Main Container for Map */}
+            <div className="relative w-full max-w-5xl flex justify-center items-center group" onMouseMove={handleMouseMove}>
+
+                {/* Stats Overlay */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
+                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 p-4 rounded-2xl shadow-2xl">
+                        <p className="text-[10px] font-black text-blue-400 uppercase mb-1 tracking-widest">Valeur Totale</p>
+                        <p className="text-2xl font-black text-white font-mono">{totalStock.toLocaleString()} <span className="text-xs text-white/30">DT</span></p>
+                    </div>
+                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 p-4 rounded-2xl">
+                        <p className="text-[10px] font-black text-purple-400 uppercase mb-1 tracking-widest">Zones Actives</p>
+                        <p className="text-2xl font-black text-white font-mono">{regionsData.filter(r => r.totalValue > 0).length} / 24</p>
+                    </div>
+                </div>
+
+                {/* Tooltip Custom Style */}
                 {hoveredRegion && (
                     <div
-                        className="absolute bg-slate-900/90 border border-blue-500 text-white px-4 py-2 rounded-lg shadow-2xl text-sm pointer-events-none z-50 flex flex-col gap-1"
+                        className="fixed bg-slate-900/95 border border-blue-500/50 text-white px-5 py-3 rounded-xl shadow-[0_0_30px_rgba(59,130,246,0.3)] pointer-events-none z-[100] backdrop-blur-md"
                         style={{ left: mousePos.x, top: mousePos.y }}
                     >
-                        <span className="font-bold text-blue-300 text-base">
-                            {hoveredRegion.name}
-                        </span>
-                        <span className="font-mono font-bold text-emerald-400">
-                            {getStockForRegion(hoveredRegion.id)}DT
-                        </span>
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span className="font-black uppercase italic text-sm tracking-tighter">
+                                {hoveredRegion.name}
+                            </span>
+                        </div>
+                        <div className="text-xl font-mono font-black text-emerald-400">
+                            {getStockForRegion(hoveredRegion.id).toLocaleString()} <span className="text-[10px] text-white/40 italic">DT</span>
+                        </div>
+                        <p className="text-[9px] text-white/30 mt-1 uppercase font-bold flex items-center gap-1">
+                            <MousePointer2 size={10} /> Clicker pour les détails
+                        </p>
                     </div>
                 )}
 
+                {/* SVG Map */}
                 <svg
-                    baseProfile="tiny"
-                    fill="#1e293b"
-                    height="1000"
-                    stroke="#ffffff"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth=".5"
-                    version="1.2"
-                    viewBox="0 0 1000 1000"
-                    width="1200"
+                    viewBox="0 75 1000 1000"
+                    className="w-full h-auto max-h-[150vh] drop-shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-transform duration-700"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="drop-shadow-2xl"
                 >
-                    {regions.map((region) => (
-                        <path
-                            key={region.id}
-                            id={region.id}
-                            d={region.d}
-                            className="cursor-pointer transition-all duration-300 hover:fill-blue-500 fill-[#1e293b] stroke-white"
-                            fill={getStockForRegion(region.id) > 0 ? "blue" : "grey"}
-                            onMouseEnter={() =>
-                                handleMouseEnter({ id: region.id, name: region.name })
-                            }
-                            onMouseLeave={handleMouseLeave}
-                            onClick={() => handleRegionClick(region.id)}
-                        />
-                    ))}
-                </svg>
-            </div>
+                    {/* Background Glow derrière la map */}
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="15" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
 
-            <div className="mt-8 grid grid-cols-4 gap-4 text-sm">
-                <span className="text-gray-400">
-                    Total Stock: {totalStock}
-                </span>
-                <span className="text-gray-400">
-                    Click on a region to view specific stock data.
-                </span>
+                    {regions.map((region: any) => {
+                        const hasStock = getStockForRegion(region.id) > 0;
+                        return (
+                            <path
+                                key={region.id}
+                                d={region.d}
+                                onClick={() => navigate(`/region/${region.id.toLowerCase()}`)}
+                                onMouseEnter={() => setHoveredRegion({ id: region.id, name: region.name })}
+                                onMouseLeave={() => setHoveredRegion(null)}
+                                className={`
+                                    cursor-pointer transition-all duration-500
+                                    stroke-white/20 hover:stroke-white-400 stroke-[1.2]
+                                    ${hasStock
+                                        ? 'fill-blue-600/40 hover:fill-blue-500 hover:stroke-blue-300'
+                                        : 'fill-slate-800/60 hover:fill-slate-700'
+                                    }
+                                `}
+                                style={{
+                                    filter: hasStock ? 'drop-shadow(0 0 5px rgba(59, 130, 246, 0.2))' : 'none'
+                                }}
+                            />
+                        );
+                    })}
+                </svg>
+
+                {/* Legend */}
+                <div className="absolute bottom-4 right-0 flex items-center gap-6 backdrop-blur-md bg-black/20 px-6 py-3 rounded-full border border-white/5">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-blue-600 rounded-sm border border-blue-400/50"></div>
+                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-tighter">Stock Actif</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-slate-800 rounded-sm border border-white/10"></div>
+                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-tighter">Aucun Stock</span>
+                    </div>
+                </div>
             </div>
         </div>
     );
-};
-
+}
 export default TunisiaMap;
