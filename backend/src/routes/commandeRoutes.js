@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { getCommandes, createCommande, deleteCommande, updateCommande } = require('../controllers/commandeController');
+const { getCommandes, createCommande, deleteCommande, expedierCommande ,livreeCommande,updateCommande} = require('../controllers/commandeController');
 const { protect,authorizeRoles} = require('../middleware/authMiddleware');
 router.use(protect);
 router.get('/', getCommandes);
 router.post('/',authorizeRoles("administrateur"), createCommande);
 router.delete('/:id',authorizeRoles("administrateur"), deleteCommande);
-// router.put('/:id',authorizeRoles("administrateur"), updateCommande);
+router.put('/:id',authorizeRoles("administrateur"), updateCommande);
+router.patch('/:id/expedier',authorizeRoles("administrateur"), expedierCommande);
+router.patch('/:id/livree',authorizeRoles("Gestionnaire de Stock"), livreeCommande);
 module.exports = router;

@@ -139,6 +139,7 @@ export interface Commande {
     demande_id: Demande;
     items: { quantite: number; product_id: Product }[];
     region: string;
+    description: string;
     status: 'EN_PREPARATION' | 'EXPEDIEE' | 'LIVREE';
     createdAt: string;
 }
@@ -164,4 +165,11 @@ export interface ConfirmConfig {
 
 export interface ConfirmContextType {
   showConfirm: (title: string, confirmValue: string, onConfirm: () => void) => void;
+}
+//props for commande model update
+export interface PropsCommandeUpdate {
+    isOpen: boolean;
+    onClose: () => void;
+    onCommandeUpdated: () => void;
+    commande: Commande;
 }

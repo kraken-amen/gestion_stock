@@ -1,4 +1,3 @@
-const Livraison = require('../models/Livraison');
 const Commande = require('../models/Commande');
 const Demande = require('../models/Demande');
 const Product = require('../models/Product');
@@ -158,11 +157,6 @@ exports.approveRequest = async (req, res) => {
                 quantite: item.quantite
             })),
             status: "EN_PREPARATION"
-        }], { session });
-
-        await Livraison.create([{
-            commande_id: newCommande._id,
-            status: "EN_TRANSIT"
         }], { session });
 
         for (let item of demande.items) {

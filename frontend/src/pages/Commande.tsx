@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box } from 'lucide-react';
-import { getCommandes, deleteCommande } from "../services/commandeService";
+import { Search, Plus, Filter, ArrowLeft, Loader2, Trash2, ClipboardList, Truck, CheckCircle, Clock, Box, Pencil } from 'lucide-react';
+import { getCommandes, deleteCommande, expedierCommande, livrerCommande } from "../services/commandeService";
 import CommandeModelCreate from '../components/CommandeModelCreate';
 import { useNavigate } from 'react-router-dom';
 import type { Commande } from "../types";
 import CommandeModelView from '../components/CommandeModelView';
 import ConfirmModal from '../components/ConfirmModel';
+import CommandeModelUpdate from '../components/CommandeModelUpdate';
+import { useToast } from '../context/ToastContext';
 
 export default function CommandePage() {
     const [commandes, setCommandes] = useState<Commande[]>([]);
@@ -16,10 +18,10 @@ export default function CommandePage() {
     const [isModalOpenView, setIsModalOpenView] = useState(false);
     const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
     const [selectedCommande, setSelectedCommande] = useState<Commande | null>(null);
-
+    const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteConfig, setDeleteConfig] = useState({ id: '', confirmValue: '' });
-
+    const { addToast } = useToast();
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -44,13 +46,30 @@ export default function CommandePage() {
     };
 
     const openDeleteModal = (commande: Commande) => {
-        setDeleteConfig({ 
-            id: commande._id!, 
+        setDeleteConfig({
+            id: commande._id!,
             confirmValue: commande._id?.slice(-6).toUpperCase()
         });
         setIsConfirmOpen(true);
     };
-
+    const handleExpedier = async (id: string) => {
+        try {
+            await expedierCommande(id);
+            addToast("Commande expediee", "success");
+            fetchCommandes();
+        } catch (error) {
+            console.error("Erreur expedier:", error);
+        }
+    };
+    const handleLivrer = async (id: string) => {
+        try {
+            await livrerCommande(id);
+            addToast("Commande livree", "success");
+            fetchCommandes();
+        } catch (error) {
+            console.error("Erreur livrer:", error);
+        }
+    };
     const executeDelete = async () => {
         try {
             await deleteCommande(deleteConfig.id);
@@ -158,7 +177,7 @@ export default function CommandePage() {
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
                                         <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
-                                        {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                        {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur" || JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock") && (
                                             <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
                                         )}
                                     </tr>
@@ -224,16 +243,48 @@ export default function CommandePage() {
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <div className="flex items-center justify-center gap-2">
+                                                    {JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock" && commande.status === "EXPEDIEE" && (
+                                                        <div className="flex flex-row items-center gap-2">
+                                                            <button
+                                                                onClick={(e) => { handleLivrer(commande._id), e.stopPropagation() }}
+                                                                className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 transition-all"
+                                                                title="livrer"
+                                                            >
+                                                                <CheckCircle size={16} />
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                openDeleteModal(commande);
-                                                            }}
-                                                            className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                                        <div className="flex flex-row items-center gap-2">
+                                                            <button
+                                                                onClick={(e) => { handleExpedier(commande._id), e.stopPropagation(); }}
+                                                                className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
+
+                                                                title="expedier"
+                                                            >
+                                                                <Truck size={16} />
+                                                            </button>
+                                                            {/* EDIT BUTTON */}
+                                                            {commande.status === "EN_PREPARATION" && !commande.demande_id && (
+                                                                <button
+                                                                    onClick={(e) => { setSelectedCommande(commande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
+                                                                    className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 transition-all"
+                                                                    title="Modifier"
+                                                                >
+                                                                    <Pencil size={16} />
+                                                                </button>
+                                                            )}
+                                                            {/* DELETE BUTTON */}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    openDeleteModal(commande);
+                                                                }}
+                                                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
@@ -259,7 +310,7 @@ export default function CommandePage() {
                     commande={selectedCommande}
                 />
             )}
-            
+
             {isModalOpenCreate && (
                 <CommandeModelCreate
                     isOpen={isModalOpenCreate}
@@ -278,6 +329,16 @@ export default function CommandePage() {
                     onClose={() => setIsConfirmOpen(false)}
                 />
             )}
+            {
+                isModalOpenUpdate && selectedCommande && (
+                    <CommandeModelUpdate
+                        isOpen={isModalOpenUpdate}
+                        onClose={() => { setIsModalOpenUpdate(false); setSelectedCommande(null) }}
+                        onCommandeUpdated={fetchCommandes}
+                        commande={selectedCommande}
+                    />
+                )
+            }
         </div>
     );
 }

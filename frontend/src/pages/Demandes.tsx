@@ -290,13 +290,13 @@ export default function DemandesPage() {
                                             {/* Section 3: Actions */}
                                             <div className="flex gap-2 w-full md:w-auto justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
                                                 <button
-                                                    onClick={() => { setSelectedDemande(demande); setIsModalOpenUpdate(true); }}
+                                                    onClick={(e) => { setSelectedDemande(demande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
                                                     className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-all border border-amber-500/20"
                                                     title="Modifier"
                                                 >
                                                     <Edit2 size={18} />
                                                 </button>
-                                                <button onClick={() => { setIsModalOpenView(true); setSelectedDemande(demande); }}
+                                                <button onClick={(e) => { setIsModalOpenView(true); setSelectedDemande(demande); e.stopPropagation(); }}
                                                     className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all border border-blue-500/20"
                                                     title="Voir Détails">
                                                     <Eye size={16} />
@@ -414,7 +414,7 @@ export default function DemandesPage() {
                                                 {/* Bouton Accepter*/}
                                                 {demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                     <button
-                                                        onClick={() => handleApprove(demande._id)}
+                                                        onClick={(e) => { handleApprove(demande._id); e.stopPropagation(); }}
                                                         title="Accepter la demande"
                                                         className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30 transition-all"
                                                     >
@@ -424,7 +424,7 @@ export default function DemandesPage() {
                                                 {/* Bouton Refuser*/}
                                                 {demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                     <button
-                                                        onClick={() => handleReject(demande._id)}
+                                                        onClick={(e) => { handleReject(demande._id); e.stopPropagation(); }}
                                                         title="Refuser la demande"
                                                         className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30 transition-all"
                                                     >

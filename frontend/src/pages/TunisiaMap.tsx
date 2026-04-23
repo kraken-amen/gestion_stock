@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { RegionStock } from "../types";
 import { getDashboard } from "../services/dashboardService";
 import { MapPin, TrendingUp, MousePointer2 } from 'lucide-react';
 
@@ -124,7 +123,7 @@ const TunisiaMap = () => {
                         </feMerge>
                     </filter>
 
-                    {regions.map((region: any) => {
+                    {regions.map((region:any) => {
                         const hasStock = getStockForRegion(region.id) > 0;
                         return (
                             <path
