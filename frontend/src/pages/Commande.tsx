@@ -256,6 +256,7 @@ export default function CommandePage() {
                                                     )}
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <div className="flex flex-row items-center gap-2">
+                                                            {commande.status === "EN_PREPARATION" && (
                                                             <button
                                                                 onClick={(e) => { handleExpedier(commande._id), e.stopPropagation(); }}
                                                                 className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
@@ -264,6 +265,7 @@ export default function CommandePage() {
                                                             >
                                                                 <Truck size={16} />
                                                             </button>
+                                                            )}
                                                             {/* EDIT BUTTON */}
                                                             {commande.status === "EN_PREPARATION" && !commande.demande_id && (
                                                                 <button

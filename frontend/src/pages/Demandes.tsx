@@ -431,6 +431,16 @@ export default function DemandesPage() {
                                                         <X size={16} />
                                                     </button>
                                                 )}
+                                                {/* Bouton modifier*/}
+                                                {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                                <button
+                                                    onClick={(e) => { setSelectedDemande(demande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
+                                                    className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 border border-amber-400/30 transition-all"
+                                                    title="Modifier"
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                )}
                                                 {/* Bouton Supprimer*/}
                                                 {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                     <button
