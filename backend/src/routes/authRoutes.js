@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { login, verifyCode, createUserByAdmin,
     getAllUsers, updateUser, deleteUser,
-    toggleUserStatus, resendOtp } = require("../controllers/authController");
+    toggleUserStatus, resendOtp, getUserById } = require("../controllers/authController");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 //us3
 router.post("/create-user", protect, authorizeRoles("administrateur"), createUserByAdmin);
 //us1
 router.get("/", protect, authorizeRoles("administrateur"), getAllUsers);
+//us1
+router.get("/:id", protect, authorizeRoles("administrateur"), getUserById);
 //us1
 router.post("/login", login);
 //us1
