@@ -1,17 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
-const { getAllStocks, getStockById } = require('../controllers/stockController')
-const { getDashboard } = require('../controllers/dashboardController')
-router.use(protect);
-
+const { protect, authorizeRoles } = require('../middleware/authMiddleware');
+const { getAllStocks, getStockById, createStock, deleteStock, registerStock, updateStock } = require('../controllers/stockController')
+const { getDashboardOverview } = require('../controllers/dashboardController')
+// router.use(protect);
 router.get('/', getAllStocks)
 router.get('/:id', getStockById)
-// router.post('/', authorizeRoles("administrateur"), createStock)
-// router.put('/:id', authorizeRoles("administrateur"), updateStock)
-// router.delete('/:id', authorizeRoles("administrateur"), deleteStock)
+router.post('/', authorizeRoles("responsable region"), createStock)
+router.put('/:id', authorizeRoles("responsable region"), updateStock)
+router.delete('/:id', authorizeRoles("responsable region"), deleteStock)
 //us4
-// router.patch('/register/:id', authorizeRoles("responsable region"), registerStock)
-//us5
-router.get('/dashboard', getDashboard)
+router.patch('/register/:id', authorizeRoles("responsable region"), registerStock)
+
 module.exports = router;

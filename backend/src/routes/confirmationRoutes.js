@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { confirmReceipt, toggleEnregistered, getConfirmReceipt } = require('../controllers/confirmationController');
+const {  toggleEnregistered } = require('../controllers/confirmationController');
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
 router.use(protect);
-router.get('/', getConfirmReceipt);
-router.patch('/:livraisonId', authorizeRoles('administrateur'), confirmReceipt);
+// router.get('/', getConfirmReceipt);
+// router.patch('/:livraisonId', authorizeRoles('administrateur'), confirmReceipt);
 //slock in depôt
 router.patch('/enregistered/:stockId', authorizeRoles('responsable region'), toggleEnregistered);
 module.exports = router;
