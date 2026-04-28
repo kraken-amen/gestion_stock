@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: Region,
         required: function () {
-            return this.role === "responsable region";
+            return this.role === "responsable region" || this.role === "Gestionnaire de Stock" || this.role === "utilisateur";
         }
     },
     isVerified: {

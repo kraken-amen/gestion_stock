@@ -134,7 +134,22 @@ export default function CommandePage() {
                         </button>
                     </div>
                 </div>
-
+                <div className="max-w-7xl mx-auto px-4 py-6">
+                    {/* Stats Section */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {[
+                            { label: 'Total', value: commandes.length, color: 'text-white' },
+                            { label: 'en preparation', value: commandes.filter(d => d.status === 'EN_PREPARATION').length, color: 'text-amber-400' },
+                            { label: 'expedie', value: commandes.filter(d => d.status === 'EXPEDIEE').length, color: 'text-red-400' },
+                            { label: 'livre', value: commandes.filter(d => d.status === 'LIVREE').length, color: 'text-emerald-400' },
+                        ].map((stat, i) => (
+                            <div key={i} className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center">
+                                <span className="text-white/50 text-[20px] uppercase font-black mb-1">{stat.label}</span>
+                                <span className={`text-2xl font-black ${stat.color}`}>{stat.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                         <div className="md:col-span-2 relative">
@@ -257,14 +272,14 @@ export default function CommandePage() {
                                                     {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                         <div className="flex flex-row items-center gap-2">
                                                             {commande.status === "EN_PREPARATION" && (
-                                                            <button
-                                                                onClick={(e) => { handleExpedier(commande._id), e.stopPropagation(); }}
-                                                                className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
+                                                                <button
+                                                                    onClick={(e) => { handleExpedier(commande._id), e.stopPropagation(); }}
+                                                                    className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
 
-                                                                title="expedier"
-                                                            >
-                                                                <Truck size={16} />
-                                                            </button>
+                                                                    title="expedier"
+                                                                >
+                                                                    <Truck size={16} />
+                                                                </button>
                                                             )}
                                                             {/* EDIT BUTTON */}
                                                             {commande.status === "EN_PREPARATION" && !commande.demande_id && (

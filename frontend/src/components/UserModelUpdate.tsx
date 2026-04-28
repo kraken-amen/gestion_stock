@@ -59,6 +59,10 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUserUpda
             addToast('Le mot de passe doit contenir au moins 8 caractères', 'error');
             return;
         }
+        if ((formData.role === "responsable region" || formData.role === "gestionnaire de stock" || formData.role === "utilisateur") && !formData.region.trim()) {
+            addToast('Veuillez choisir une region', 'error');
+            return;
+        }
         setLoading(true);
         try {
             // Appel au service de mise à jour
@@ -147,13 +151,14 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUserUpda
                         </select>
                     </div>
                     {/* Region */}
-                    {formData.role === "responsable region" && (
+                    {(formData.role === "responsable region" || formData.role === "gestionnaire de stock" || formData.role === "utilisateur") && (
                         <div className="mb-4">
                             <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
 
                             <Select
                                 options={Region}
                                 placeholder="Choisir une region"
+                                value={formData.region}
                                 isSearchable={true}
                                 classNamePrefix="my-react-select"
                                 styles={customSelectStyles}

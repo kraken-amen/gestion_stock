@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getKpiStats, getStockByRegion, getStockEvolution, getRecentActivities } = require('../controllers/dashboardController')
 const { protect } = require('../middleware/authMiddleware');
-// router.use(protect);
+router.use(protect);
 
 // Routes
 router.get('/stats', getKpiStats);

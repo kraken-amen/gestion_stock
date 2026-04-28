@@ -42,7 +42,7 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
             addToast('Le mot de passe doit contenir au moins 8 caractères', 'error');
             return;
         }
-        if (formData.role === "responsable region" && !formData.region) {
+        if ((formData.role === "responsable region" || formData.role === "gestionnaire de stock" || formData.role === "utilisateur") && !formData.region) {
             addToast('Veuillez sélectionner une région', 'error');
             return;
         }
@@ -154,7 +154,7 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
                                 </select>
                             </div>
                             {/* Region */}
-                            {formData.role === "responsable region" && (
+                            {(formData.role === "responsable region" || formData.role === "Gestionnaire de Stock" || formData.role === "utilisateur") && (
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
 

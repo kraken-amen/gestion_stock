@@ -22,7 +22,7 @@ exports.createUserByAdmin = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      region: role === "responsable region" ? region : null,
+      region: role === "responsable region" || role === "Gestionnaire de Stock" || role === "utilisateur" ? region : null,
       isVerified: false
     });
 
@@ -149,7 +149,7 @@ exports.verifyCode = async (req, res) => {
 
     // 3. Générer le Token JWT pour la session
     const token = jwt.sign(
-      { id: user._id, role: user.role ,region: user.region},
+      { id: user._id, role: user.role, region: user.region },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -185,7 +185,7 @@ exports.updateUser = async (req, res) => {
         }
         updateData.region = region;
       } else {
-        updateData.$unset = { region: 1 }; 
+        updateData.$unset = { region: 1 };
       }
     }
     if (password && password.trim() !== "") {
@@ -198,9 +198,9 @@ exports.updateUser = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { 
-        new: true, 
-        runValidators: true, 
+      {
+        new: true,
+        runValidators: true,
         context: 'query'
       }
     ).select("-password");
@@ -236,21 +236,56 @@ exports.deleteUser = async (req, res) => {
 // Désactivation User
 exports.toggleUserStatus = async (req, res) => {
   try {
-    const userIdToToggle = req.params.id; 
+    const userIdToToggle = req.params.id;
+
     const user = await User.findById(userIdToToggle);
-    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+    if (!user)
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+
     if (req.user.id === user._id.toString()) {
-      return res.status(400).json({ message: "Tu ne peux pas désactiver ton propre compte" });
+      return res.status(400).json({
+        message: "Tu ne peux pas désactiver ton propre compte",
+      });
     }
+
+    // 🔁 Toggle
     user.isActive = !user.isActive;
     await user.save();
-    res.json({ 
-      message: `Statut changé: ${user.isActive ? 'Activé' : 'Désactivé'}`,
-      isActive: user.isActive 
+
+    // 📧 Email Message dynamique
+    const message = user.isActive
+      ? `Bonjour ${user.name},
+      
+Votre compte a été ACTIVÉ par l'administration.
+
+Vous pouvez maintenant accéder à votre espace.
+
+Merci.`
+      : `Bonjour ${user.name},
+
+Votre compte a été DÉSACTIVÉ par l'administration.
+
+Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administration.`;
+
+    //  Send Email (async safe)
+    sendEmail({
+      email: user.email,
+      subject: "Mise à jour de votre compte",
+      message,
+    }).catch((err) => {
+      console.error("Email failed:", err.message);
     });
+
+    res.json({
+      message: `Statut changé: ${user.isActive ? "Activé" : "Désactivé"}`,
+      isActive: user.isActive,
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur lors de la désactivation: " + error.message });
+    res.status(500).json({
+      message: "Erreur lors du changement de statut: " + error.message,
+    });
   }
 };
 // get all users

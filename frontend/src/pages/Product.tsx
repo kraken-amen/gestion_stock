@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Product } from "../types";
 import ProductModelCreate from '../components/ProductModelCreate';
 import ProductModelUpdate from '../components/ProductModelUpdate';
+import ConfirmModal from '../components/ConfirmModel';
 
 export default function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,6 +17,7 @@ export default function ProductListPage() {
   const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
   const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -38,13 +40,17 @@ export default function ProductListPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Voulez-vous supprimer ce produit ?")) return;
+  const openDeleteModal = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpenDelete(true);
+  };
+  const executeDelete = async (id: string) => {
     try {
       await deleteProduct(id);
       fetchProducts();
+      setIsModalOpenDelete(false);
     } catch (error) {
-      alert("Erreur lors de la suppression");
+      console.error("Erreur suppression:", error);
     }
   };
 
@@ -222,8 +228,11 @@ export default function ProductListPage() {
                                 <Edit2 size={16} />
                               </button>
                               <button
-                                onClick={() => handleDelete(product._id!)}
-                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDeleteModal(product);
+                                }}
+                                className="p-2 rounded-lg bg-gray-500/20 text-gray-400 hover:bg-gray-500/40 transition-all"
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -257,6 +266,16 @@ export default function ProductListPage() {
           onClose={() => { setIsModalOpenUpdate(false); setSelectedProduct(null); }}
           onProductUpdated={fetchProducts}
           product={selectedProduct}
+        />
+      )}
+      {isModalOpenDelete && (
+        <ConfirmModal
+          config={{
+            title: "Supprimer le produit ?",
+            confirmValue: selectedProduct?.libelle!,
+            onConfirm: ()=>executeDelete(selectedProduct?._id!)
+          }}
+          onClose={() => setIsModalOpenDelete(false)}
         />
       )}
     </div>

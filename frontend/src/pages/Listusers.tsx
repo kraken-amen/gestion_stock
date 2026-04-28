@@ -219,7 +219,7 @@ export default function UsersListPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap ${getRoleColor(user.role)}`}>
-                          {user.role === "responsable region" ? "responsable " + user.region : user.role}
+                          {user.role === "responsable region" ? "responsable " + user.region : user.role === "Gestionnaire de Stock" ? "gestionnaire " + user.region : user.role === "utilisateur" ? "utilisateur "+ user.region : user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4">
