@@ -7,11 +7,11 @@ import { OtpProtectedRoute } from "../components/ProtectedRoute"
 import { ToastProvider } from "../context/ToastContext"
 import DashboardLayout from "../layouts/DashboardLayout"
 import TunisiaMap from "../pages/TunisiaMap"
-import RegionPage from "../pages/Region"
 import Demandes from "../pages/Demandes"
 import Products from "../pages/Product"
 import Parametres from "../pages/Parametres"
 import Commande from "../pages/Commande"
+import Stock from "../pages/Stock"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -28,8 +28,9 @@ const AppRouter = () => {
             <Route path="/users" element={<Users />} />
             <Route path="/products" element={<Products />} />
             <Route path="/commandes" element={<Commande />} />
+            <Route path="/stocks" element={<Stock />} />
             <Route path="/map" element={<TunisiaMap />} />
-            <Route path="/region/:name" element={<RegionPage />} />
+            <Route path="/region/:name" element={<Stock />} />
             <Route path="/parametres" element={<Parametres />} />
           </Route>
         </Routes>

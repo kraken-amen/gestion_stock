@@ -9,7 +9,7 @@ router.post("/create-user", protect, authorizeRoles("administrateur"), createUse
 //us1
 router.get("/", protect, authorizeRoles("administrateur"), getAllUsers);
 //us1
-router.get("/:id", protect, authorizeRoles("administrateur"), getUserById);
+router.get("/:id", protect, getUserById);
 //us1
 router.post("/login", login);
 //us1

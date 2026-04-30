@@ -31,21 +31,21 @@ const ROLE_CONFIG: Record<string, {
     pillText: 'text-red-300',
     dot: 'bg-emerald-400',
   },
-  gestionnaire_stock: {
-    label: 'Gestionnaire Stock',
+  "gestionnaire stock": {
+    label: 'Gestionnaire',
     gradient: 'from-emerald-500 to-teal-600',
     pillBg: 'bg-emerald-500/20 border border-emerald-500/25',
     pillText: 'text-emerald-300',
     dot: 'bg-emerald-400',
   },
-  responsable: {
-    label: 'Responsable Régionale',
+  "responsable region": {
+    label: 'Responsable',
     gradient: 'from-amber-500 to-orange-600',
     pillBg: 'bg-amber-500/20 border border-amber-500/25',
     pillText: 'text-amber-300',
     dot: 'bg-emerald-400',
   },
-  user: {
+  utilisateur: {
     label: 'Utilisateur',
     gradient: 'from-blue-500 to-indigo-600',
     pillBg: 'bg-blue-500/20 border border-blue-500/25',
@@ -127,7 +127,7 @@ const DashboardLayout = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const displayEmail = userData?.email || user?.email || (localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).email : 'Utilisateur');
+  const displayEmail = userData?.email || user?.email;
   const shortName    = displayEmail?.includes('@') ? displayEmail.split('@')[0] : displayEmail;
 
   const handleLogout = () => {

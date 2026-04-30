@@ -28,6 +28,15 @@ exports.getStockById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 }
+exports.getStockByRegion = async (req, res) => {
+  try {
+    const { region } = req.params;
+    const stocks = await Stock.find({ region }).populate('product_id').populate('product_id.codeArticle').populate('product_id.prix').populate('quantite').populate('enregisted');
+    res.json(stocks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
 exports.createStock = async (req, res) => {
   try {
     const { product_id, region } = req.body;
