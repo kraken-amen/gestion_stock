@@ -41,7 +41,15 @@ exports.createStock = async (req, res) => {
   try {
     const { product_id, region } = req.body;
     const exists = await Stock.findOne({ product_id, region });
-    if (exists) return res.status(400).json({ message: "Le produit existe déjà dans cette région" });
+    if (exists) 
+    {
+      const stock = await Stock.findByIdAndUpdate(
+        exists._id,
+        { quantite: exists.quantite + req.body.quantite },
+        { new: true, runValidators: true }
+      );
+      res.json(stock);
+    }
     const stock = new Stock(req.body);
     await stock.save();
     res.status(201).json(stock);

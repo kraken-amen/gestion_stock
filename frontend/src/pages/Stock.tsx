@@ -3,11 +3,17 @@ import {
   Search, Filter, ArrowLeft, Loader2, Box,
   Package2, Package, Ruler, MapPin,
   CheckCircle2, Clock, TrendingUp, ClipboardCheck, Calendar,
-  Truck
+  Truck,
+  Edit2,
+  Trash2,
+  Warehouse
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getStockByRegion, registerStock } from '../services/stockService';
+import { getStockByRegion, registerStock, deleteStock } from '../services/stockService';
 import { useToast } from "../context/ToastContext.tsx";
+import ConfirmModal from '../components/ConfirmModel.tsx';
+import StockModelCreate from '../components/StockModelCreate.tsx';
+import StockModelUpdate from '../components/StockModelUpdate.tsx';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface StockEntry {
@@ -54,7 +60,12 @@ export default function StockRegionPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterQty, setFilterQty] = useState<'all' | 'rupture' | 'alerte' | 'disponible'>('all');
-
+  const { addToast } = useToast();
+  const [isModalOpenCreate, setIsModalOpenCreate] = useState(false);
+  const [selectedStock, setSelectedStock] = useState<StockEntry | null>(null);
+  const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteConfig, setDeleteConfig] = useState({ id: '', confirmValue: '' });
   // ── Fetch ──────────────────────────────────────────────────────────────────
 
   const fetchStocks = async (regionName: string) => {
@@ -93,10 +104,27 @@ export default function StockRegionPage() {
   const handleValidate = async (id: string) => {
     try {
       await registerStock(id);
-      if (name) fetchStocks(name);
-      useToast("success", "Stock enregistré avec succès");
+
+      if (name) {
+        const normalized = normalizeRegion(name);
+        await fetchStocks(normalized);
+      }
+
+      addToast("Stock enregistré avec succès", "success");
     } catch (err) {
       console.error('Erreur validation:', err);
+      addToast("Erreur lors de l'enregistrement", "error");
+    }
+  };
+  const executeDelete = async () => {
+    if (!deleteConfig.id) return;
+    try {
+      await deleteStock(deleteConfig.id);
+      if (name) await fetchStocks(normalizeRegion(name));
+      addToast("Stock supprimé", "success");
+      setIsConfirmOpen(false);
+    } catch (err) {
+      addToast("Erreur lors de la suppression", "error");
     }
   };
 
@@ -132,6 +160,7 @@ export default function StockRegionPage() {
     pending: stocks.filter(s => !s.enregisted).length,
     rupture: stocks.filter(s => s.quantite === 0).length,
   }), [stocks]);
+  const totalQuantiteEnregistree = stocksEnregistres.reduce((acc, curr) => acc + (curr.quantite || 0), 0) || 0;
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -158,46 +187,60 @@ export default function StockRegionPage() {
               </button>
               <div>
                 <h1 className="text-xl md:text-3xl font-black drop-shadow-lg">Stock de Région</h1>
-                <p className="text-white/60 text-xs hidden md:block flex items-center gap-1">
-                  <MapPin size={12} className="inline mr-1" />
-                  {name || 'Région non définie'}
+                <p className="text-white/60 text-xs hidden md:block">
+                  Gestion des inventaires et flux logistiques
                 </p>
               </div>
             </div>
 
-            {/* Region badge */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-300 text-sm font-bold">
-              <MapPin size={16} />
-              {name || '—'}
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              {JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && (
+
+                <button
+                  onClick={() => setIsModalOpenCreate(true)}
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition-all active:scale-95 shadow-lg shadow-blue-600/20 flex items-center gap-2"
+                >
+                  <Package2 size={16} />
+                  Nouveau Stock
+                </button>
+              )}
+
+              {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-sm font-bold">
+                  <MapPin size={16} />
+                  {name || '—'}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
 
-          {/* ── Stats Cards ───────────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {/* ── Stats Grid ─────────────────────────────────────────────────── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[
               { label: 'Total produits', value: stats.total, icon: <TrendingUp size={18} />, color: 'blue' },
               { label: 'Validés', value: stats.validated, icon: <CheckCircle2 size={18} />, color: 'green' },
               { label: 'En attente', value: stats.pending, icon: <Clock size={18} />, color: 'amber' },
-              { label: 'Rupture', value: stats.rupture, icon: <Box size={18} />, color: 'red' },
+              { label: 'Stock Global', value: totalQuantiteEnregistree, icon: <Warehouse size={18} />, color: 'purple' }
             ].map(({ label, value, icon, color }) => (
               <div
                 key={label}
-                className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-4"
+                className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all hover:bg-white/10"
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center
-                  ${color === 'blue' ? 'bg-blue-500/20  text-blue-400' : ''}
-                  ${color === 'green' ? 'bg-green-500/20 text-green-400' : ''}
-                  ${color === 'amber' ? 'bg-amber-500/20 text-amber-400' : ''}
-                  ${color === 'red' ? 'bg-red-500/20   text-red-400' : ''}
-                `}>
+          ${color === 'blue' ? 'bg-blue-500/20   text-blue-400' : ''}
+          ${color === 'green' ? 'bg-green-500/20  text-green-400' : ''}
+          ${color === 'amber' ? 'bg-amber-500/20  text-amber-400' : ''}
+          ${color === 'purple' ? 'bg-purple-500/20 text-purple-400' : ''}
+          ${color === 'red' ? 'bg-red-500/20    text-red-400' : ''}
+        `}>
                   {icon}
                 </div>
                 <div>
-                  <p className="text-white/50 text-xs">{label}</p>
-                  <p className="text-2xl font-black">{value}</p>
+                  <p className="text-white/50 text-xs font-medium uppercase tracking-wider">{label}</p>
+                  <p className="text-2xl font-black text-white">{value}</p>
                 </div>
               </div>
             ))}
@@ -216,13 +259,13 @@ export default function StockRegionPage() {
                     </div>
 
                     <span>Stocks en cours de Réception</span>
-                    
+
                   </h3>
 
                   <div className="h-[2px] w-12 bg-gradient-to-r from-amber-500 to-transparent rounded-full mt-1"></div>
                 </div>
 
-                
+
                 <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest hidden md:block">
                   Flux Logistique Direct
                 </span>
@@ -270,21 +313,32 @@ export default function StockRegionPage() {
                       </div>
 
                       {/* Section 3: Actions (Contrôle & Enregistrement) */}
-                      <div className="flex gap-2 w-full md:w-auto justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
-                        <a
-                          href={`mailto:admin@votre-domaine.tn?subject=Réception Stock: ${p?.libelle}&body=Bonjour,%0D%0A%0D%0AJe vous informe que le produit ${p?.libelle} (#${p?.codeArticle}) a été réceptionné par le livreur ${item.livreurName || ''}.%0D%0AQuantité: ${item.quantiteRecue} ${p?.unite}.%0D%0A%0D%0ACordialement.`}
-                          className="p-2.5 rounded-xl bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-white/10"
-                          title="Notifier l'Admin par Email"
-                        >
-                          <ClipboardCheck size={18} />
-                        </a>
-                        <button
-                          onClick={() => handleValidate(item._id)}
-                          className="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-green-500 hover:bg-green-400 text-black text-xs font-black transition-all active:scale-95 shadow-lg shadow-green-500/20"
-                        >
-                          Valider
-                        </button>
-                      </div>
+                      {
+                        JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && (
+                          <div className="flex gap-2 w-full md:w-auto justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
+                            <a
+                              href={`mailto:admin@votre-domaine.tn?subject=Réception Stock: ${p?.libelle}&body=Bonjour,%0D%0A%0D%0AJe vous informe que le produit ${p?.libelle} (#${p?.codeArticle}) a été réceptionné par le livreur .%0D%0AQuantité: ${item.quantite} ${p?.unite}.%0D%0A%0D%0ACordialement.`}
+                              className="p-2.5 rounded-xl bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-white/10"
+                              title="Notifier l'Admin par Email"
+                            >
+                              <ClipboardCheck size={18} />
+                            </a>
+                            <button
+                              onClick={() => handleValidate(item._id)}
+                              className="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-green-500 hover:bg-green-400 text-black text-xs font-black transition-all active:scale-95 shadow-lg shadow-green-500/20"
+                            >
+                              Valider
+                            </button>
+                          </div>
+                        )
+                      }
+                      {
+                        JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                          <div className="flex gap-2 w-full md:w-auto justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
+                            <Truck size={40} className="text-white transition-all" />
+                          </div>
+                        )
+                      }
                     </div>
                   );
                 })}
@@ -378,18 +432,38 @@ export default function StockRegionPage() {
 
                     {/* 3. Status & Action */}
                     <div className="flex items-center gap-3 w-full md:w-auto justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
-                      {stock.enregisted ? (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                          <CheckCircle2 size={12} /> Validé
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleValidate(stock._id)}
-                          className="flex-1 md:flex-none px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-                        >
-                          Valider
-                        </button>
-                      )}
+                      {
+                        JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && stock.enregisted && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                            <CheckCircle2 size={12} /> Validé
+                          </div>
+                        )
+                      }
+                      {
+                        JSON.parse(localStorage.getItem('role') || '""') === "responsable region" && stock.enregisted && (
+                          <div className='flex items-center justify-center gap-2'>
+                            <button
+                              onClick={() => { setSelectedStock(stock); setIsModalOpenUpdate(true); }}
+                              className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setDeleteConfig({
+                                  id: stock._id!,
+                                  confirmValue: stock.product_id?.libelle.toUpperCase() || '',
+                                });
+                                setIsConfirmOpen(true);
+                              }}
+                              className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        )
+                      }
                     </div>
                   </div>
                 );
@@ -399,6 +473,34 @@ export default function StockRegionPage() {
                 <Box className="mx-auto mb-4 opacity-10" size={64} />
                 <p className="text-white/40 font-medium">Aucun stock enregistré pour le moment.</p>
               </div>
+            )}
+            {isConfirmOpen && (
+              <ConfirmModal
+                config={{
+                  title: "Supprimer le stock ?",
+                  confirmValue: deleteConfig.confirmValue,
+                  onConfirm: executeDelete
+                }}
+                onClose={() => setIsConfirmOpen(false)}
+              />
+            )}
+            {/* Create Modal */}
+            {isModalOpenCreate && (
+              <StockModelCreate
+                isOpen={isModalOpenCreate}
+                onClose={() => setIsModalOpenCreate(false)}
+                onStockCreated={() => name && fetchStocks(normalizeRegion(name))}
+              />
+            )}
+
+            {/* Update Modal */}
+            {isModalOpenUpdate && selectedStock && (
+              <StockModelUpdate
+                isOpen={isModalOpenUpdate}
+                onClose={() => { setIsModalOpenUpdate(false); setSelectedStock(null); }}
+                onStockUpdated={() => name && fetchStocks(normalizeRegion(name))}
+                stock={selectedStock}
+              />
             )}
           </div>
 
