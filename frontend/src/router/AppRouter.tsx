@@ -12,6 +12,7 @@ import Products from "../pages/Product"
 import Parametres from "../pages/Parametres"
 import Commande from "../pages/Commande"
 import Stock from "../pages/Stock"
+import RegionDashboardPage from "../pages/RegionDashboardPage"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -32,6 +33,7 @@ const AppRouter = () => {
             <Route path="/map" element={<TunisiaMap />} />
             <Route path="/region/:name" element={<Stock />} />
             <Route path="/parametres" element={<Parametres />} />
+            <Route path="/dash/:name" element={<RegionDashboardPage/>}/>
           </Route>
         </Routes>
       </ToastProvider>

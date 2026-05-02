@@ -129,7 +129,7 @@ const TunisiaMap = () => {
                             <path
                                 key={region.id}
                                 d={region.d}
-                                onClick={() => navigate(`/region/${region.id.toLowerCase()}`)}
+                                onClick={() => navigate(`/dash/${region.id.toLowerCase()}`)}
                                 onMouseEnter={() => setHoveredRegion({ id: region.id, name: region.name })}
                                 onMouseLeave={() => setHoveredRegion(null)}
                                 className={`
