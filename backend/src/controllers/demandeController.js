@@ -169,15 +169,6 @@ exports.approveRequest = async (req, res) => {
 
             product.quantite -= item.quantite;
             await product.save({ session });
-
-            await Movement.create([{
-                commande_id: newCommande._id,
-                product_id: item.product_id,
-                from: req.user._id, // Admin
-                to: demande.user_id._id,
-                quantite: item.quantite,
-                dateMovement: Date.now()
-            }], { session });
         }
 
         demande.status = 'ACCEPTEE';

@@ -2,6 +2,7 @@ const Commande = require('../models/Commande');
 const Product = require('../models/Product');
 const Stock = require('../models/Stock');
 const mongoose = require('mongoose');
+const Movement = require('../models/Movements');
 
 exports.getCommandes = async (req, res) => {
     try {
@@ -107,17 +108,37 @@ exports.deleteCommande = async (req, res) => {
     }
 };
 exports.expedierCommande = async (req, res) => {
-    try {
-        const commande = await Commande.findById(req.params.id);
-        if (!commande) return res.status(404).json({ message: "Commande non trouvée" });
-        if (commande.status === 'EN_PREPARATION') {
-            commande.status = 'EXPEDIEE';
-            await commande.save();
-        }
-        res.json(commande);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const commande = await Commande.findById(req.params.id);
+
+    if (!commande) {
+      return res.status(404).json({ message: "Commande non trouvée" });
     }
+
+    if (commande.status !== 'EN_PREPARATION') {
+      return res.status(400).json({ message: "Commande déjà traitée" });
+    }
+
+    commande.status = 'EXPEDIEE';
+    await commande.save();
+
+    const movements = commande.items.map(item => ({
+      commande_id: commande._id,
+      product_id: item.product_id,
+      from: req.user._id,
+      to: commande.user_id,
+      region: commande.region,
+      quantite: item.quantite,
+      dateMovement: new Date()
+    }));
+
+    await Movement.insertMany(movements);
+
+    res.json(commande);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 exports.livreeCommande = async (req, res) => {
     const session = await mongoose.startSession();

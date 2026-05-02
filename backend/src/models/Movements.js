@@ -22,6 +22,10 @@ const MovementSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
+    region: {
+        type: String,
+        required: true
+    },
 
     quantite: {
         type: Number,

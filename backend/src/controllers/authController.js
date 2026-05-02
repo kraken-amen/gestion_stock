@@ -267,7 +267,7 @@ Votre compte a été DÉSACTIVÉ par l'administration.
 
 Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administration.`;
 
-    //  Send Email (async safe)
+    // Send Email (async safe)
     sendEmail({
       email: user.email,
       subject: "Mise à jour de votre compte",

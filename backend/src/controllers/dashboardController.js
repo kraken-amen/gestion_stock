@@ -4,7 +4,7 @@ import Demande from '../models/Demande.js';
 import Commande from '../models/Commande.js';
 import StockMovement from '../models/Movements.js';
 import User from '../models/User.js';
-// 1. KPI Stats (Total Products, Stock, Alerts...)
+// KPI Stats (Total Products, Stock, Alerts...)
 export const getKpiStats = async (req, res) => {
   try {
 
@@ -43,40 +43,221 @@ export const getKpiStats = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// 2. Stock by Region (Chart)
+// Stock by Region 
 export const getStockByRegion = async (req, res) => {
   try {
     const data = await Stock.aggregate([
-      { $lookup: { from: "regions", localField: "region", foreignField: "_id", as: "region" } },
-      { $unwind: "$region" },
-      { $group: { _id: "$region.name", value: { $sum: "$quantity" } } }
+      { 
+        $group: { 
+          _id: "$region", 
+          value: { $sum: "$quantite" } 
+        } 
+      }
     ]);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-// 3. Stock Evolution (Chart - Last 30 Days)
+// Stock Evolution 
 export const getStockEvolution = async (req, res) => {
   try {
-    const data = await StockMovement.aggregate([
-      { $match: { createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } },
-      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, value: { $sum: "$quantity" } } },
-      { $sort: { _id: 1 } }
+    const rawData = await StockMovement.find().limit(5);
+    const stats = await StockMovement.aggregate([
+      { 
+        $group: { 
+          _id: null, 
+          count: { $sum: 1 }, 
+          total: { $sum: "$quantity" } 
+        } 
+      }
     ]);
-    res.json(data);
+
+    res.json({
+      message: "Debug Info",
+      collectionSize: rawData.length,
+      sampleData: rawData,
+      aggregateTest: stats
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+// demandes and commandes stats
+export const getStatutsStats = async (req, res) => {
+  try {
+    const [demandes, commandes] = await Promise.all([
+      Demande.aggregate([
+        { $match: { status: { $in: ['EN_ATTENTE', 'REJETEE', 'ACCEPTEE'] } } },
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]),
+      Commande.aggregate([
+        { $match: { status: { $in: ['EXPEDIEE', 'EN_PREPARATION', 'LIVREE'] } } },
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ])
+    ]);
+
+    const getCount = (arr, status) => arr.find(item => item._id === status)?.count || 0;
+
+    const enCoursTotal = 
+      getCount(demandes, 'ACCEPTEE') + 
+      getCount(commandes, 'EXPEDIEE') + 
+      getCount(commandes, 'EN_PREPARATION');
+
+    const finalStats = [
+      { name: 'En attente', value: getCount(demandes, 'EN_ATTENTE') },
+      { name: 'Rejetées', value: getCount(demandes, 'REJETEE') },
+      { name: 'Livrées', value: getCount(commandes, 'LIVREE') },
+      { name: 'En cours', value: enCoursTotal }
+    ];
+
+    res.json(finalStats);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-// 4. Recent Activities (Table)
-export const getRecentActivities = async (req, res) => {
+// top products
+export const getTopProducts = async (req, res) => {
   try {
-    const recentRequests = await Demande.find().sort({ createdAt: -1 }).limit(5).populate('product');
-    res.json(recentRequests);
+    const topProducts = await Demande.aggregate([
+      { $match: { status: { $ne: "REJETEE" } } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.product_id",
+          totalQty: { $sum: "$items.quantite" }
+        }
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      { $unwind: "$productInfo" },
+      {
+        $group: {
+          _id: null,
+          all: { 
+            $push: { 
+              name: "$productInfo.libelle", 
+              qty: "$totalQty" 
+            } 
+          },
+          grandTotal: { $sum: "$totalQty" }
+        }
+      },
+      { $unwind: "$all" },
+      {
+        $project: {
+          _id: 0,
+          name: "$all.name",
+          value: {
+            $round: [
+              { $multiply: [{ $divide: ["$all.qty", "$grandTotal"] }, 100] },
+              0
+            ]
+          }
+        }
+      },
+
+      { $sort: { value: -1 } },
+      { $limit: 5 }
+    ]);
+
+    res.json(topProducts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// active alerts
+export const getActiveAlerts = async (req, res) => {
+  try {
+    const lowStock = await Stock.find({ quantite: { $lte: 10 } })
+      .populate('product_id', 'libelle') 
+      .select('product_id quantite region')
+      .limit(3);
+
+    const alerts = lowStock.map(p => ({
+      type: 'CRITICAL',
+      message: `Stock critique — ${p.product_id?.libelle}`,
+      details: `${p.quantite} unités restantes`
+    }));
+
+    res.json(alerts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// recent demandes
+export const getRecentDemandes = async (req, res) => {
+  try {
+    const demandes = await Demande.find()
+      .sort({ createdAt: -1 }) 
+      .limit(3)
+      .populate('items.product_id', 'libelle'); 
+
+    const formatted = demandes.map(d => ({
+      id: d._id,
+      productName: d.items[0]?.product_id?.libelle || "Produit inconnu",
+      status: d.status,
+      time: d.createdAt
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// recent commandes
+export const getRecentCommandes = async (req, res) => {
+  try {
+    const commandes = await Commande.find()
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .populate('items.product_id', 'libelle');
+
+    const formatted = commandes.map(c => ({
+      id: c._id,
+      productName: c.items[0]?.product_id?.libelle || "Produit inconnu",
+      qty: c.items[0]?.quantite || 0,
+      region: c.region,
+      status: c.status
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// recent movements
+export const getRecentMovements = async (req, res) => {
+  try {
+    const movements = await StockMovement.aggregate([
+      { $sort: { dateMovement: -1 } },
+      { $limit: 4 },
+      {
+        $lookup: {
+          from: "products",
+          localField: "product_id",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      { $unwind: "$productInfo" },
+      {
+        $project: {
+          _id: 1,
+          productName: "$productInfo.libelle",
+          quantity: "$quantite",
+          time: "$dateMovement" 
+        }
+      }
+    ]);
+
+    res.json(movements);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
