@@ -216,11 +216,13 @@ export const getRecentDemandes = async (req, res) => {
     const demandes = await Demande.find()
       .sort({ createdAt: -1 })
       .limit(3)
-      .populate('items.product_id', 'libelle');
+      .populate('items.product_id', 'codeArticle')
+      .populate('user_id', 'region');
 
     const formatted = demandes.map(d => ({
       id: d._id,
-      productName: d.items[0]?.product_id?.libelle || "Produit inconnu",
+      productName: d.items[0]?.product_id?.codeArticle || "Produit inconnu",
+      to: d.user_id?.region || "Inconnu",
       status: d.status,
       time: d.createdAt
     }));
@@ -236,11 +238,11 @@ export const getRecentCommandes = async (req, res) => {
     const commandes = await Commande.find()
       .sort({ createdAt: -1 })
       .limit(3)
-      .populate('items.product_id', 'libelle');
+      .populate('items.product_id', 'codeArticle');
 
     const formatted = commandes.map(c => ({
       id: c._id,
-      productName: c.items[0]?.product_id?.libelle || "Produit inconnu",
+      productName: c.items[0]?.product_id?.codeArticle || "Produit inconnu",
       qty: c.items[0]?.quantite || 0,
       region: c.region,
       status: c.status
@@ -271,7 +273,8 @@ export const getRecentMovements = async (req, res) => {
           _id: 1,
           productName: "$productInfo.libelle",
           quantity: "$quantite",
-          time: "$dateMovement"
+          time: "$dateMovement",
+          region: "$region"
         }
       }
     ]);

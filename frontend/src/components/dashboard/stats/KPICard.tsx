@@ -11,7 +11,6 @@ interface KPICardProps {
   color?: "blue" | "green" | "red" | "yellow" | "purple" | "cyan";
 }
 
-// Map lel colors bech nasta3mlouhom dynamically f CSS classes
 const stylesMap = {
   blue:   { border: "border-blue-500/20",   icon: "text-blue-400",   bg: "bg-blue-500/10",   glow: "shadow-blue-500/5" },
   purple: { border: "border-purple-500/20", icon: "text-purple-400", bg: "bg-purple-500/10", glow: "shadow-purple-500/5" },

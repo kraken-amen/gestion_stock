@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllProducts } from '../services/productService';
+import { getProducts } from '../services/productService';
 import { createCommande } from '../services/commandeService';
 import { Region } from '../utils/region';
 import type { PropsCommande, Product } from '../types';
@@ -23,7 +23,7 @@ const CommandeModelCreate = ({ isOpen, onClose, onCommandeCreated }: PropsComman
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const prodRes = await getAllProducts();
+                const prodRes = await getProducts();
 
                 const prodData = prodRes.data || prodRes;
                 setProducts(prodData.map((p: Product) => ({

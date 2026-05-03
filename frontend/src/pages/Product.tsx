@@ -29,16 +29,16 @@ export default function ProductListPage() {
   }, [navigate]);
 
   const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await getProducts();
-      setProducts(res.data || []);
-    } catch (error) {
-      console.error("Erreur:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const data = await getProducts(); 
+    setProducts(Array.isArray(data) ? data : data.products || []); 
+  } catch (error) {
+    console.error("Erreur:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const openDeleteModal = (product: Product) => {
     setSelectedProduct(product);

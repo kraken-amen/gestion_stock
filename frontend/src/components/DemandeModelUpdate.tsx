@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { updateDemande } from '../services/demandeService';
-import { getAllProducts } from '../services/productService';
+import { getProducts } from '../services/productService';
 import type { PropsDemandeUpdate, Product } from '../types';
 import { useToast } from '../context/ToastContext';
 import Select from 'react-select';
@@ -20,7 +20,7 @@ const DemandeModelUpdate = ({ isOpen, onClose, onDemandeUpdated, demande }: Prop
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await getAllProducts();
+                const data = await getProducts();
                 const options = data.map((p: Product) => ({
                     value: p._id,
                     label: p.libelle
