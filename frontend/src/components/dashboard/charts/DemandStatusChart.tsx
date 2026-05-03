@@ -1,31 +1,78 @@
+import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { getStatutsStats } from "../../../services/dashboardService";
 
-const data = [
-  { name: "En attente", value: 7, color: "#f59e0b" },
-  { name: "En cours", value: 5, color: "#3b82f6" },
-  { name: "Livrées", value: 43, color: "#10b981" },
-  { name: "Rejetées", value: 2, color: "#ef4444" },
-];
+const statusColors: Record<string, string> = {
+  "En attente": "#f59e0b",
+  "En cours": "#3b82f6",
+  "Livrées": "#10b981",
+  "Rejetées": "#ef4444",
+};
+
+interface StatusData {
+  name: string;
+  value: number;
+  color: string;
+}
 
 const DemandStatusChart = () => {
+  const [data, setData] = useState<StatusData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const result = await getStatutsStats();
+
+      if (Array.isArray(result)) {
+        const formattedData = result.map((item: any) => ({
+          ...item,
+          color: statusColors[item.name] || "#6366f1",
+        }));
+        setData(formattedData);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const total = data.reduce((acc, curr) => acc + curr.value, 0);
+
+  if (loading) return null;
+
   return (
     <div className="bg-white/[0.04] backdrop-blur-xl p-5 rounded-2xl border border-white/5 shadow-xl h-full">
-      <h3 className="text-white font-medium text-sm mb-4">Statuts demandes</h3>
+      <h3 className="text-white font-medium text-sm mb-4 uppercase tracking-wider opacity-60">Statuts demandes</h3>
       
       <div className="h-[180px] w-full relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+            <Pie 
+              data={data} 
+              innerRadius={60} 
+              outerRadius={80} 
+              paddingAngle={5} 
+              dataKey="value" 
+              stroke="none"
+            >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: 'none', borderRadius: '8px', color: '#fff' }} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1a1a1a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px' }} 
+              itemStyle={{ color: '#fff' }}
+            />
           </PieChart>
         </ResponsiveContainer>
-        {/* El Katiba eli fi west el Donut */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-2xl font-black text-white">62</span>
+          <span className="text-2xl font-black text-white">{total}</span>
           <span className="text-[10px] text-white/40 uppercase">Total</span>
         </div>
       </div>

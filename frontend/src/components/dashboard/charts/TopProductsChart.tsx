@@ -1,10 +1,49 @@
+import { useEffect, useState } from "react";
+import { getTopProducts } from "../../../services/dashboardService";
+
+interface TopProductData {
+  name: string;
+  value: number;
+  color: string;
+}
+
 const TopProductsChart = () => {
-  const data = [
-    { name: "Modem ADSL v2", value: 72, color: "bg-blue-500" },
-    { name: "ONT Fibre XG", value: 58, color: "bg-purple-500" },
-    { name: "Carte SIM Pro", value: 45, color: "bg-cyan-500" },
-    { name: "Décodeur IPTV", value: 31, color: "bg-emerald-500" },
-  ];
+  const [data, setData] = useState<TopProductData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const colors = ["bg-blue-500", "bg-purple-500", "bg-cyan-500", "bg-emerald-500", "bg-orange-500"];
+
+  const fetchTopProducts = async () => {
+    try {
+      setLoading(true);
+      const result = await getTopProducts();
+      
+      if (Array.isArray(result)) {
+        const formattedData: TopProductData[] = result.map((item, index) => ({
+          name: item.name || "Inconnu",
+          value: item.value || 0,
+          color: colors[index % colors.length]
+        }));
+        setData(formattedData);
+      }
+    } catch (error) {
+      console.error("Erreur TopProducts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[300px] bg-white/[0.04] rounded-2xl flex items-center justify-center">
+        <span className="text-white/20 text-xs animate-pulse">Chargement...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white/[0.04] backdrop-blur-xl p-5 rounded-2xl border border-white/5 shadow-xl group relative overflow-hidden">

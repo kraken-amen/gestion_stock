@@ -47,13 +47,20 @@ export const getKpiStats = async (req, res) => {
 export const getStockByRegion = async (req, res) => {
   try {
     const data = await Stock.aggregate([
-      { 
-        $group: { 
-          _id: "$region", 
-          value: { $sum: "$quantite" } 
-        } 
+      {
+        $group: {
+          _id: "$region",
+          value: { $sum: "$quantite" }
+        }
+      },
+      {
+        $sort: { value: -1 }
+      },
+      {
+        $limit: 6
       }
     ]);
+
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -62,25 +69,38 @@ export const getStockByRegion = async (req, res) => {
 // Stock Evolution 
 export const getStockEvolution = async (req, res) => {
   try {
-    const rawData = await StockMovement.find().limit(5);
-    const stats = await StockMovement.aggregate([
-      { 
-        $group: { 
-          _id: null, 
-          count: { $sum: 1 }, 
-          total: { $sum: "$quantity" } 
-        } 
+    const data = await StockMovement.aggregate([
+      {
+        $group: {
+          _id: {
+            day: { $dayOfMonth: "$dateMovement" },
+            month: { $month: "$dateMovement" }
+          },
+          stock: {
+            $sum: {
+              $cond: [
+                { $ifNull: ["$from", false] },
+                { $multiply: ["$quantite", 1] },
+                "$quantite"
+              ]
+            }
+          }
+        }
+      },
+      {
+        $sort: { "_id.month": 1, "_id.day": 1 }
       }
     ]);
 
-    res.json({
-      message: "Debug Info",
-      collectionSize: rawData.length,
-      sampleData: rawData,
-      aggregateTest: stats
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const formatted = data.map(d => ({
+      date: `${d._id.day}/${d._id.month}`,
+      stock: d.stock
+    }));
+
+    res.json(formatted);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 // demandes and commandes stats
@@ -99,9 +119,8 @@ export const getStatutsStats = async (req, res) => {
 
     const getCount = (arr, status) => arr.find(item => item._id === status)?.count || 0;
 
-    const enCoursTotal = 
-      getCount(demandes, 'ACCEPTEE') + 
-      getCount(commandes, 'EXPEDIEE') + 
+    const enCoursTotal =
+      getCount(commandes, 'EXPEDIEE') +
       getCount(commandes, 'EN_PREPARATION');
 
     const finalStats = [
@@ -140,11 +159,11 @@ export const getTopProducts = async (req, res) => {
       {
         $group: {
           _id: null,
-          all: { 
-            $push: { 
-              name: "$productInfo.libelle", 
-              qty: "$totalQty" 
-            } 
+          all: {
+            $push: {
+              name: "$productInfo.libelle",
+              qty: "$totalQty"
+            }
           },
           grandTotal: { $sum: "$totalQty" }
         }
@@ -176,7 +195,7 @@ export const getTopProducts = async (req, res) => {
 export const getActiveAlerts = async (req, res) => {
   try {
     const lowStock = await Stock.find({ quantite: { $lte: 10 } })
-      .populate('product_id', 'libelle') 
+      .populate('product_id', 'libelle')
       .select('product_id quantite region')
       .limit(3);
 
@@ -195,9 +214,9 @@ export const getActiveAlerts = async (req, res) => {
 export const getRecentDemandes = async (req, res) => {
   try {
     const demandes = await Demande.find()
-      .sort({ createdAt: -1 }) 
+      .sort({ createdAt: -1 })
       .limit(3)
-      .populate('items.product_id', 'libelle'); 
+      .populate('items.product_id', 'libelle');
 
     const formatted = demandes.map(d => ({
       id: d._id,
@@ -252,7 +271,7 @@ export const getRecentMovements = async (req, res) => {
           _id: 1,
           productName: "$productInfo.libelle",
           quantity: "$quantite",
-          time: "$dateMovement" 
+          time: "$dateMovement"
         }
       }
     ]);

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getDashboard } from "../services/dashboardService";
 import { MapPin, TrendingUp, MousePointer2 } from 'lucide-react';
 
 const TunisiaMap = () => {
@@ -35,18 +34,6 @@ const TunisiaMap = () => {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [regionsData, setRegionsData] = useState<any[]>([]);
     const [totalStock, setTotalStock] = useState(0);
-
-    const fetchStock = async () => {
-        try {
-            const res = await getDashboard();
-            setRegionsData(res.stockByRegion || []);
-            setTotalStock(res.totalInventoryValue || 0);
-        } catch (error) {
-            console.error("Erreur:", error);
-        }
-    };
-
-    useEffect(() => { fetchStock(); }, []);
 
     const getStockForRegion = (id: string) => {
         const region = regionsData.find(r => r._id.toLowerCase() === id.toLowerCase());

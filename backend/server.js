@@ -9,6 +9,7 @@ const moveRoutes = require("./src/routes/moveRoute");
 const demandeRoutes = require("./src/routes/demandeRoutes");
 const commandeRoutes = require("./src/routes/commandeRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
+const dashregionRoutes = require("./src/routes/dashregionRoutes");
 
 dotenv.config();
 
@@ -42,6 +43,8 @@ app.use("/api/demande", demandeRoutes);
 app.use("/api/commande", commandeRoutes);
 // Dashboard Routes
 app.use("/api/dashboard", dashboardRoutes);
+// Dashboard Region Routes
+app.use("/api/dash", dashregionRoutes)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

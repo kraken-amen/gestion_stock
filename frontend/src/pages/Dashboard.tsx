@@ -1,29 +1,26 @@
-import MangeUser from "../components/MangeUser";
-import { PermissionGate } from "../components/PermissionGate";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
-import { Bell, ArrowLeft } from "lucide-react";
+import { Bell } from "lucide-react";
 
-// ✅ Stats
+// Stats
 import KPISection from "../components/dashboard/stats/KPISection";
 
-// ✅ Charts
+// Charts
 import StockByRegionChart from "../components/dashboard/charts/StockByRegionChart";
 import DemandStatusChart from "../components/dashboard/charts/DemandStatusChart";
 import StockEvolutionChart from "../components/dashboard/charts/StockEvolutionChart";
 import TopProductsChart from "../components/dashboard/charts/TopProductsChart";
 
-// ✅ Alerts
+//  Alerts
 import AlertsPanel from "../components/dashboard/alerts/AlertsPanel";
 
-// ✅ Activity
+// Activity
 import RecentRequests from "../components/dashboard/activity/RecentRequests";
 import StockMovements from "../components/dashboard/activity/StockMovements";
 import RecentOrders from "../components/dashboard/activity/RecentOrders";
 
 
 const Dashboard = () => {
-  const { user } = useAuth();
   const [notifOpen, setNotifOpen] = useState(false);
 
 
@@ -58,10 +55,10 @@ const Dashboard = () => {
   {/* ─── CONTENT ──────────────────────────────────────── */}
   <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    {/* 🔢 KPI */}
+    {/* KPI */}
     <KPISection />
 
-    {/* 📊 CHARTS */}
+    {/* CHARTS */}
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch auto-rows-fr">
       <StockByRegionChart />
       <DemandStatusChart />
@@ -69,32 +66,15 @@ const Dashboard = () => {
       <TopProductsChart />
     </div>
 
-    {/* 🚨 PANELS */}
+    {/*PANELS */}
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch auto-rows-fr">
       <AlertsPanel />
       <RecentRequests />
       <StockMovements />
     </div>
 
-    {/* 🚚 ORDERS */}
+    {/* ORDERS */}
     <RecentOrders />
-
-    {/* 👥 ADMIN */}
-    <PermissionGate role={user?.role} permission="MANAGE_USERS">
-      <div className="mt-6">
-
-        <div className="flex items-center gap-3 px-5 mb-4">
-          <div className="h-px flex-1 bg-white/[0.06]" />
-          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-white/20">
-            Administration
-          </span>
-          <div className="h-px flex-1 bg-white/[0.06]" />
-        </div>
-
-        <MangeUser />
-      </div>
-    </PermissionGate>
-
   </div>
 </div>
   );

@@ -70,7 +70,7 @@ export default function RegionDashboardPage() {
             <div className="backdrop-blur-xl bg-white/5 border-b border-white/10 sticky top-0 z-30 h-16 flex items-center">
                 <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/dashboard')} className="p-2 rounded-lg hover:bg-white/10 text-white/70 transition-all">
+                        <button onClick={() => navigate('/map')} className="p-2 rounded-lg hover:bg-white/10 text-white/70 transition-all">
                             <ArrowLeft size={24} />
                         </button>
                         <div>
@@ -97,7 +97,7 @@ export default function RegionDashboardPage() {
             {/* ─── CONTENT (Organisation Global) ──────────────────────────────────────── */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-6 relative z-10">
 
-                {/* 🔢 KPI SECTION (Grid 4 columns kima Global) */}
+                {/* KPI SECTION*/}
                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <KPISectionRegion
                         total={stats.total}

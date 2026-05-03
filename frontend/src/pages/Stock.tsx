@@ -180,7 +180,7 @@ export default function StockRegionPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <button
-                onClick={() => navigate('/map')}
+                onClick={() => navigate(`/region/dash/${name}`)}
                 className="p-2 rounded-lg hover:bg-white/10 text-white/70 transition-all"
               >
                 <ArrowLeft size={24} />
