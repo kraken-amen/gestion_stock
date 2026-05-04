@@ -284,3 +284,49 @@ export const getRecentMovements = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const getGlobalStats = async (req, res) => {
+    try {
+        const stats = await Stock.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalValue: { $sum: "$quantite" },
+                    activeRegions: { $addToSet: "$region" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    valeurTotale: { $ifNull: ["$totalValue", 0] },
+                    countZonesActives: { $size: "$activeRegions" }
+                }
+            }
+        ]);
+        const result = stats[0] || { valeurTotale: 0, countZonesActives: 0 };
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+export const getMapData = async (req, res) => {
+    try {
+        const mapData = await Stock.aggregate([
+            {
+                $group: {
+                    _id: "$region",
+                    totalStock: { $sum: "$quantite" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    region: "$_id",
+                    hasStock: { $gt: ["$totalStock", 0] }
+                }
+            }
+        ]);
+        res.status(200).json(mapData);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

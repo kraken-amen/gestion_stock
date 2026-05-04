@@ -8,7 +8,9 @@ const { getKpiStats,
     getActiveAlerts,
     getRecentDemandes,
     getRecentCommandes,
-    getRecentMovements 
+    getRecentMovements,
+    getGlobalStats,
+    getMapData
 } = require('../controllers/dashboardController')
 const { protect } = require('../middleware/authMiddleware');
 router.use(protect);
@@ -23,4 +25,7 @@ router.get('/alerts', getActiveAlerts);
 router.get('/recent', getRecentDemandes);
 router.get('/recent-commandes', getRecentCommandes);
 router.get('/history', getRecentMovements);
+// Routes map
+router.get('/global-stats', getGlobalStats);
+router.get('/map-data', getMapData);
 module.exports = router;

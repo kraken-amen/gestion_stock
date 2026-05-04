@@ -4,7 +4,7 @@ import { Box, Warehouse, AlertTriangle, FileText, MoreHorizontal, Loader2 } from
 import { getRegionKPIs } from '../../services/dashregionService';
 
 export default function KPISectionRegion() {
-  const { regionName } = useParams<{ regionName: string }>();
+  const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -16,10 +16,10 @@ export default function KPISectionRegion() {
     demandesAttente: 0
   });
 
-  const fetchData = async (regionName: string) => {
+  const fetchData = async (name: string) => {
     try {
       setLoading(true);
-      const res = await getRegionKPIs(regionName);
+      const res = await getRegionKPIs(name);
       setData(res);
     } catch (err) {
       console.error('Erreur KPI:', err);
@@ -27,7 +27,7 @@ export default function KPISectionRegion() {
       setLoading(false);
     }
   };
-
+  const normalizeRegion = (r: string) => r.charAt(0).toUpperCase() + r.slice(1).toLowerCase();
   useEffect(() => {
   const token = localStorage.getItem('token');
 
@@ -36,14 +36,11 @@ export default function KPISectionRegion() {
     return;
   }
 
-  if (!regionName) {
-    navigate('/dashboard');
-    return;
-  }
+  if (!name) return;
 
-  fetchData(regionName);
+  fetchData(normalizeRegion(name))
 
-}, [regionName, navigate]);
+}, [name]);
 
   const kpiConfig = [
     {

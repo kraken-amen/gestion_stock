@@ -13,6 +13,7 @@ import Parametres from "../pages/Parametres"
 import Commande from "../pages/Commande"
 import Stock from "../pages/Stock"
 import RegionDashboardPage from "../pages/RegionDashboardPage"
+import History from "../pages/History"
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -34,6 +35,7 @@ const AppRouter = () => {
             <Route path="/region/:name" element={<Stock />} />
             <Route path="/parametres" element={<Parametres />} />
             <Route path="/dash/:name" element={<RegionDashboardPage/>}/>
+            <Route path="/historique" element={<History />} />
           </Route>
         </Routes>
       </ToastProvider>

@@ -81,6 +81,7 @@ export default function StockRegionPage() {
       setLoading(false);
     }
   };
+  
   const normalizeRegion = (r: string) => r.charAt(0).toUpperCase() + r.slice(1).toLowerCase();
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -208,7 +209,7 @@ export default function StockRegionPage() {
               {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-sm font-bold">
                   <MapPin size={16} />
-                  {name || '—'}
+                  {name}
                 </div>
               )}
             </div>

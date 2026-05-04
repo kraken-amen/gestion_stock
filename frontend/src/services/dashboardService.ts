@@ -46,3 +46,12 @@ export const getRecentMovements = async () => {
   const response = await api.get('/dashboard/history');
   return response.data;
 };
+export const getGlobalStats = async () => {
+  const response = await api.get('/dashboard/global-stats');
+  return response.data;
+};
+
+export const getMapData = async () => {
+  const response = await api.get('/dashboard/map-data');
+  return response.data;
+};

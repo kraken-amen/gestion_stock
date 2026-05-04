@@ -1,24 +1,11 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, LayoutGrid } from 'lucide-react';
 
 import KPISectionRegion from '../components/regionDashboard/KPISectionRegion';
 import AlertsRegion from '../components/regionDashboard/AlertsRegion';
 
-import { getStockByRegion } from '../services/stockService';
 import StockByProductChart from '../components/regionDashboard/StockByProductChart';
-
-interface Stock {
-    _id: string;
-    product_id: {
-        codeArticle: string;
-        libelle: string;
-        unite: string;
-        prix: number;
-    };
-    quantite: number;
-    enregisted: boolean;
-}
 
 // ─── Page ─────────────────────────────────────
 
@@ -26,7 +13,6 @@ export default function RegionDashboardPage() {
     const navigate = useNavigate();
     const { name } = useParams();
 
-    const [stocks, setStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
 
     // ── Fetch ───────────────────────────────────
@@ -34,8 +20,6 @@ export default function RegionDashboardPage() {
     const fetchStocks = async () => {
         try {
             setLoading(true);
-            const res = await getStockByRegion(name!);
-            setStocks(res.data || []);
         } catch (err) {
             console.error(err);
         } finally {
@@ -48,18 +32,6 @@ export default function RegionDashboardPage() {
         fetchStocks();
     }, [name]);
 
-    // ── Stats ──────────────────────────────────
-
-    const stats = useMemo(() => {
-        const total = stocks.length;
-        const validated = stocks.filter(s => s.enregisted).length;
-        const pending = stocks.filter(s => !s.enregisted).length;
-        const rupture = stocks.filter(s => s.quantite === 0).length;
-        const alerte = stocks.filter(s => s.quantite > 0 && s.quantite <= 100).length;
-        const disponible = stocks.filter(s => s.quantite > 100).length;
-
-        return { total, validated, pending, rupture, alerte, disponible };
-    }, [stocks]);
 
     // ── Render ─────────────────────────────────
 
@@ -83,7 +55,7 @@ export default function RegionDashboardPage() {
                         </div>
                     </div>
 
-                    {/* Status & Notifications */}
+                    {/* Status  */}
                     <button
                         onClick={() => navigate(`/region/${name}`)}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 transition-all active:scale-95 font-bold text-xs uppercase tracking-widest"
@@ -99,12 +71,7 @@ export default function RegionDashboardPage() {
 
                 {/* KPI SECTION*/}
                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <KPISectionRegion
-                        total={stats.total}
-                        stockGlobal={stats.validated}
-                        lowStock={stats.pending}
-                        value={stats.rupture}
-                    />
+                    <KPISectionRegion/>
                 </section>
 
                 {/*  CHARTS GRID  */}
@@ -118,8 +85,6 @@ export default function RegionDashboardPage() {
                     {/* Chart 2: Alerts & Status Panels */}
                     <div>
                         <AlertsRegion
-                            rupture={stats.rupture}
-                            alerte={stats.alerte}
                         />
                     </div>
                 </div>

@@ -11,7 +11,7 @@ export const getRegionKPIs = async (req, res) => {
                     totalProduits: { $count: {} },
                     stockGlobal: { $sum: "$quantite" },
                     stockFaible: {
-                        $sum: { $cond: [{ $lt: ["$quantite", 10] }, 1, 0] }
+                        $sum: { $cond: [{ $lt: ["$quantite", 20] }, 1, 0] }
                     },
                     demandesAttente: {
                         $sum: { $cond: [{ $eq: ["$enregisted", false] }, 1, 0] }
@@ -65,7 +65,7 @@ export const getRegionAlerts = async (req, res) => {
             { 
                 $match: { 
                     region: regionName, 
-                    quantite: { $lte: 50 }
+                    quantite: { $lte: 20 }
                 } 
             },
             {
@@ -80,7 +80,7 @@ export const getRegionAlerts = async (req, res) => {
             {
                 $project: {
                     _id: 0,
-                    productName: "$product.name",
+                    productName: "$product.codeArticle",
                     quantite: 1,
                     status: { 
                         $cond: [{ $eq: ["$quantite", 0] }, "Rupture", "Faible"] 
