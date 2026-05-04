@@ -149,7 +149,7 @@ return (
                                 cursor-pointer transition-all duration-500
                                 stroke-white/20 hover:stroke-white stroke-[1.2]
                                 ${hasStock
-                                    ? 'fill-green-600/40 hover:fill-green-500 hover:stroke-green-300'
+                                    ? 'fill-amber-600/40 hover:fill-amber-500 hover:stroke-amber-300'
                                     : 'fill-slate-800/60 hover:fill-slate-700'}
                             `}
                         />
@@ -160,7 +160,7 @@ return (
             {/* Legend */}
             <div className="absolute bottom-4 right-0 flex items-center gap-6 backdrop-blur-md bg-black/20 px-6 py-3 rounded-full border border-white/5">
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
+                    <div className="w-3 h-3 bg-amber-600 rounded-sm"></div>
                     <span className="text-[10px] font-bold text-white/50 uppercase">Stock Actif</span>
                 </div>
                 <div className="flex items-center gap-2">

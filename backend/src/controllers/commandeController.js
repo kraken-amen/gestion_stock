@@ -108,37 +108,37 @@ exports.deleteCommande = async (req, res) => {
     }
 };
 exports.expedierCommande = async (req, res) => {
-  try {
-    const commande = await Commande.findById(req.params.id);
+    try {
+        const commande = await Commande.findById(req.params.id);
 
-    if (!commande) {
-      return res.status(404).json({ message: "Commande non trouvée" });
+        if (!commande) {
+            return res.status(404).json({ message: "Commande non trouvée" });
+        }
+
+        if (commande.status !== 'EN_PREPARATION') {
+            return res.status(400).json({ message: "Commande déjà traitée" });
+        }
+
+        commande.status = 'EXPEDIEE';
+        await commande.save();
+
+        const movements = commande.items.map(item => ({
+            commande_id: commande._id,
+            product_id: item.product_id,
+            from: req.user._id,
+            to: commande.user_id,
+            region: commande.region,
+            quantite: item.quantite,
+            dateMovement: new Date()
+        }));
+
+        await Movement.insertMany(movements);
+
+        res.json(commande);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-
-    if (commande.status !== 'EN_PREPARATION') {
-      return res.status(400).json({ message: "Commande déjà traitée" });
-    }
-
-    commande.status = 'EXPEDIEE';
-    await commande.save();
-
-    const movements = commande.items.map(item => ({
-      commande_id: commande._id,
-      product_id: item.product_id,
-      from: req.user._id,
-      to: commande.user_id,
-      region: commande.region,
-      quantite: item.quantite,
-      dateMovement: new Date()
-    }));
-
-    await Movement.insertMany(movements);
-
-    res.json(commande);
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 exports.livreeCommande = async (req, res) => {
     const session = await mongoose.startSession();
@@ -165,6 +165,16 @@ exports.livreeCommande = async (req, res) => {
 
             commande.status = 'LIVREE';
             await commande.save({ session });
+            try {
+                await createNotification({
+                    user: commande.user_id,
+                    title: "Mise à jour Commande",
+                    message: `Votre commande #${commande._id.toString().slice(-6)} est maintenant livrée.`,
+                    type: "COMMANDE"
+                });
+            } catch (err) {
+                console.error("Commande Notif Error:", err);
+            }
         }
 
         await session.commitTransaction();

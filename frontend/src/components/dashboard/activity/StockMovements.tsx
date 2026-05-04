@@ -51,7 +51,7 @@ const StockMovements = () => {
     <div className="bg-white/[0.04] backdrop-blur-xl p-5 rounded-2xl border border-white/5 shadow-xl h-full">
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-white font-medium text-sm uppercase tracking-wider opacity-60">Mouvements stock</h3>
-        <button onClick={() => navigate("/demandes")} className="text-[10px] text-white/40 hover:text-white transition-colors uppercase font-bold tracking-widest">
+        <button onClick={() => navigate("/historique")} className="text-[10px] text-white/40 hover:text-white transition-colors uppercase font-bold tracking-widest">
           voir tout →
         </button>
       </div>

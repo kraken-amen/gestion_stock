@@ -1,31 +1,27 @@
+const mongoose = require('mongoose');
+
 const NotificationSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: [
-      "STOCK_LOW",
-      "DEMANDE_DELAY",
-      "COMMANDE_DELAY",
-      "INFO"
-    ]
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false
   },
 
+  region: {
+    type: String,
+    required: false
+  },
+
+  title: String,
   message: String,
-  detail: String,
 
-  role: {
-    type: String,
-    enum: ["admin", "responsable"],
-    default: "admin"
-  },
+  type: String,
 
   isRead: {
     type: Boolean,
     default: false
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
-});
+
+}, { timestamps: true });
+
 module.exports = mongoose.model("Notification", NotificationSchema);

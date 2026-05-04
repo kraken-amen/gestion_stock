@@ -1,7 +1,7 @@
 const Commande = require('../models/Commande');
 const Demande = require('../models/Demande');
 const Product = require('../models/Product');
-const Movement = require('../models/Movements');
+const createNotification = require('../utils/createNotification');
 const mongoose = require('mongoose');
 
 exports.createDemande = async (req, res) => {
@@ -9,9 +9,9 @@ exports.createDemande = async (req, res) => {
         const userId = req.user._id;
         const { items, description } = req.body;
 
-        let existingDemande = await Demande.findOne({ 
-            user_id: userId, 
-            status: "EN_ATTENTE" 
+        let existingDemande = await Demande.findOne({
+            user_id: userId,
+            status: "EN_ATTENTE"
         });
 
         if (existingDemande) {
@@ -63,9 +63,9 @@ exports.updateDemande = async (req, res) => {
         const userId = req.user._id;
         const { items, description } = req.body;
 
-        let existingDemande = await Demande.findOne({ 
+        let existingDemande = await Demande.findOne({
             user_id: userId,
-            status: "EN_ATTENTE" 
+            status: "EN_ATTENTE"
         });
 
         if (existingDemande) {
@@ -151,24 +151,44 @@ exports.approveRequest = async (req, res) => {
 
         const [newCommande] = await Commande.create([{
             demande_id: demande._id,
-            region: regionName, 
+            region: regionName,
             items: demande.items.map(item => ({
                 product_id: item.product_id,
                 quantite: item.quantite
             })),
             status: "EN_PREPARATION"
         }], { session });
+        try {
+            await createNotification({
+                user: demande.user_id._id,
+                region: demande.user_id.region,
+                title: "Demande acceptée",
+                message: `Votre demande pour ${demande.user_id.region} acceptée`,
+                type: "DEMANDE"
+            });
+        } catch (notifError) {
+            console.error("Notification failed:", notifError);
+        }
 
         for (let item of demande.items) {
             const product = await Product.findById(item.product_id).session(session);
             if (!product) throw new Error(`Produit ${item.product_id} non trouvé`);
-
             if (product.quantite < item.quantite) {
                 throw new Error(`Stock insuffisant pour ${product.libelle}.`);
             }
-
             product.quantite -= item.quantite;
             await product.save({ session });
+            if (product.quantite <= 20) {
+                try {
+                    await createNotification({
+                        title: "Alerte Stock Faible",
+                        message: `Le produit ${product.codeArticle} est presque épuisé (${product.quantite} restants).`,
+                        type: "STOCK"
+                    });
+                } catch (err) {
+                    console.error("Stock Notif Error:", err);
+                }
+            }
         }
 
         demande.status = 'ACCEPTEE';
