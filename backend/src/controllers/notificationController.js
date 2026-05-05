@@ -61,21 +61,23 @@ exports.markAllAsRead = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-exports.deleteNotification = async (req, res) => {
+exports.deleteAllNotif = async (req, res) => {
   try {
-    const notif = await Notification.findById(req.params.id);
+    let filter = {};
 
-    if (!notif) {
-      return res.status(404).json({ message: "Notification non trouvée" });
+    if (req.user.role !== 'administrateur') {
+      filter = { user: req.user._id };
     }
 
-    if (notif.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Accès refusé" });
-    }
+    const result = await Notification.deleteMany(filter);
 
-    await notif.deleteOne();
-
-    res.json({ success: true });
+    res.json({ 
+      success: true, 
+      message: req.user.role === 'administrateur' 
+        ? "Toutes les notifications du système ont été supprimées" 
+        : "Vos notifications ont été supprimées",
+      deletedCount: result.deletedCount 
+    });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

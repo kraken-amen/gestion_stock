@@ -4,31 +4,23 @@ import Demande from '../models/Demande.js';
 import Commande from '../models/Commande.js';
 import StockMovement from '../models/Movements.js';
 import User from '../models/User.js';
+import Settings from '../models/Settings.js';
 // KPI Stats (Total Products, Stock, Alerts...)
 export const getKpiStats = async (req, res) => {
   try {
+    const settings = await Settings.findOne({ user: req.user._id });
+    const minLimit = settings?.business?.stockMin || 10; 
 
-    const [totalProducts, demandesCount, commandesCount, totalUser] = await Promise.all([
+    const [totalProducts, demandesCount, commandesCount, totalUser, totalStockAgg, lowStockProducts] = await Promise.all([
       Product.countDocuments(),
       Demande.countDocuments(),
       Commande.countDocuments(),
-      User.countDocuments()
+      User.countDocuments(),
+      Product.aggregate([
+        { $group: { _id: null, total: { $sum: "$quantite" } } }
+      ]),
+      Product.find({ quantite: { $lte: minLimit } })
     ]);
-
-    const totalStockAgg = await Product.aggregate([
-      {
-        $group: {
-          _id: null,
-          total: {
-            $sum: "$quantite"
-          }
-        }
-      }
-    ]);
-
-    const lowStockProducts = await Product.find({
-      quantite: { $lte: 20 }
-    });
 
     res.json({
       totalProducts,
@@ -36,6 +28,7 @@ export const getKpiStats = async (req, res) => {
       demandes: demandesCount,
       commandes: commandesCount,
       users: totalUser,
+      lowStock: lowStockProducts.length,
       lowStockProducts,
     });
 
@@ -194,7 +187,9 @@ export const getTopProducts = async (req, res) => {
 // active alerts
 export const getActiveAlerts = async (req, res) => {
   try {
-    const lowStock = await Stock.find({ quantite: { $lte: 10 } })
+    const settings = await Settings.findOne({ user: req.user._id });
+    const minLimit = settings?.business?.stockMin || 10;
+    const lowStock = await Stock.find({ quantite: { $lte: minLimit } })
       .populate('product_id', 'libelle')
       .select('product_id quantite region')
       .limit(3);

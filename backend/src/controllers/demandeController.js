@@ -203,3 +203,22 @@ exports.approveRequest = async (req, res) => {
         session.endSession();
     }
 };
+exports.deleteAllDemandes = async (req, res) => {
+    try {
+        const result = await Demande.deleteMany({ 
+            status: { $ne: 'EN_ATTENTE' , $ne: 'REJETEE' ,} 
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(403).json({ 
+                message: "Aucune demande traitée à supprimer" 
+            });
+        }
+
+        res.json({ 
+            message: `${result.deletedCount} demandes traitées ont été supprimées` 
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

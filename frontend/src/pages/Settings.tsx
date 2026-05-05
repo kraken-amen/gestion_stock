@@ -1,80 +1,121 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  ArrowLeft, Bell, Shield, Globe, Sun, Moon, Trash2, Save, AlertTriangle,
-  Loader2
+  ArrowLeft, Shield, Globe, Sun, Moon, Trash2, Save, AlertTriangle, Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getSettings, updateSettings } from "../services/settingsService";
+import { useToast } from "../context/ToastContext";
+import {
+  changePassword,
+  getSettings,
+  updateSettings,
+  deleteAllDemandes,
+  deleteAllNotif
+} from "../services/settingsService";
+
+interface SETTINGS {
+  notifications: {
+    demande: boolean;
+  };
+  business: {
+    stockMin: number;
+  };
+  _id: string;
+  user: {
+    _id: string;
+    email: string;
+  };
+}
 
 export default function SettingsPage() {
   const navigate = useNavigate();
 
-  // State Management
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [language, setLanguage] = useState("fr");
   const [darkMode, setDarkMode] = useState(true);
-  const [emailNotif, setEmailNotif] = useState(true);  
-  const [stockThreshold, setStockThreshold] = useState(20);
-
-  const [settings, setSettings] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false); 
+  const [emailNotif, setEmailNotif] = useState(true);
+  const [stockThreshold, setStockThreshold] = useState(10);
+  const [settings, setSettings] = useState<SETTINGS | null>(null);
+  const [saving, setSaving] = useState(false);
+  
+  const { addToast } = useToast();
+  
 
   useEffect(() => {
-  const fetchSettings = async () => {
-    try {
-      const res = await getSettings();
-      
-      if (res && res.data) {
-        const data = res.data;
-        setSettings(data);
-        if (data.business) {
-          setStockThreshold(data.business.stockMin ?? 10); 
+    const fetchSettings = async () => {
+      try {
+        const data: SETTINGS = await getSettings();
+        if (data) {
+          setSettings(data);
+          setStockThreshold(data?.business?.stockMin ?? 10);
+          setEmailNotif(data?.notifications?.demande ?? true);
         }
-        
-        if (data.notifications) {
-          setEmailNotif(data.notifications.demande ?? true);
-        }
+      } catch (err) {
+        addToast("Impossible de charger les paramètres", "error");
       }
-    } catch (err) {
-      console.error("Erreur Fetch Settings:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  fetchSettings();
-}, []);
+    };
+    fetchSettings();
+  }, []);
+
   const handleSave = async () => {
     try {
+      if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
+        addToast("Veuillez remplir les deux champs du mot de passe", "error");
+        return;
+      }
+
+      setSaving(true);
       const updatedData = {
-        notifications: { 
-          demande: emailNotif,
-        },
-        business: { 
-          stockMin: stockThreshold 
-        }
+        notifications: { demande: emailNotif },
+        business: { stockMin: stockThreshold }
       };
+
       await updateSettings(updatedData);
-      alert("Paramètres enregistrés !");
-    } catch (err) {
-      alert("Erreur lors de l'enregistrement");
+
+      if (currentPassword && newPassword) {
+        await changePassword({ currentPassword, newPassword });
+        setCurrentPassword("");
+        setNewPassword("");
+      }
+
+      addToast("Paramètres enregistrés avec succès !", "success");
+    } catch (err: any) {
+      addToast(err?.response?.data?.message || "Une erreur est survenue", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
+  const handleDeleteDemandes = async () => {
+    if (!window.confirm("Supprimer toutes les demandes traitées ?")) return;
+    try {
+      await deleteAllDemandes();
+      addToast("Demandes supprimées", "success");
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      addToast("Erreur de suppression", "error");
+    }
+  };
+
+  const handleDeleteNotif = async () => {
+    if (!window.confirm("Supprimer toutes les notifications ?")) return;
+    try {
+      await deleteAllNotif();
+      addToast("Notifications vidées", "success");
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      addToast("Erreur de suppression", "error");
+    }
+  };
   return (
   <div className="min-h-screen relative font-sans text-white overflow-x-hidden">
-    {/* 🔥 Background Fixed */}
     <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900" />
-
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto px-4 py-8 space-y-8"
     >
-      {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -90,7 +131,6 @@ export default function SettingsPage() {
             <p className="text-white/40 text-sm font-medium">Gestion globale du système</p>
           </div>
         </div>
-        
         <button 
           onClick={handleSave} 
           disabled={saving}
@@ -155,10 +195,6 @@ export default function SettingsPage() {
 
         {/* ================= NOTIFS & APPEARANCE ================= */}
         <div className="space-y-6">
-          <Section title="Préférences Notifications" icon={<Bell size={18} className="text-purple-400" />}>
-            <Toggle label="Notifications par Email" value={emailNotif} onChange={setEmailNotif} />
-          </Section>
-
           <Section title="Interface & Langue" icon={<Globe size={18} className="text-emerald-400" />}>
             <div className="flex justify-between items-center bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
               <div className="flex items-center gap-3">
@@ -188,8 +224,11 @@ export default function SettingsPage() {
               <Trash2 size={18} />
               Maintenance & Risques
             </div>
-            <button className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]">
+            <button  onClick={handleDeleteDemandes} className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]">
               SUPPRIMER LES DEMANDES ACCEPTEES
+            </button>
+            <button  onClick={handleDeleteNotif} className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]">
+              SUPPRIMER LES NOTIFICATIONS
             </button>
           </div>
         </div>
@@ -233,15 +272,6 @@ function Input({ label, ...props }: any) {
         {...props}
         className="w-full px-4 py-3.5 bg-[#0f172a]/40 border border-white/5 rounded-xl focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all text-sm placeholder:text-white/20"
       />
-    </div>
-  );
-}
-
-function Toggle({ label, value, onChange }: any) {
-  return (
-    <div className="flex justify-between items-center bg-white/2 border border-white/5 p-4 rounded-xl hover:bg-white/5 transition-colors group">
-      <p className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">{label}</p>
-      <ToggleSimple value={value} onChange={onChange} />
     </div>
   );
 }

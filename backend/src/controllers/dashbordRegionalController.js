@@ -1,8 +1,10 @@
 import Stock from '../models/Stock.js';
-
+import Settings from '../models/Settings.js';
 export const getRegionKPIs = async (req, res) => {
     try {
         const { regionName } = req.params;
+        const settings = await Settings.findOne({ user: req.user._id });
+        const minLimit = settings?.business?.stockMin || 10;
         const kpis = await Stock.aggregate([
             { $match: { region: regionName } },
             {
@@ -11,7 +13,7 @@ export const getRegionKPIs = async (req, res) => {
                     totalProduits: { $count: {} },
                     stockGlobal: { $sum: "$quantite" },
                     stockFaible: {
-                        $sum: { $cond: [{ $lt: ["$quantite", 20] }, 1, 0] }
+                        $sum: { $cond: [{ $lt: ["$quantite", minLimit] }, 1, 0] }
                     },
                     demandesAttente: {
                         $sum: { $cond: [{ $eq: ["$enregisted", false] }, 1, 0] }
@@ -59,13 +61,15 @@ export const getRegionChartData = async (req, res) => {
 };
 
 export const getRegionAlerts = async (req, res) => {
+    const settings = await Settings.findOne({ user: req.user._id });
+    const minLimit = settings?.business?.stockMin || 10;
     try {
         const { regionName } = req.params;
         const alerts = await Stock.aggregate([
             { 
                 $match: { 
                     region: regionName, 
-                    quantite: { $lte: 20 }
+                    quantite: { $lte: minLimit }
                 } 
             },
             {

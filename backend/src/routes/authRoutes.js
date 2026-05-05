@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { login, verifyCode, createUserByAdmin,
     getAllUsers, updateUser, deleteUser,
-    toggleUserStatus, resendOtp, getUserById } = require("../controllers/authController");
+    toggleUserStatus, resendOtp, getUserById, changePassword } = require("../controllers/authController");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 //us3
 router.post("/create-user", protect, authorizeRoles("administrateur"), createUserByAdmin);
@@ -22,4 +22,6 @@ router.patch("/toggle-status/:id", protect, authorizeRoles("administrateur"), to
 router.post("/resend-otp", resendOtp);
 //us3
 router.delete("/delete-user/:id", protect, authorizeRoles("administrateur"), deleteUser);
+//us3
+router.put("/change-password", protect, changePassword);
 module.exports = router;

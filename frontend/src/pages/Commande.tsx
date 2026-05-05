@@ -149,173 +149,173 @@ export default function CommandePage() {
                             </div>
                         ))}
                     </div>
-                </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div className="md:col-span-2 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                            <input
-                                type="text"
-                                placeholder="Rechercher par ID Demande ou statut..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
-                            />
-                        </div>
-
-                        <div className="relative">
-                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
-                            >
-                                <option value="all" className="bg-slate-900">Tous les statuts</option>
-                                <option value="EN_PREPARATION" className="bg-slate-900">En Préparation</option>
-                                <option value="EXPEDIEE" className="bg-slate-900">Expédiée</option>
-                                <option value="LIVREE" className="bg-slate-900">Livrée</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
-                        {loading ? (
-                            <div className="py-20 flex flex-col items-center gap-4 text-white/50">
-                                <Loader2 className="animate-spin" size={40} />
-                                <p>Chargement des commandes...</p>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            <div className="md:col-span-2 relative">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                                <input
+                                    type="text"
+                                    placeholder="Rechercher par ID Demande ou statut..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
+                                />
                             </div>
-                        ) : (
-                            <table className="w-full text-left min-w-[700px]">
-                                <thead>
-                                    <tr className="bg-white/5 border-b border-white/10">
-                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">commande/Qté</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
-                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
-                                        {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur" || JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock") && (
-                                            <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
-                                        )}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {filteredCommandes.map((commande) => (
-                                        <tr key={commande._id} className="hover:bg-white/5 transition-colors group cursor-pointer"
-                                            onClick={() => { setIsModalOpenView(true); setSelectedCommande(commande); }}
-                                        >
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getdemande(commande.demande_id)}`}>
-                                                        <ClipboardList size={18} />
-                                                    </div>
-                                                    <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
-                                                        {commande.items?.slice(0, 2).map((item, index) => (
-                                                            <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
-                                                                <Box size={10} />
-                                                                <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
-                                                                    #{item?.product_id?.codeArticle}
-                                                                </span>
-                                                                <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
-                                                                    / {item?.quantite} UNITÉS
-                                                                </span>
-                                                            </div>
-                                                        ))}
-                                                        {commande.items?.length > 2 && (
-                                                            <span className="text-white/40 text-xs font-bold mt-1">
-                                                                ... et {commande.items.length - 2} autres
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-emerald-400 text-base font-black tracking-tight">
-                                                        {new Intl.NumberFormat('fr-TN', {
-                                                            minimumFractionDigits: 3
-                                                        }).format(commande.items?.reduce((total, item) =>
-                                                            total + (item.quantite * (item.product_id?.prix || 0)), 0)
-                                                        )}
-                                                        <span className="ml-1 text-xs font-medium text-emerald-500/70">DT</span>
-                                                    </span>
-                                                    <span className="text-white/30 text-[10px] uppercase tracking-widest mt-0.5">Total Net</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-white/80 text-sm font-bold">{commande.region}</span>
-                                                    <span className="text-white/50 text-xs flex items-center gap-1">
-                                                        <Clock size={12} /> {commande.createdAt ? new Date(commande.createdAt).toLocaleDateString() : '-'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap flex items-center gap-2 w-fit ${getStatusStyles(commande.status)}`}>
-                                                    {commande.status === 'EN_PREPARATION' && <Loader2 size={12} className="animate-spin" />}
-                                                    {commande.status === 'EXPEDIEE' && <Truck size={12} />}
-                                                    {commande.status === 'LIVREE' && <CheckCircle size={12} />}
-                                                    {commande.status.replace('_', ' ')}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    {JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock" && commande.status === "EXPEDIEE" && (
-                                                        <div className="flex flex-row items-center gap-2">
-                                                            <button
-                                                                onClick={(e) => { handleLivrer(commande._id), e.stopPropagation() }}
-                                                                className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 transition-all"
-                                                                title="livrer"
-                                                            >
-                                                                <CheckCircle size={16} />
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                    {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                        <div className="flex flex-row items-center gap-2">
-                                                            {commande.status === "EN_PREPARATION" && (
-                                                                <button
-                                                                    onClick={(e) => { handleExpedier(commande._id), e.stopPropagation(); }}
-                                                                    className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
 
-                                                                    title="expedier"
-                                                                >
-                                                                    <Truck size={16} />
-                                                                </button>
-                                                            )}
-                                                            {/* EDIT BUTTON */}
-                                                            {commande.status === "EN_PREPARATION" && !commande.demande_id && (
-                                                                <button
-                                                                    onClick={(e) => { setSelectedCommande(commande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
-                                                                    className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 transition-all"
-                                                                    title="Modifier"
-                                                                >
-                                                                    <Pencil size={16} />
-                                                                </button>
-                                                            )}
-                                                            {/* DELETE BUTTON */}
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    openDeleteModal(commande);
-                                                                }}
-                                                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
+                            <div className="relative">
+                                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
+                                >
+                                    <option value="all" className="bg-slate-900">Tous les statuts</option>
+                                    <option value="EN_PREPARATION" className="bg-slate-900">En Préparation</option>
+                                    <option value="EXPEDIEE" className="bg-slate-900">Expédiée</option>
+                                    <option value="LIVREE" className="bg-slate-900">Livrée</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
+                            {loading ? (
+                                <div className="py-20 flex flex-col items-center gap-4 text-white/50">
+                                    <Loader2 className="animate-spin" size={40} />
+                                    <p>Chargement des commandes...</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left min-w-[700px]">
+                                    <thead>
+                                        <tr className="bg-white/5 border-b border-white/10">
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">commande/Qté</th>
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
+                                            {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur" || JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock") && (
+                                                <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                                            )}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                        {!loading && filteredCommandes.length === 0 && (
-                            <div className="py-20 text-center text-white/40">
-                                <ClipboardList className="mx-auto mb-4 opacity-20" size={60} />
-                                <p>Aucune commande trouvée.</p>
-                            </div>
-                        )}
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {filteredCommandes.map((commande) => (
+                                            <tr key={commande._id} className="hover:bg-white/5 transition-colors group cursor-pointer"
+                                                onClick={() => { setIsModalOpenView(true); setSelectedCommande(commande); }}
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getdemande(commande.demande_id)}`}>
+                                                            <ClipboardList size={18} />
+                                                        </div>
+                                                        <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
+                                                            {commande.items?.slice(0, 2).map((item, index) => (
+                                                                <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
+                                                                    <Box size={10} />
+                                                                    <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
+                                                                        #{item?.product_id?.codeArticle}
+                                                                    </span>
+                                                                    <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
+                                                                        / {item?.quantite} UNITÉS
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                            {commande.items?.length > 2 && (
+                                                                <span className="text-white/40 text-xs font-bold mt-1">
+                                                                    ... et {commande.items.length - 2} autres
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-emerald-400 text-base font-black tracking-tight">
+                                                            {new Intl.NumberFormat('fr-TN', {
+                                                                minimumFractionDigits: 3
+                                                            }).format(commande.items?.reduce((total, item) =>
+                                                                total + (item.quantite * (item.product_id?.prix || 0)), 0)
+                                                            )}
+                                                            <span className="ml-1 text-xs font-medium text-emerald-500/70">DT</span>
+                                                        </span>
+                                                        <span className="text-white/30 text-[10px] uppercase tracking-widest mt-0.5">Total Net</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white/80 text-sm font-bold">{commande.region}</span>
+                                                        <span className="text-white/50 text-xs flex items-center gap-1">
+                                                            <Clock size={12} /> {commande.createdAt ? new Date(commande.createdAt).toLocaleDateString() : '-'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap flex items-center gap-2 w-fit ${getStatusStyles(commande.status)}`}>
+                                                        {commande.status === 'EN_PREPARATION' && <Loader2 size={12} className="animate-spin" />}
+                                                        {commande.status === 'EXPEDIEE' && <Truck size={12} />}
+                                                        {commande.status === 'LIVREE' && <CheckCircle size={12} />}
+                                                        {commande.status.replace('_', ' ')}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        {JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock" && commande.status === "EXPEDIEE" && (
+                                                            <div className="flex flex-row items-center gap-2">
+                                                                <button
+                                                                    onClick={(e) => { handleLivrer(commande._id), e.stopPropagation() }}
+                                                                    className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 transition-all"
+                                                                    title="livrer"
+                                                                >
+                                                                    <CheckCircle size={16} />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                        {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                                            <div className="flex flex-row items-center gap-2">
+                                                                {commande.status === "EN_PREPARATION" && (
+                                                                    <button
+                                                                        onClick={(e) => { handleExpedier(commande._id), e.stopPropagation(); }}
+                                                                        className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/40 transition-all"
+
+                                                                        title="expedier"
+                                                                    >
+                                                                        <Truck size={16} />
+                                                                    </button>
+                                                                )}
+                                                                {/* EDIT BUTTON */}
+                                                                {commande.status === "EN_PREPARATION" && !commande.demande_id && (
+                                                                    <button
+                                                                        onClick={(e) => { setSelectedCommande(commande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
+                                                                        className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 transition-all"
+                                                                        title="Modifier"
+                                                                    >
+                                                                        <Pencil size={16} />
+                                                                    </button>
+                                                                )}
+                                                                {/* DELETE BUTTON */}
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        openDeleteModal(commande);
+                                                                    }}
+                                                                    className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                            {!loading && filteredCommandes.length === 0 && (
+                                <div className="py-20 text-center text-white/40">
+                                    <ClipboardList className="mx-auto mb-4 opacity-20" size={60} />
+                                    <p>Aucune commande trouvée.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
