@@ -11,7 +11,7 @@ const SettingsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-    unique: true
+    unique:  true
   }
 }, { timestamps: true });
 
