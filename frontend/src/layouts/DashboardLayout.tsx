@@ -204,16 +204,16 @@ const DashboardLayout = () => {
 
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 scrollbar-none">
           <SectionLabel>Principal</SectionLabel>
-          <NavItem icon={<BarChart3 size={15} />} label="Tableau de Bord" to="/dashboard" />
+          <NavItem icon={<BarChart3 size={15} />} label="Tableau de Bord"to="/dashboard" />
 
-          <NavItem icon={<Package size={15} />}   label="Produits"         to="/products" />
-          <NavItem icon={<Warehouse size={15} />} label="Stocks"           to="/map"       badge={3} badgeVariant="amber" />
+          <NavItem icon={<Package size={15} />} label="Produits"to="/products" />
+          <NavItem icon={<Warehouse size={15} />} label="Stocks"to="/map"/>
 
           <SectionLabel>Opérations</SectionLabel>
           <PermissionGate role={currentRole} permission="VIEW_DEMANDE">
-            <NavItem icon={<FileText size={15} />} label="Demandes"  to="/demandes" badge={7} badgeVariant="red" />
+            <NavItem icon={<FileText size={15} />} label="Demandes"to="/demandes"/>
           </PermissionGate>
-          <NavItem icon={<ShoppingCart size={15} />} label="Commandes" to="/commandes" />
+          <NavItem icon={<ShoppingCart size={15} />} label="Commandes"to="/commandes" />
 
           <SectionLabel>Admin</SectionLabel>
           <PermissionGate role={currentRole} permission="MANAGE_USERS">

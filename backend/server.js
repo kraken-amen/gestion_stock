@@ -11,6 +11,7 @@ const commandeRoutes = require("./src/routes/commandeRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const dashregionRoutes = require("./src/routes/dashregionRoutes");
 const notificationsRoutes = require("./src/routes/notificationRoutes");
+const settingsRoutes = require("./src/routes/settingsRoutes");
 
 dotenv.config();
 
@@ -48,6 +49,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/dash", dashregionRoutes)
 // Notification Routes
 app.use("/api/notif", notificationsRoutes);
+// Settings Routes
+app.use("/api/settings", settingsRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

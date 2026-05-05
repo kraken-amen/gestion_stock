@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Bell, CheckCheck, Info } from "lucide-react";
+import { Bell, CheckCheck,Package,ShoppingCart,FileText} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from "../services/notifService";
@@ -17,7 +17,7 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate(); // 2. initialize navigate
+  const navigate = useNavigate();
 
   const fetchNotifs = async () => {
     try {
@@ -27,8 +27,6 @@ export default function NotificationBell() {
       console.error("Notif error:", err);
     }
   };
-
-  // Click Outside Logic
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -126,11 +124,15 @@ export default function NotificationBell() {
                       n.isRead ? 'opacity-60' : 'bg-blue-500/5'
                     } hover:bg-white/5`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                      n.type === 'STOCK' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'
-                    }`}>
-                      <Info size={16} />
-                    </div>
+                    {n.type === 'STOCK' && (<div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-red-500/20 text-red-400">
+                      <Package size={16} />
+                    </div>)}
+                    {n.type === 'COMMANDE' && (<div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-blue-500/20 text-blue-400">
+                      <ShoppingCart size={16} />
+                    </div>)}
+                    {n.type === 'DEMANDE' && (<div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-green-500/20 text-green-400">
+                      <FileText size={16} />
+                    </div>)}
                     
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-1">

@@ -179,7 +179,7 @@ exports.updateUser = async (req, res) => {
     if (email) updateData.email = email;
     if (role) {
       updateData.role = role;
-      if (role === "responsable region") {
+      if (role !== "administrateur") {
         if (!region) {
           return res.status(400).json({ message: "Region est obligatoire pour responsable region" });
         }
