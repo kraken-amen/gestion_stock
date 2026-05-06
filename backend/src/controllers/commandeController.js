@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const Movement = require('../models/Movements.js');
 const Settings = require('../models/Settings.js');
 const createNotification = require('../utils/createNotification');
+const User = require("../models/User");
 exports.getCommandes = async (req, res) => {
     try {
         const commandes = await Commande.find()
@@ -124,8 +125,13 @@ exports.deleteCommande = async (req, res) => {
 };
 exports.expedierCommande = async (req, res) => {
     try {
-        const commande = await Commande.findById(req.params.id).populate('demande_id');
-
+        const commande = await Commande.findById(req.params.id)
+            .populate({
+                path: 'demande_id',
+                populate: {
+                    path: 'user_id'
+                }
+            });
         if (!commande) {
             return res.status(404).json({ message: "Commande non trouvée" });
         }
@@ -134,27 +140,32 @@ exports.expedierCommande = async (req, res) => {
         }
         commande.status = 'EXPEDIEE';
         await commande.save();
-        const recipientId = commande.demande_id?.user_id.email;
-        if (commande.items && commande.items.length > 0 && recipientId) {
+        let recipientId = commande.demande_id?.user_id?._id;
+        if (!recipientId) {
+            const admin = await User.findOne({ role: "administrateur" });
+            recipientId = admin?._id;
+        }
+        if (commande.items?.length > 0 && recipientId) {
             const movements = commande.items.map(item => ({
                 commande_id: commande._id,
                 product_id: item.product_id,
-                from: req.user?._id, 
+                from: req.user?._id,
                 to: recipientId,
                 region: commande.region,
                 quantite: item.quantite,
                 dateMovement: new Date()
             }));
+
             await Movement.insertMany(movements);
         } else {
-            console.warn("Mouvement non enregistré: user_id ou items");
+            console.warn("Mouvement non enregistré");
         }
-        res.json(commande);
+    res.json(commande);
 
-    } catch (error) {
-        console.error("Erreur détaillée:", error);
-        res.status(500).json({ message: "Erreur Serveur: " + error.message });
-    }
+} catch (error) {
+    console.error("Erreur détaillée:", error);
+    res.status(500).json({ message: "Erreur Serveur: " + error.message });
+}
 };
 exports.livreeCommande = async (req, res) => {
     const session = await mongoose.startSession();

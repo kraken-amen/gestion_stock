@@ -11,7 +11,6 @@ const MovementSchema = new mongoose.Schema({
         ref: "Product",
         required: true
     },
-
     from: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -20,7 +19,7 @@ const MovementSchema = new mongoose.Schema({
     to: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
+        required: false
     },
     region: {
         type: String,
@@ -31,8 +30,6 @@ const MovementSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-
-
     dateMovement: {
         type: Date,
         default: Date.now
