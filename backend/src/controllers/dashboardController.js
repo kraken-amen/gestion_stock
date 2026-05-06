@@ -188,7 +188,7 @@ export const getTopProducts = async (req, res) => {
 export const getActiveAlerts = async (req, res) => {
   try {
     const settings = await Settings.findOne({ user: req.user._id });
-    const minLimit = settings?.business?.stockMin || 10;
+    const minLimit = settings?.business?.stockMin;
     const lowStock = await Stock.find({ quantite: { $lte: minLimit } })
       .populate('product_id', 'libelle')
       .select('product_id quantite region')

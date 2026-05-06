@@ -3,8 +3,12 @@ const Demande = require('../models/Demande');
 const Product = require('../models/Product');
 const createNotification = require('../utils/createNotification');
 const mongoose = require('mongoose');
+const Settings = require('../models/Settings.js');
 
 exports.createDemande = async (req, res) => {
+    if (req.user.role !== "responsable region") {
+        return res.status(403).json({ message: "Action interdite pour ce rôle" });
+    }
     try {
         const userId = req.user._id;
         const { items, description } = req.body;
@@ -178,7 +182,9 @@ exports.approveRequest = async (req, res) => {
             }
             product.quantite -= item.quantite;
             await product.save({ session });
-            if (product.quantite <= 20) {
+            const settings = await Settings.findOne({ user: req.user._id });
+            const minLimit = settings?.business?.stockMin;
+            if (product.quantite <= minLimit) {
                 try {
                     await createNotification({
                         title: "Alerte Stock Faible",
@@ -205,18 +211,18 @@ exports.approveRequest = async (req, res) => {
 };
 exports.deleteAllDemandes = async (req, res) => {
     try {
-        const result = await Demande.deleteMany({ 
-            status: { $ne: 'EN_ATTENTE' , $ne: 'REJETEE' ,} 
+        const result = await Demande.deleteMany({
+            status: 'ACCEPTEE'
         });
 
         if (result.deletedCount === 0) {
-            return res.status(403).json({ 
-                message: "Aucune demande traitée à supprimer" 
+            return res.status(404).json({
+                message: "Aucune demande acceptée à supprimer"
             });
         }
 
-        res.json({ 
-            message: `${result.deletedCount} demandes traitées ont été supprimées` 
+        res.json({
+            message: `${result.deletedCount} demandes acceptées ont été supprimées`
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -2,8 +2,9 @@ const Commande = require('../models/Commande');
 const Product = require('../models/Product');
 const Stock = require('../models/Stock');
 const mongoose = require('mongoose');
-const Movement = require('../models/Movements');
-
+const Movement = require('../models/Movements.js');
+const Settings = require('../models/Settings.js');
+const createNotification = require('../utils/createNotification');
 exports.getCommandes = async (req, res) => {
     try {
         const commandes = await Commande.find()
@@ -49,6 +50,20 @@ exports.createCommande = async (req, res) => {
 
             product.quantite -= item.quantite;
             await product.save({ session });
+            const settings = await Settings.findOne({ user: req.user._id });
+            console.log(settings);
+            const minLimit = settings?.business?.stockMin;
+            if (product.quantite <= minLimit) {
+                try {
+                    await createNotification({
+                        title: "Alerte Stock Faible",
+                        message: `Le produit ${product.codeArticle} est presque épuisé (${product.quantite} restants).`,
+                        type: "STOCK"
+                    });
+                } catch (err) {
+                    console.error("Stock Notif Error:", err);
+                }
+            }
         }
 
         await session.commitTransaction();
@@ -109,35 +124,36 @@ exports.deleteCommande = async (req, res) => {
 };
 exports.expedierCommande = async (req, res) => {
     try {
-        const commande = await Commande.findById(req.params.id);
+        const commande = await Commande.findById(req.params.id).populate('demande_id');
 
         if (!commande) {
             return res.status(404).json({ message: "Commande non trouvée" });
         }
-
         if (commande.status !== 'EN_PREPARATION') {
             return res.status(400).json({ message: "Commande déjà traitée" });
         }
-
         commande.status = 'EXPEDIEE';
         await commande.save();
-
-        const movements = commande.items.map(item => ({
-            commande_id: commande._id,
-            product_id: item.product_id,
-            from: req.user._id,
-            to: commande.user_id,
-            region: commande.region,
-            quantite: item.quantite,
-            dateMovement: new Date()
-        }));
-
-        await Movement.insertMany(movements);
-
+        const recipientId = commande.demande_id?.user_id.email;
+        if (commande.items && commande.items.length > 0 && recipientId) {
+            const movements = commande.items.map(item => ({
+                commande_id: commande._id,
+                product_id: item.product_id,
+                from: req.user?._id, 
+                to: recipientId,
+                region: commande.region,
+                quantite: item.quantite,
+                dateMovement: new Date()
+            }));
+            await Movement.insertMany(movements);
+        } else {
+            console.warn("Mouvement non enregistré: user_id ou items");
+        }
         res.json(commande);
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Erreur détaillée:", error);
+        res.status(500).json({ message: "Erreur Serveur: " + error.message });
     }
 };
 exports.livreeCommande = async (req, res) => {

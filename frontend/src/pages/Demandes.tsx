@@ -32,7 +32,6 @@ export default function DemandesPage() {
             navigate('/');
             return;
         }
-        console.log(otherDemandes, myDemandes);
         try {
             setLoading(true);
             const res = await getDemandes() as any;

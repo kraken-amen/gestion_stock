@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  ArrowLeft, Shield, Globe, Sun, Moon, Trash2, Save, AlertTriangle, Loader2
-} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import {
+  ArrowLeft, Shield, Trash2, Save, AlertTriangle, Loader2, Eye, EyeOff
+} from "lucide-react";
 import { useToast } from "../context/ToastContext";
+import { useConfirm } from "../context/ConfirmContext";
 import {
   changePassword,
   getSettings,
@@ -29,18 +30,17 @@ interface SETTINGS {
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-
+  const { addToast } = useToast();
+  const { showConfirm } = useConfirm();
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);  
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [language, setLanguage] = useState("fr");
-  const [darkMode, setDarkMode] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
   const [stockThreshold, setStockThreshold] = useState(10);
   const [settings, setSettings] = useState<SETTINGS | null>(null);
   const [saving, setSaving] = useState(false);
-  
-  const { addToast } = useToast();
-  
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -56,66 +56,88 @@ export default function SettingsPage() {
       }
     };
     fetchSettings();
-  }, []);
+  }, [addToast]);
 
   const handleSave = async () => {
-    try {
-      if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
-        addToast("Veuillez remplir les deux champs du mot de passe", "error");
-        return;
+  try {
+    if (newPassword && newPassword !== confirmPassword) {
+      addToast("Les mots de passe ne correspondent pas", "error");
+      return;
+    }
+    if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
+      addToast("Veuillez remplir les deux champs du mot de passe", "error");
+      return;
+    }
+
+    setSaving(true);
+
+    const updatedData = {
+      notifications: { demande: emailNotif },
+      business: { stockMin: stockThreshold }
+    };
+
+    await updateSettings(updatedData);
+
+    if (currentPassword && newPassword) {
+      await changePassword({ currentPassword, newPassword });
+      
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+
+    addToast("Paramètres enregistrés avec succès !", "success");
+  } catch (err: any) {
+    addToast(err?.response?.data?.message || "Une erreur est survenue", "error");
+  } finally {
+    setSaving(false);
+  }
+};
+
+  const handleDeleteNotifications = () => {
+    showConfirm(
+      "Supprimer les notifications ?",
+      "Toutes les notifications seront supprimées définitivement",
+      async () => {
+        try {
+          await deleteAllNotif();
+          addToast("Notifications supprimées", "success");
+          setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+          addToast("Erreur lors de la suppression", "error");
+        }
       }
+    );
+  };
 
-      setSaving(true);
-      const updatedData = {
-        notifications: { demande: emailNotif },
-        business: { stockMin: stockThreshold }
-      };
-
-      await updateSettings(updatedData);
-
-      if (currentPassword && newPassword) {
-        await changePassword({ currentPassword, newPassword });
-        setCurrentPassword("");
-        setNewPassword("");
+  const handleDeleteDemandes = () => {
+    showConfirm(
+      "Supprimer les demandes ?",
+      "Toutes les demandes acceptées seront supprimées",
+      async () => {
+        try {
+          await deleteAllDemandes();
+          addToast("Demandes supprimées", "success");
+          setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+          addToast("Erreur lors de la suppression", "error");
+        }
       }
-
-      addToast("Paramètres enregistrés avec succès !", "success");
-    } catch (err: any) {
-      addToast(err?.response?.data?.message || "Une erreur est survenue", "error");
-    } finally {
-      setSaving(false);
-    }
+    );
   };
 
-  const handleDeleteDemandes = async () => {
-    if (!window.confirm("Supprimer toutes les demandes traitées ?")) return;
-    try {
-      await deleteAllDemandes();
-      addToast("Demandes supprimées", "success");
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (err) {
-      addToast("Erreur de suppression", "error");
-    }
-  };
-
-  const handleDeleteNotif = async () => {
-    if (!window.confirm("Supprimer toutes les notifications ?")) return;
-    try {
-      await deleteAllNotif();
-      addToast("Notifications vidées", "success");
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (err) {
-      addToast("Erreur de suppression", "error");
-    }
-  };
-  return (
+ return (
   <div className="min-h-screen relative font-sans text-white overflow-x-hidden">
+    {/* Background layer */}
     <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900" />
+    
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto px-4 py-8 space-y-8"
+      // max-w-7xl bech tji wide kima t7eb w px-10 bech tkhali chwaya hsebe 3la jnab
+      className="max-w-7xl mx-auto px-6 md:px-10 py-8 space-y-8"
     >
+      {/* Header Section */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -141,33 +163,80 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        {/* ================= PROFILE & SECURITY ================= */}
+        {/* Left Column: Security */}
         <div className="space-y-6">
           <Section title="Sécurité Compte" icon={<Shield size={18} className="text-blue-400" />}>
+            {/* Email - View Only */}
             <Input 
               label="ID Utilisateur" 
-              placeholder="Chargement..." 
               value={settings?.user?.email || ""} 
-              readOnly 
+              disabled 
+              className="w-full px-4 py-3.5 bg-white/5 border border-white/5 rounded-xl text-white/40 cursor-not-allowed opacity-70"
             />
-            <div className="space-y-3 pt-2">
-              <Input
-                label="Mot de passe actuel"
-                type="password"
-                value={currentPassword}
-                onChange={(e: any) => setCurrentPassword(e.target.value)}
-              />
-              <Input
-                label="Nouveau mot de passe"
-                type="password"
-                value={newPassword}
-                onChange={(e: any) => setNewPassword(e.target.value)}
-              />
+
+            <div className="space-y-4 pt-2">
+              {/* Mot de passe actuel */}
+              <div className="relative group">
+                <Input
+                  label="Mot de passe actuel"
+                  type={showPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e: any) => setCurrentPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-[38px] text-white/20 hover:text-blue-400 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {/* Nouveau mot de passe */}
+              <div className="relative group">
+                <Input
+                  label="Nouveau mot de passe"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e: any) => setNewPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-[38px] text-white/20 hover:text-blue-400 transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {/* Confirmation Mot de passe */}
+              <div className="space-y-1">
+                <Input
+                  label="Confirmer le nouveau mot de passe"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e: any) => setConfirmPassword(e.target.value)}
+                  className={`w-full px-4 py-3.5 bg-[#0f172a]/40 border rounded-xl transition-all text-sm ${
+                    confirmPassword && newPassword !== confirmPassword 
+                    ? "border-red-500/50 focus:border-red-500 ring-1 ring-red-500/20" 
+                    : "border-white/5 focus:border-blue-500/50"
+                  }`}
+                />
+                {confirmPassword && newPassword !== confirmPassword && (
+                  <p className="text-[10px] text-red-400 font-medium px-1 flex items-center gap-1">
+                    <AlertTriangle size={10} /> Les mots de passe ne correspondent pas.
+                  </p>
+                )}
+              </div>
             </div>
           </Section>
+        </div>
 
+        {/* Right Column: Stock & Maintenance */}
+        <div className="space-y-6">
           <Section title="Configuration Stock" icon={<AlertTriangle size={18} className="text-amber-400" />}>
              <div className="space-y-2">
                <label className="text-[11px] uppercase tracking-wider text-white/40 font-bold">
@@ -180,7 +249,7 @@ export default function SettingsPage() {
                   max="200" 
                   value={stockThreshold} 
                   onChange={(e) => setStockThreshold(parseInt(e.target.value))}
-                  className="flex-1 accent-blue-500 cursor-pointer"
+                  className="flex-1 accent-blue-500 cursor-pointer h-1.5 bg-white/10 rounded-lg appearance-none"
                  />
                  <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-lg font-mono font-bold border border-blue-500/20 min-w-[45px] text-center">
                    {stockThreshold}
@@ -191,51 +260,29 @@ export default function SettingsPage() {
                </p>
              </div>
           </Section>
-        </div>
-
-        {/* ================= NOTIFS & APPEARANCE ================= */}
-        <div className="space-y-6">
-          <Section title="Interface & Langue" icon={<Globe size={18} className="text-emerald-400" />}>
-            <div className="flex justify-between items-center bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors">
-              <div className="flex items-center gap-3">
-                {darkMode ? <Moon size={18} className="text-blue-400" /> : <Sun size={18} className="text-amber-400" />}
-                <p className="text-sm font-medium">Mode Sombre</p>
-              </div>
-              <ToggleSimple value={darkMode} onChange={setDarkMode} />
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <label className="text-[11px] uppercase tracking-wider text-white/40 font-bold px-1">Langue de l'interface</label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full px-4 py-3 bg-[#0f172a]/50 border border-white/10 rounded-xl focus:outline-none focus:border-blue-500 transition-colors cursor-pointer appearance-none text-sm"
-              >
-                <option value="fr">Français (Standard)</option>
-                <option value="en">English (US)</option>
-                <option value="ar">العربية (TN)</option>
-              </select>
-            </div>
-          </Section>
-
-          {/* ================= DANGER ZONE ================= */}
-          <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 space-y-4 shadow-xl shadow-red-950/10">
-            <div className="flex items-center gap-2 text-red-400 font-bold text-sm uppercase tracking-tighter">
+          
+          <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-5 space-y-4 shadow-xl shadow-red-950/10">
+            <div className="flex items-center gap-2 text-red-400 font-bold text-sm uppercase tracking-tighter opacity-80">
               <Trash2 size={18} />
               Maintenance & Risques
             </div>
-            <button  onClick={handleDeleteDemandes} className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]">
+            <button 
+              onClick={handleDeleteDemandes} 
+              className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]"
+            >
               SUPPRIMER LES DEMANDES ACCEPTEES
             </button>
-            <button  onClick={handleDeleteNotif} className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]">
+            <button 
+              onClick={handleDeleteNotifications} 
+              className="w-full py-3 rounded-xl border border-red-500/20 hover:bg-red-500/10 text-red-400 text-sm font-bold transition-all active:scale-[0.98]"
+            >
               SUPPRIMER LES NOTIFICATIONS
             </button>
           </div>
         </div>
-
       </div>
 
-      {/* MOBILE SAVE BUTTON */}
+      {/* Mobile Save Button */}
       <button 
         onClick={handleSave} 
         disabled={saving}
@@ -244,10 +291,11 @@ export default function SettingsPage() {
         {saving && <Loader2 size={20} className="animate-spin" />}
         ENREGISTRER TOUT
       </button>
-
     </motion.div>
   </div>
-);}
+);
+}
+
 function Section({ title, icon, children }: any) {
   return (
     <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 space-y-5 shadow-inner">
@@ -273,22 +321,5 @@ function Input({ label, ...props }: any) {
         className="w-full px-4 py-3.5 bg-[#0f172a]/40 border border-white/5 rounded-xl focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all text-sm placeholder:text-white/20"
       />
     </div>
-  );
-}
-
-function ToggleSimple({ value, onChange }: any) {
-  return (
-    <button
-      onClick={() => onChange(!value)}
-      className={`w-11 h-6 rounded-full relative transition-all duration-300 ${
-        value ? "bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.4)]" : "bg-white/10"
-      }`}
-    >
-      <div
-        className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-lg ${
-          value ? "left-6" : "left-1"
-        }`}
-      />
-    </button>
   );
 }
