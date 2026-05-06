@@ -35,7 +35,7 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUserUpda
             setFormData({
                 email: user.email || '',
                 password: '', // Le mot de passe reste vide par défaut (sécurité)
-                role: user.role || 'utilisateur',
+                role: user.role,
                 region: user.region || ''
             });
         }
@@ -154,11 +154,10 @@ const UserModelUpdate = ({ isOpen, onClose, onUserUpdated, user }: PropsUserUpda
                     {(formData.role === "responsable region" || formData.role === "gestionnaire de stock" || formData.role === "utilisateur") && (
                         <div className="mb-4">
                             <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
-
                             <Select
                                 options={Region}
                                 placeholder="Choisir une region"
-                                value={formData.region}
+                                value={Region.find(option => option.value === formData.region) || null}
                                 isSearchable={true}
                                 classNamePrefix="my-react-select"
                                 styles={customSelectStyles}

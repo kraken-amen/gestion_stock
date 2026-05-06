@@ -150,11 +150,11 @@ const UserModelCreate = ({ isOpen, onClose, onUserCreated }: PropsUser) => {
                                     <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
                                     <option value="responsable region" className="bg-slate-900">Responsable Region</option>
                                     <option value="administrateur" className="bg-slate-900">Administrateur</option>
-                                    <option value="Gestionnaire de Stock" className="bg-slate-900">Gestionnaire de Stock</option>
+                                    <option value="gestionnaire de stock" className="bg-slate-900">Gestionnaire de Stock</option>
                                 </select>
                             </div>
                             {/* Region */}
-                            {(formData.role === "responsable region" || formData.role === "Gestionnaire de Stock" || formData.role === "utilisateur") && (
+                            {(formData.role === "responsable region" || formData.role === "gestionnaire de stock" || formData.role === "utilisateur") && (
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold text-white/90 mb-2">Region</label>
 

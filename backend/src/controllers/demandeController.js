@@ -64,41 +64,23 @@ exports.getAllDemandes = async (req, res) => {
 };
 exports.updateDemande = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const demandeId = req.params.id;
         const { items, description } = req.body;
 
-        let existingDemande = await Demande.findOne({
-            user_id: userId,
-            status: "EN_ATTENTE"
-        });
-
-        if (existingDemande) {
-            items.forEach(newItem => {
-                const itemIndex = existingDemande.items.findIndex(
-                    item => item.product_id.toString() === newItem.product_id.toString()
-                );
-
-                if (itemIndex > -1) {
-                    existingDemande.items[itemIndex].quantite += Number(newItem.quantite);
-                } else {
-                    existingDemande.items.push(newItem);
-                }
-            });
-
-            if (description) existingDemande.description = description;
-
-            await existingDemande.save();
-            return res.status(200).json(existingDemande);
-
-        } else {
-            const newDemande = await Demande.create({
-                user_id: userId,
-                items: items,
-                description: description || "",
-                status: "EN_ATTENTE"
-            });
-            return res.status(201).json(newDemande);
+        let existingDemande = await Demande.findById(demandeId);
+        if (!existingDemande) {
+            return res.status(404).json({ message: "Demande non trouvée" });
         }
+        if (existingDemande.status !== "EN_ATTENTE") {
+            return res.status(400).json({ message: "Impossible de modifier une demande déjà traitée" });
+        }
+        existingDemande.items = items;
+
+        if (description) existingDemande.description = description;
+
+        await existingDemande.save();
+        return res.status(200).json(existingDemande);
+
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -178,7 +160,12 @@ exports.approveRequest = async (req, res) => {
             const product = await Product.findById(item.product_id).session(session);
             if (!product) throw new Error(`Produit ${item.product_id} non trouvé`);
             if (product.quantite < item.quantite) {
-                throw new Error(`Stock insuffisant pour ${product.libelle}.`);
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(402).json({
+                    success: false,
+                    message: `Stock insuffisant pour ${product.libelle}. (Disponible: ${product.quantite})`
+                });
             }
             product.quantite -= item.quantite;
             await product.save({ session });

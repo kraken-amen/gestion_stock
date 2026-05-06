@@ -191,7 +191,7 @@ export default function CommandePage() {
                                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
                                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
                                             <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
-                                            {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur" || JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock") && (
+                                            {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur" || JSON.parse(localStorage.getItem('role') || '""') === "gestionnaire de stock") && (
                                                 <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
                                             )}
                                         </tr>
@@ -257,7 +257,7 @@ export default function CommandePage() {
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex items-center justify-center gap-2">
-                                                        {JSON.parse(localStorage.getItem('role') || '""') === "Gestionnaire de Stock" && commande.status === "EXPEDIEE" && (
+                                                        {JSON.parse(localStorage.getItem('role') || '""') === "gestionnaire de stock" && commande.status === "EXPEDIEE" && (
                                                             <div className="flex flex-row items-center gap-2">
                                                                 <button
                                                                     onClick={(e) => { handleLivrer(commande._id), e.stopPropagation() }}

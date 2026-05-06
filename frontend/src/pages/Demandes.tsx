@@ -24,8 +24,6 @@ export default function DemandesPage() {
     const userRegion = JSON.parse(localStorage.getItem('region') || '""');
     const [orderBy, setOrderBy] = useState('all');
     const { addToast } = useToast();
-    const savedUser = localStorage.getItem('user');
-    const current = savedUser ? JSON.parse(savedUser) : null;
     const fetchDemandes = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -52,14 +50,19 @@ export default function DemandesPage() {
         fetchDemandes();
     }, [navigate]);
     const handleApprove = async (id: string) => {
-        try {
-            await approveDemande(id, { region: current.region });
-            addToast("Demande approuvée", "success");
-            fetchDemandes();
-        } catch (error) {
-            console.error("Erreur approbation:", error);
+    try {
+        await approveDemande(id);
+        addToast("Demande approuvée ", "success");
+        fetchDemandes();
+    } catch (error: any) {
+        if (error.response && error.response.status === 402) {
+            addToast(error.response.data.message, "error"); 
+        } else {
+            addToast("Erreur lors de l'approbation", "error");
         }
-    };
+        console.error("Détails de l'erreur:", error.response?.data || error.message);
+    }
+};
     const handleReject = async (id: string) => {
         try {
             await rejectDemande(id);
@@ -305,7 +308,7 @@ export default function DemandesPage() {
                                                         e.stopPropagation();
                                                         openDeleteModal(demande);
                                                     }}
-                                                    className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 transition-all"
+                                                    className="p-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -437,7 +440,7 @@ export default function DemandesPage() {
                                                     className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 border border-amber-400/30 transition-all"
                                                     title="Modifier"
                                                 >
-                                                    <Edit2 size={18} />
+                                                    <Edit2 size={16} />
                                                 </button>
                                                 )}
                                                 {/* Bouton Supprimer*/}

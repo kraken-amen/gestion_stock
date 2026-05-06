@@ -79,7 +79,7 @@ export default function UsersListPage() {
     switch (role) {
       case 'administrateur': return 'bg-red-500/20 text-red-400 border border-red-400/50';
       case 'responsable region': return 'bg-amber-500/20 text-amber-400 border border-amber-400/50';
-      case 'Gestionnaire de Stock': return 'bg-green-500/20 text-green-400 border border-green-400/50';
+      case 'gestionnaire de stock': return 'bg-green-500/20 text-green-400 border border-green-400/50';
       default: return 'bg-blue-500/20 text-blue-400 border border-blue-400/50';
     }
   };
@@ -169,7 +169,7 @@ export default function UsersListPage() {
                 <option value="administrateur" className="bg-slate-900">Administrateur</option>
                 <option value="responsable region" className="bg-slate-900">Responsable Région</option>
                 <option value="utilisateur" className="bg-slate-900">Utilisateur</option>
-                <option value="Gestionnaire de Stock" className="bg-slate-900">Gestionnaire de Stock</option>
+                <option value="gestionnaire de stock" className="bg-slate-900">Gestionnaire de Stock</option>
               </select>
             </div>
             <div className="relative">
@@ -219,7 +219,7 @@ export default function UsersListPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap ${getRoleColor(user.role)}`}>
-                          {user.role === "responsable region" ? "responsable " + user.region : user.role === "Gestionnaire de Stock" ? "gestionnaire " + user.region : user.role === "utilisateur" ? "utilisateur "+ user.region : user.role}
+                          {user.role === "responsable region" ? "responsable " + user.region : user.role === "gestionnaire de stock" ? "gestionnaire " + user.region : user.role === "utilisateur" ? "utilisateur "+ user.region : user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4">

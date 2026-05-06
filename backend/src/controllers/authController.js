@@ -22,7 +22,7 @@ exports.createUserByAdmin = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      region: role === "responsable region" || role === "Gestionnaire de Stock" || role === "utilisateur" ? region : null,
+      region: role === "responsable region" || role === "gestionnaire de stock" || role === "utilisateur" ? region : null,
       isVerified: false
     });
 

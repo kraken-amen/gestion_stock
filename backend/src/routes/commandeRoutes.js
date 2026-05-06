@@ -8,5 +8,5 @@ router.post('/',authorizeRoles("administrateur"), createCommande);
 router.delete('/:id',authorizeRoles("administrateur"), deleteCommande);
 router.put('/:id',authorizeRoles("administrateur"), updateCommande);
 router.patch('/:id/expedier',authorizeRoles("administrateur"), expedierCommande);
-router.patch('/:id/livree',authorizeRoles("Gestionnaire de Stock"), livreeCommande);
+router.patch('/:id/livree',authorizeRoles("gestionnaire de stock"), livreeCommande);
 module.exports = router;

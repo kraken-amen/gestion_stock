@@ -12,14 +12,14 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["administrateur", "responsable region", "utilisateur", "Gestionnaire de Stock"],
+        enum: ["administrateur", "responsable region", "utilisateur", "gestionnaire de stock"],
         default: "utilisateur"
     },
     region: {
         type: String,
         enum: Region,
         required: function () {
-            return this.role === "responsable region" || this.role === "Gestionnaire de Stock" || this.role === "utilisateur";
+            return this.role === "responsable region" || this.role === "gestionnaire de stock" || this.role === "utilisateur";
         }
     },
     isVerified: {
