@@ -50,19 +50,19 @@ export default function DemandesPage() {
         fetchDemandes();
     }, [navigate]);
     const handleApprove = async (id: string) => {
-    try {
-        await approveDemande(id);
-        addToast("Demande approuvée ", "success");
-        fetchDemandes();
-    } catch (error: any) {
-        if (error.response && error.response.status === 402) {
-            addToast(error.response.data.message, "error"); 
-        } else {
-            addToast("Erreur lors de l'approbation", "error");
+        try {
+            await approveDemande(id);
+            addToast("Demande approuvée ", "success");
+            fetchDemandes();
+        } catch (error: any) {
+            if (error.response && error.response.status === 402) {
+                addToast(error.response.data.message, "error");
+            } else {
+                addToast("Erreur lors de l'approbation", "error");
+            }
+            console.error("Détails de l'erreur:", error.response?.data || error.message);
         }
-        console.error("Détails de l'erreur:", error.response?.data || error.message);
-    }
-};
+    };
     const handleReject = async (id: string) => {
         try {
             await rejectDemande(id);
@@ -407,44 +407,43 @@ export default function DemandesPage() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4  text-center">
-                                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${getStatusStyles(demande.status)}`}>
+                                            <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap  ${getStatusStyles(demande.status)}`}>
                                                 {getStatusLabel(demande.status)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-center gap-2">
-                                                {/* Bouton Accepter*/}
-                                                {demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                    <button
-                                                        onClick={(e) => { handleApprove(demande._id); e.stopPropagation(); }}
-                                                        title="Accepter la demande"
-                                                        className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30 transition-all"
-                                                    >
-                                                        <Check size={16} />
-                                                    </button>
-                                                )}
-                                                {/* Bouton Refuser*/}
-                                                {demande.status === 'EN_ATTENTE' && JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                    <button
-                                                        onClick={(e) => { handleReject(demande._id); e.stopPropagation(); }}
-                                                        title="Refuser la demande"
-                                                        className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30 transition-all"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                )}
-                                                {/* Bouton modifier*/}
-                                                {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
-                                                <button
-                                                    onClick={(e) => { setSelectedDemande(demande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
-                                                    className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 border border-amber-400/30 transition-all"
-                                                    title="Modifier"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                )}
-                                                {/* Bouton Supprimer*/}
-                                                {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+
+                                        {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                                            <td className="px-6 py-4 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    {/* Bouton Accepter*/}
+                                                    {demande.status === 'EN_ATTENTE' && (
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <button
+                                                                onClick={(e) => { handleApprove(demande._id); e.stopPropagation(); }}
+                                                                title="Accepter la demande"
+                                                                className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 border border-green-400/30 transition-all"
+                                                            >
+                                                                <Check size={16} />
+                                                            </button>
+                                                            {/* Bouton Refuser*/}
+                                                            <button
+                                                                onClick={(e) => { handleReject(demande._id); e.stopPropagation(); }}
+                                                                title="Refuser la demande"
+                                                                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/40 border border-red-400/30 transition-all"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                            {/* Bouton modifier*/}
+                                                            <button
+                                                                onClick={(e) => { setSelectedDemande(demande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
+                                                                className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 border border-amber-400/30 transition-all"
+                                                                title="Modifier"
+                                                            >
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                    {/* Bouton Supprimer*/}
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -454,9 +453,9 @@ export default function DemandesPage() {
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
-                                                )}
-                                            </div>
-                                        </td>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

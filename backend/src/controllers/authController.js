@@ -161,7 +161,7 @@ exports.verifyCode = async (req, res) => {
       role: user.role
     };
 
-    if (user.role === "responsable region") {
+    if (user.role === "responsable region" || user.role === "gestionnaire de stock"||user.role === "utilisateur") {
       responseData.region = user.region;
     }
 

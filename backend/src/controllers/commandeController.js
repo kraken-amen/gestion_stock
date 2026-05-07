@@ -160,12 +160,12 @@ exports.expedierCommande = async (req, res) => {
         } else {
             console.warn("Mouvement non enregistré");
         }
-    res.json(commande);
+        res.json(commande);
 
-} catch (error) {
-    console.error("Erreur détaillée:", error);
-    res.status(500).json({ message: "Erreur Serveur: " + error.message });
-}
+    } catch (error) {
+        console.error("Erreur détaillée:", error);
+        res.status(500).json({ message: "Erreur Serveur: " + error.message });
+    }
 };
 exports.livreeCommande = async (req, res) => {
     const session = await mongoose.startSession();
@@ -182,12 +182,21 @@ exports.livreeCommande = async (req, res) => {
 
         if (commande.status === 'EXPEDIEE') {
             for (let item of commande.items) {
-                await Stock.create([{
-                    product_id: item.product_id,
-                    quantite: item.quantite,
-                    region: commande.region,
-                    date: new Date()
-                }], { session });
+                await Stock.findOneAndUpdate(
+                    {
+                        product_id: item.product_id,
+                        region: commande.region
+                    },
+                    {
+                        $inc: { quantite: item.quantite },
+                        $set: { date: new Date() }
+                    },
+                    {
+                        session,
+                        upsert: true,
+                        new: true
+                    }
+                );
             }
 
             commande.status = 'LIVREE';
@@ -217,11 +226,61 @@ exports.livreeCommande = async (req, res) => {
     }
 };
 exports.updateCommande = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        const commande = await Commande.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!commande) return res.status(404).json({ message: "Commande non trouvée" });
-        res.json(commande);
+        const oldCommande = await Commande.findById(req.params.id).session(session);
+        if (!oldCommande) {
+            throw new Error("Commande non trouvée");
+        }
+        for (let oldItem of oldCommande.items) {
+            await Product.findByIdAndUpdate(
+                oldItem.product_id,
+                { $inc: { quantite: oldItem.quantite } },
+                { session }
+            );
+        }
+        const updatedCommande = await Commande.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, session }
+        );
+        const settings = await Settings.findOne({ user: req.user._id }).session(session);
+        const minLimit = settings?.business?.stockMin || 0;
+
+        for (let newItem of updatedCommande.items) {
+            const product = await Product.findById(newItem.product_id).session(session);
+
+            if (!product) {
+                throw new Error(`Produit ${newItem.product_id} non trouvé`);
+            }
+
+            if (product.quantite < newItem.quantite) {
+                throw new Error(`Stock insuffisant pour ${product.libelle} (Dispo: ${product.quantite})`);
+            }
+            product.quantite -= newItem.quantite;
+            await product.save({ session });
+            if (product.quantite <= minLimit) {
+                try {
+                    await createNotification({
+                        title: "Alerte Stock Faible",
+                        message: `Le produit ${product.codeArticle} est presque épuisé (${product.quantite} restants).`,
+                        type: "STOCK"
+                    });
+                } catch (err) {
+                    console.error("Stock Notif Error:", err);
+                }
+            }
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+        res.json(updatedCommande);
+
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         res.status(500).json({ message: error.message });
     }
 };

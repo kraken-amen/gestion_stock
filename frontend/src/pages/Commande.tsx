@@ -21,6 +21,7 @@ export default function CommandePage() {
     const [isModalOpenUpdate, setIsModalOpenUpdate] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [deleteConfig, setDeleteConfig] = useState({ id: '', confirmValue: '' });
+    const userRegion = JSON.parse(localStorage.getItem('region') || '""');
     const { addToast } = useToast();
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -79,17 +80,29 @@ export default function CommandePage() {
             console.error("Erreur suppression:", error);
         }
     };
+    const myCommandes = useMemo(() => {
+        if (!commandes || !userRegion) return [];
+
+        return commandes.filter(c =>
+            c.region === userRegion && c.status === 'EXPEDIEE'
+        );
+    }, [commandes, userRegion]);
 
     // Filter logic updated for Commande Status and Demande Reference
     const filteredCommandes = useMemo(() => {
         if (!Array.isArray(commandes)) return [];
+
         return commandes.filter(cmd => {
             const matchesStatus = filterStatus === 'all' || cmd.status === filterStatus;
-            const refId = typeof cmd.demande_id === 'object' ? cmd.demande_id?._id : cmd.demande_id;
-            const matchesSearch =
-                (refId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                (cmd.status?.toLowerCase().includes(searchTerm.toLowerCase()));
-            return matchesSearch && matchesStatus;
+            const searchLower = searchTerm.toLowerCase();
+            const matchesRegion = cmd.region?.toLowerCase().includes(searchLower);
+            const matchesProduct = cmd.items?.some(item =>
+                item.product_id?.codeArticle?.toLowerCase().includes(searchLower)
+            );
+
+            const matchesSearch = matchesRegion || matchesProduct;
+
+            return matchesStatus && matchesSearch;
         });
     }, [commandes, searchTerm, filterStatus]);
 
@@ -126,12 +139,12 @@ export default function CommandePage() {
                                 <p className="text-white/60 text-xs hidden md:block">Gestion des expéditions et livraisons</p>
                             </div>
                         </div>
-                        <button
-                            onClick={() => setIsModalOpenCreate(true)}
-                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95"
-                        >
-                            <Plus size={18} /> Nouvelle Commande
-                        </button>
+
+                        {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+                            <button onClick={() => setIsModalOpenCreate(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95">
+                                <Plus size={18} /> Nouvelle Commande
+                            </button>
+                        )}
                     </div>
                 </div>
                 <div className="max-w-7xl mx-auto px-4 py-6">
@@ -149,125 +162,179 @@ export default function CommandePage() {
                             </div>
                         ))}
                     </div>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                            <div className="md:col-span-2 relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                                <input
-                                    type="text"
-                                    placeholder="Rechercher par ID Demande ou statut..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
-                                />
-                            </div>
+                    {JSON.parse(localStorage.getItem('role') || '""') === "gestionnaire de stock" && (
+                        <div className="mb-10">
+                            <h3 className="text-white/70 text-sm font-bold mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                Mes Livraisons Régionales
+                            </h3>
 
-                            <div className="relative">
-                                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
-                                >
-                                    <option value="all" className="bg-slate-900">Tous les statuts</option>
-                                    <option value="EN_PREPARATION" className="bg-slate-900">En Préparation</option>
-                                    <option value="EXPEDIEE" className="bg-slate-900">Expédiée</option>
-                                    <option value="LIVREE" className="bg-slate-900">Livrée</option>
-                                </select>
+                            <div className="space-y-4">
+                                {myCommandes.map((commande) => {
+                                    const totalMontant = commande.items?.reduce((sum, item) =>
+                                        sum + (item.quantite * (item.product_id?.prix || 0)), 0
+                                    );
+
+                                    return (
+                                        <div key={commande._id} className="backdrop-blur-xl bg-emerald-600/10 border border-emerald-500/30 rounded-2xl p-5 md:p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+
+                                            <div className="flex items-center gap-4 min-w-[200px]">
+                                                <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-lg shadow-emerald-500/20">
+                                                    <Truck size={24} />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        {commande.items?.slice(0, 2).map((item, idx) => (
+                                                            <span key={idx} className="text-[10px] bg-white/5 px-2 py-0.5 rounded border border-white/5 text-emerald-300">
+                                                                {item.product_id?.codeArticle}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <p className="text-white/40 text-[11px] font-medium">{commande.region}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 w-full border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6">
+                                                <div>
+                                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-tighter mb-1">Date</p>
+                                                    <p className="text-xs font-semibold text-white/80">{new Date(commande.createdAt).toLocaleDateString()}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-tighter mb-1">Statut</p>
+                                                    <span className="text-[10px] font-black text-emerald-400 uppercase">{commande.status}</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-tighter mb-1">Total</p>
+                                                    <p className="text-sm font-black text-emerald-400 italic">{totalMontant?.toLocaleString()} TND</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-row items-center gap-2">
+                                                <button
+                                                    onClick={(e) => { handleLivrer(commande._id), e.stopPropagation() }}
+                                                    className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 transition-all"
+                                                    title="livrer"
+                                                >
+                                                    <CheckCircle size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
+                    )}
+                    {/* Filters Section */}
 
-                        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
-                            {loading ? (
-                                <div className="py-20 flex flex-col items-center gap-4 text-white/50">
-                                    <Loader2 className="animate-spin" size={40} />
-                                    <p>Chargement des commandes...</p>
-                                </div>
-                            ) : (
-                                <table className="w-full text-left min-w-[700px]">
-                                    <thead>
-                                        <tr className="bg-white/5 border-b border-white/10">
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">commande/Qté</th>
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
-                                            {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur" || JSON.parse(localStorage.getItem('role') || '""') === "gestionnaire de stock") && (
-                                                <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
-                                            )}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                        {filteredCommandes.map((commande) => (
-                                            <tr key={commande._id} className="hover:bg-white/5 transition-colors group cursor-pointer"
-                                                onClick={() => { setIsModalOpenView(true); setSelectedCommande(commande); }}
-                                            >
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getdemande(commande.demande_id)}`}>
-                                                            <ClipboardList size={18} />
-                                                        </div>
-                                                        <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
-                                                            {commande.items?.slice(0, 2).map((item, index) => (
-                                                                <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
-                                                                    <Box size={10} />
-                                                                    <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
-                                                                        #{item?.product_id?.codeArticle}
-                                                                    </span>
-                                                                    <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
-                                                                        / {item?.quantite} UNITÉS
-                                                                    </span>
-                                                                </div>
-                                                            ))}
-                                                            {commande.items?.length > 2 && (
-                                                                <span className="text-white/40 text-xs font-bold mt-1">
-                                                                    ... et {commande.items.length - 2} autres
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div className="md:col-span-2 relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                            <input
+                                type="text"
+                                placeholder="Rechercher par ID Demande ou statut..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:bg-white/10 focus:outline-none text-white placeholder-white/40 font-medium transition-all"
+                            />
+                        </div>
+
+                        <div className="relative">
+                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-white/5 backdrop-blur-sm border-2 border-white/20 focus:border-white/50 focus:outline-none text-white appearance-none cursor-pointer font-medium transition-all"
+                            >
+                                <option value="all" className="bg-slate-900">Tous les statuts</option>
+                                <option value="EN_PREPARATION" className="bg-slate-900">En Préparation</option>
+                                <option value="EXPEDIEE" className="bg-slate-900">Expédiée</option>
+                                <option value="LIVREE" className="bg-slate-900">Livrée</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl overflow-x-auto">
+                        {loading ? (
+                            <div className="py-20 flex flex-col items-center gap-4 text-white/50">
+                                <Loader2 className="animate-spin" size={40} />
+                                <p>Chargement des commandes...</p>
+                            </div>
+                        ) : (
+                            <table className="w-full text-left min-w-[700px]">
+                                <thead>
+                                    <tr className="bg-white/5 border-b border-white/10">
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">commande/Qté</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Montant</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">région/Date</th>
+                                        <th className="px-6 py-4 text-xs font-black uppercase tracking-wider">Statut</th>
+                                        {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur") && (
+                                            <th className="px-6 py-4 text-center text-xs font-black uppercase tracking-wider">Actions</th>
+                                        )}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {filteredCommandes.map((commande) => (
+                                        <tr key={commande._id} className="hover:bg-white/5 transition-colors group cursor-pointer"
+                                            onClick={() => { setIsModalOpenView(true); setSelectedCommande(commande); }}
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${getdemande(commande.demande_id)}`}>
+                                                        <ClipboardList size={18} />
+                                                    </div>
+                                                    <div className="flex flex-col gap-1 max-h-[120px] overflow-hidden relative">
+                                                        {commande.items?.slice(0, 2).map((item, index) => (
+                                                            <div key={index} className="flex flex-row items-center gap-2 mb-1 last:mb-0">
+                                                                <Box size={10} />
+                                                                <span className="font-bold text-sm text-blue-400 whitespace-nowrap">
+                                                                    #{item?.product_id?.codeArticle}
                                                                 </span>
-                                                            )}
-                                                        </div>
+                                                                <span className="text-red-300/70 text-[10px] font-black whitespace-nowrap">
+                                                                    / {item?.quantite} UNITÉS
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                        {commande.items?.length > 2 && (
+                                                            <span className="text-white/40 text-xs font-bold mt-1">
+                                                                ... et {commande.items.length - 2} autres
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-emerald-400 text-base font-black tracking-tight">
-                                                            {new Intl.NumberFormat('fr-TN', {
-                                                                minimumFractionDigits: 3
-                                                            }).format(commande.items?.reduce((total, item) =>
-                                                                total + (item.quantite * (item.product_id?.prix || 0)), 0)
-                                                            )}
-                                                            <span className="ml-1 text-xs font-medium text-emerald-500/70">DT</span>
-                                                        </span>
-                                                        <span className="text-white/30 text-[10px] uppercase tracking-widest mt-0.5">Total Net</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-white/80 text-sm font-bold">{commande.region}</span>
-                                                        <span className="text-white/50 text-xs flex items-center gap-1">
-                                                            <Clock size={12} /> {commande.createdAt ? new Date(commande.createdAt).toLocaleDateString() : '-'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap flex items-center gap-2 w-fit ${getStatusStyles(commande.status)}`}>
-                                                        {commande.status === 'EN_PREPARATION' && <Loader2 size={12} className="animate-spin" />}
-                                                        {commande.status === 'EXPEDIEE' && <Truck size={12} />}
-                                                        {commande.status === 'LIVREE' && <CheckCircle size={12} />}
-                                                        {commande.status.replace('_', ' ')}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-emerald-400 text-base font-black tracking-tight">
+                                                        {new Intl.NumberFormat('fr-TN', {
+                                                            minimumFractionDigits: 3
+                                                        }).format(commande.items?.reduce((total, item) =>
+                                                            total + (item.quantite * (item.product_id?.prix || 0)), 0)
+                                                        )}
+                                                        <span className="ml-1 text-xs font-medium text-emerald-500/70">DT</span>
                                                     </span>
-                                                </td>
+                                                    <span className="text-white/30 text-[10px] uppercase tracking-widest mt-0.5">Total Net</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-white/80 text-sm font-bold">{commande.region}</span>
+                                                    <span className="text-white/50 text-xs flex items-center gap-1">
+                                                        <Clock size={12} /> {commande.createdAt ? new Date(commande.createdAt).toLocaleDateString() : '-'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap flex items-center gap-2 w-fit ${getStatusStyles(commande.status)}`}>
+                                                    {commande.status === 'EN_PREPARATION' && <Loader2 size={12} className="animate-spin" />}
+                                                    {commande.status === 'EXPEDIEE' && <Truck size={12} />}
+                                                    {commande.status === 'LIVREE' && <CheckCircle size={12} />}
+                                                    {commande.status.replace('_', ' ')}
+                                                </span>
+                                            </td>
+
+                                            {(JSON.parse(localStorage.getItem('role') || '""') === "administrateur") && (
                                                 <td className="px-6 py-4 text-center">
                                                     <div className="flex items-center justify-center gap-2">
-                                                        {JSON.parse(localStorage.getItem('role') || '""') === "gestionnaire de stock" && commande.status === "EXPEDIEE" && (
-                                                            <div className="flex flex-row items-center gap-2">
-                                                                <button
-                                                                    onClick={(e) => { handleLivrer(commande._id), e.stopPropagation() }}
-                                                                    className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/40 transition-all"
-                                                                    title="livrer"
-                                                                >
-                                                                    <CheckCircle size={16} />
-                                                                </button>
-                                                            </div>
-                                                        )}
                                                         {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
                                                             <div className="flex flex-row items-center gap-2">
                                                                 {commande.status === "EN_PREPARATION" && (
@@ -281,7 +348,7 @@ export default function CommandePage() {
                                                                     </button>
                                                                 )}
                                                                 {/* EDIT BUTTON */}
-                                                                {commande.status === "EN_PREPARATION" && !commande.demande_id && (
+                                                                {commande.status === "EN_PREPARATION" && (
                                                                     <button
                                                                         onClick={(e) => { setSelectedCommande(commande); setIsModalOpenUpdate(true); e.stopPropagation(); }}
                                                                         className="p-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/40 transition-all"
@@ -304,19 +371,20 @@ export default function CommandePage() {
                                                         )}
                                                     </div>
                                                 </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                            {!loading && filteredCommandes.length === 0 && (
-                                <div className="py-20 text-center text-white/40">
-                                    <ClipboardList className="mx-auto mb-4 opacity-20" size={60} />
-                                    <p>Aucune commande trouvée.</p>
-                                </div>
-                            )}
-                        </div>
+                                            )}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                        {!loading && filteredCommandes.length === 0 && (
+                            <div className="py-20 text-center text-white/40">
+                                <ClipboardList className="mx-auto mb-4 opacity-20" size={60} />
+                                <p>Aucune commande trouvée.</p>
+                            </div>
+                        )}
                     </div>
+
                 </div>
             </div>
 

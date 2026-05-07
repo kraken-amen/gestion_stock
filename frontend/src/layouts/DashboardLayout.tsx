@@ -31,7 +31,7 @@ const ROLE_CONFIG: Record<string, {
     pillText: 'text-red-300',
     dot: 'bg-emerald-400',
   },
-  "gestionnaire stock": {
+  "gestionnaire de stock": {
     label: 'Gestionnaire',
     gradient: 'from-emerald-500 to-teal-600',
     pillBg: 'bg-emerald-500/20 border border-emerald-500/25',
