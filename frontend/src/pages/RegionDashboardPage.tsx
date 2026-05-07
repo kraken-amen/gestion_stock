@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, LayoutGrid } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 
 import KPISectionRegion from '../components/regionDashboard/KPISectionRegion';
 import AlertsRegion from '../components/regionDashboard/AlertsRegion';
@@ -56,13 +57,21 @@ export default function RegionDashboardPage() {
                     </div>
 
                     {/* Status  */}
-                    <button
-                        onClick={() => navigate(`/region/${name}`)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 transition-all active:scale-95 font-bold text-xs uppercase tracking-widest"
-                    >
-                        <LayoutGrid size={16} />
-                        <span>Voir Détails</span>
-                    </button>
+                    {
+                        JSON.parse(localStorage.getItem('user') || '{}').role === "administrateur" ? (
+                            <button
+                                onClick={() => navigate(`/region/${name}`)}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 transition-all active:scale-95 font-bold text-xs uppercase tracking-widest"
+                            >
+                                <LayoutGrid size={16} />
+                                <span>Voir Détails</span>
+                            </button>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <NotificationBell />
+                            </div>
+                        )
+                    }
                 </div>
             </div>
 
@@ -71,7 +80,7 @@ export default function RegionDashboardPage() {
 
                 {/* KPI SECTION*/}
                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <KPISectionRegion/>
+                    <KPISectionRegion />
                 </section>
 
                 {/*  CHARTS GRID  */}

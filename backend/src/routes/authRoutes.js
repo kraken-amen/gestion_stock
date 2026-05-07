@@ -15,7 +15,7 @@ router.post("/login", login);
 //us1
 router.post("/verify-otp", verifyCode);
 //us3
-router.put("/update-user/:id", protect, updateUser);
+router.put("/update-user/:id", protect, authorizeRoles("administrateur"), updateUser);
 //us3
 router.patch("/toggle-status/:id", protect, authorizeRoles("administrateur"), toggleUserStatus);
 //us1

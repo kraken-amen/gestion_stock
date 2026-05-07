@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { login } from "../services/authService"
 import { useNavigate } from "react-router-dom"
-import { Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, MessageSquare } from "lucide-react"
 import { useToast } from "../context/ToastContext"
 
 const Login = () => {
@@ -60,23 +60,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden relative font-sans">
-      {/* Background avec les couleurs Tunisie Telecom - Bleu sombre et Violet */}
-      <div className="absolute inset-0">
-        {/* Gradient principal: bleu sombre -> violet */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900 opacity-100"></div>
+    <div className="min-h-screen overflow-hidden relative font-sans selection:bg-indigo-500 selection:text-white">
+      {/* Background Section */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900"></div>
+        
+        {/* Animated Blobs */}
+        <div className="absolute top-20 right-10 w-80 h-80 bg-blue-600/20 rounded-full filter blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-20 left-10 w-80 h-80 bg-purple-600/20 rounded-full filter blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-        {/* Blob animé bleu */}
-        <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-600 via-blue-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse"></div>
-
-        {/* Blob animé violet */}
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-tr from-purple-600 via-purple-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-
-        {/* Blob animé bleu-violet au centre */}
-        <div className="absolute top-1/2 right-1/3 w-96 h-96 bg-gradient-to-bl from-indigo-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-15" style={{ animationDelay: '1s' }}></div>
-
-        {/* Effet de lignes ondulées */}
-        <div className="absolute inset-0 opacity-5 mix-blend-overlay">
+        {/* Wavy Pattern Overlay */}
+        <div className="absolute inset-0 opacity-10 mix-blend-overlay">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="waves" patternUnits="userSpaceOnUse" width="120" height="120">
@@ -88,98 +82,91 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Contenu principal */}
+      {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          {/* Conteneur principal du formulaire */}
-          <div className="backdrop-blur-xl bg-white/10 rounded-2xl shadow-2xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300">
-            {/* Header avec logo et titre */}
+        <div className="w-full max-w-md transform transition-all duration-500">
+          
+          <div className="backdrop-blur-2xl bg-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 border border-white/20">
+            
+            {/* Header */}
             <div className="mb-10 text-center">
-              {/* Logo circulaire TT */}
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/10 mb-5 border-2 border-white/30 backdrop-blur-md shadow-lg transform hover:scale-110 transition-transform duration-300">
-                <span className="text-4xl font-black text-white drop-shadow-lg">TT</span>
+              <div className="group relative inline-block mb-6">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
+                <div className="relative flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl transform hover:scale-110 transition-all duration-500">
+                  <img src="/tt.png" alt="TT Logo" className="w-12 h-12 object-contain filter drop-shadow-lg" />
+                </div>
               </div>
-
-              {/* Titre principal */}
-              <h1 className="text-4xl font-black text-white mb-2 drop-shadow-lg">Tunisie Telecom</h1>
-
-              {/* Sous-titre */}
-              <p className="text-white/70 text-sm font-medium">Vérification de sécurité requise</p>
+              <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Tunisie Telecom</h1>
+              <p className="text-white/60 text-sm font-medium italic">Vérification de sécurité requise</p>
             </div>
 
-            {/* Formulaire */}
-            <form onSubmit={handleLogin} className="space-y-6">
-              {/* Champ Email */}
+            {/* Login Form */}
+            <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-white/90">Email</label>
+                <label className="block text-xs font-bold text-white/70 uppercase tracking-widest ml-1">Email Professionnel</label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-white transition-colors" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-white transition-colors" />
                   <input
                     type="email"
+                    required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="exemple@tunisietelecom.tn"
-                    className="w-full pl-12 pr-4 py-3 rounded-lg border-2 border-white/20 focus:border-white/50 focus:outline-none transition-all bg-white/5 backdrop-blur-sm focus:bg-white/15 text-white placeholder-white/40 font-medium"
+                    placeholder="nom.prenom@tunisietelecom.tn"
+                    className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-white/10 focus:border-indigo-500/50 outline-none transition-all bg-white/5 text-white placeholder-white/20 font-medium"
                   />
                 </div>
               </div>
 
-              {/* Champ Mot de passe */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-white/90">Mot de passe</label>
+                <label className="block text-xs font-bold text-white/70 uppercase tracking-widest ml-1">Mot de passe</label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-white transition-colors" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 group-focus-within:text-white transition-colors" />
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Entrez votre mot de passe"
-                    className="w-full pl-12 pr-12 py-3 rounded-lg border-2 border-white/20 focus:border-white/50 focus:outline-none transition-all bg-white/5 backdrop-blur-sm focus:bg-white/15 text-white placeholder-white/40 font-medium"
+                    placeholder="••••••••••••"
+                    className="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-white/10 focus:border-indigo-500/50 outline-none transition-all bg-white/5 text-white placeholder-white/20 font-medium"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
-              {/* Bouton de connexion */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 rounded-lg font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 hover:shadow-2xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed transform hover:scale-[1.02] shadow-lg"
+                className="w-full py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all duration-300 disabled:opacity-50 transform hover:scale-[1.01] active:scale-[0.98]"
               >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Envoi du code...</span>
-                  </div>
-                ) : (
-                  'Se connecter'
-                )}
+                {isLoading ? "Authentification..." : "Se connecter"}
               </button>
             </form>
 
-            {/* Lien support */}
-            <p className="mt-8 text-center text-white/70 text-sm font-medium">
-              Besoin d'aide ?{' '}
-              <a href="#" className="text-white font-bold hover:text-amber-300 transition-colors">
-                Support IT
-              </a>
-            </p>
+            {/* Support Link */}
+            <button 
+              className="mt-8 w-full text-center text-white/50 text-sm font-medium hover:text-white transition-colors flex items-center justify-center gap-2"
+            >
+              <MessageSquare size={16} />
+              Besoin d'aide ? <span className="font-bold underline decoration-indigo-500 underline-offset-4 text-white"><a href="https://support.tunisietelecom.tn/" target="_blank">Support IT</a></span>
+            </button>
           </div>
 
-          {/* Copyright */}
-          <p className="mt-8 text-center text-white/60 text-xs font-medium">
-            © 2026 Tunisie Telecom. Tous droits réservés.
+          <p className="mt-8 text-center text-white/30 text-xs font-medium tracking-widest uppercase">
+            © 2026 Tunisie Telecom · Infrastructure Réseau
           </p>
         </div>
       </div>
+
+      {/* --- Support IT Modal --- */}
+      
     </div>
   );
-}
+};
 
 export default Login;

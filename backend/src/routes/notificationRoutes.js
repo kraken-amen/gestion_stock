@@ -8,12 +8,12 @@ const {
   deleteAllNotif
 } = require('../controllers/notificationController');
 
-const { protect } = require('../middleware/authMiddleware');
+const { protect ,authorizeRoles} = require('../middleware/authMiddleware');
 
 router.use(protect);
 
 router.get('/', getNotifications);
 router.patch('/read/:id', markAsRead);
 router.patch('/read-all', markAllAsRead);
-router.delete('/',deleteAllNotif);
+router.delete('/',authorizeRoles("administrateur"),deleteAllNotif);
 module.exports = router;

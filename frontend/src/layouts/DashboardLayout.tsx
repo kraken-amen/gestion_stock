@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { BarChart3, ShoppingCart, Package, Settings, LogOut, Menu, X, Users, Warehouse, FileText, History, MapPin, AlertTriangle, CheckCircle2, Info, Clock,Dot} from 'lucide-react';
+import { BarChart3, ShoppingCart, Package, Settings, LogOut, Menu, X, Users, Warehouse, FileText, History, MapPin, AlertTriangle, CheckCircle2, Info, Clock, Dot } from 'lucide-react';
 import { PermissionGate } from '../components/PermissionGate';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
@@ -65,10 +65,10 @@ const getInitials = (name?: string | null) => {
 
 const NotifIcon = ({ type }: { type: NotifType }) => {
   const map = {
-    alert:   { icon: AlertTriangle,  cls: 'text-red-400 bg-red-500/15' },
-    warning: { icon: Clock,          cls: 'text-amber-400 bg-amber-500/15' },
-    success: { icon: CheckCircle2,   cls: 'text-emerald-400 bg-emerald-500/15' },
-    info:    { icon: Info,           cls: 'text-blue-400 bg-blue-500/15' },
+    alert: { icon: AlertTriangle, cls: 'text-red-400 bg-red-500/15' },
+    warning: { icon: Clock, cls: 'text-amber-400 bg-amber-500/15' },
+    success: { icon: CheckCircle2, cls: 'text-emerald-400 bg-emerald-500/15' },
+    info: { icon: Info, cls: 'text-blue-400 bg-blue-500/15' },
   };
   const { icon: Icon, cls } = map[type];
   return (
@@ -79,23 +79,23 @@ const NotifIcon = ({ type }: { type: NotifType }) => {
 };
 
 const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: '1', type: 'alert',   title: 'Stock critique',         message: 'Modem ADSL v2 — Gafsa sous le seuil minimum.',  time: 'maintenant', read: false, link: '/map' },
-  { id: '2', type: 'warning', title: 'Demande en attente',     message: '3 demandes en attente depuis +48h.',              time: 'il y a 2h',  read: false, link: '/demandes' },
-  { id: '3', type: 'success', title: 'Livraison confirmée',     message: 'CMD-088 livrée — stock mis à jour (Sousse).',     time: 'il y a 3h',  read: false, link: '/commandes' },
+  { id: '1', type: 'alert', title: 'Stock critique', message: 'Modem ADSL v2 — Gafsa sous le seuil minimum.', time: 'maintenant', read: false, link: '/map' },
+  { id: '2', type: 'warning', title: 'Demande en attente', message: '3 demandes en attente depuis +48h.', time: 'il y a 2h', read: false, link: '/demandes' },
+  { id: '3', type: 'success', title: 'Livraison confirmée', message: 'CMD-088 livrée — stock mis à jour (Sousse).', time: 'il y a 3h', read: false, link: '/commandes' },
 ];
 
 const DashboardLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen]     = useState(false);
-  const [userData, setUserData]               = useState<any>(null);
-  const [notifOpen, setNotifOpen]             = useState(false);
-  const [notifications, setNotifications]     = useState<Notification[]>(MOCK_NOTIFICATIONS);
-  const notifRef                               = useRef<HTMLDivElement>(null);
-  const navigate                               = useNavigate();
-  const { user }                               = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const currentRole   = user?.role || localStorage.getItem('role');
-  const currentRegion = user?.region || localStorage.getItem('region');
-  const roleConfig    = getRoleConfig(currentRole);
+  const currentRole = JSON.parse(localStorage.getItem('user') || '{}').role;
+  const currentRegion = JSON.parse(localStorage.getItem('user') || '{}').region;
+  const roleConfig = getRoleConfig(currentRole);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -128,7 +128,7 @@ const DashboardLayout = () => {
   }, []);
 
   const displayEmail = userData?.email || user?.email;
-  const shortName    = displayEmail?.includes('@') ? displayEmail.split('@')[0] : displayEmail;
+  const shortName = displayEmail?.includes('@') ? displayEmail.split('@')[0] : displayEmail;
 
   const handleLogout = () => {
     localStorage.clear();
@@ -145,7 +145,7 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen text-white overflow-hidden relative font-sans">
-      
+
       {/* Background Shapes */}
       <div className="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-900">
         <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-600 via-blue-500 to-transparent rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse" />
@@ -204,22 +204,38 @@ const DashboardLayout = () => {
 
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 scrollbar-none">
           <SectionLabel>Principal</SectionLabel>
-          <NavItem icon={<BarChart3 size={15} />} label="Tableau de Bord"to="/dashboard" />
-
-          <NavItem icon={<Package size={15} />} label="Produits"to="/products" />
-          <NavItem icon={<Warehouse size={15} />} label="Stocks"to="/map"/>
-
-          <SectionLabel>Opérations</SectionLabel>
-          <PermissionGate role={currentRole} permission="VIEW_DEMANDE">
-            <NavItem icon={<FileText size={15} />} label="Demandes"to="/demandes"/>
+          <PermissionGate role={currentRole} permission="VIEW_REGION">
+            <NavItem icon={<BarChart3 size={15} />} label="Tableau de Bord" to={`/dash/${currentRegion}`} />
           </PermissionGate>
-          <NavItem icon={<ShoppingCart size={15} />} label="Commandes"to="/commandes" />
+          <PermissionGate role={currentRole} permission="VIEW_DASHBOARD">
+            <NavItem icon={<BarChart3 size={15} />} label="Tableau de Bord" to="/dashboard" />
+          </PermissionGate>
+          <NavItem icon={<Package size={15} />} label="Produits" to="/products" />
+          <PermissionGate role={currentRole} permission="VIEW_REGION">
+            <NavItem icon={<Warehouse size={15} />} label="Stocks" to={`/region/${currentRegion}`} />
+          </PermissionGate>
 
+          <PermissionGate role={currentRole} permission="VIEW_MAP">
+            <NavItem icon={<Warehouse size={15} />} label="Stocks" to="/map" />
+          </PermissionGate>
+          {
+            JSON.parse(localStorage.getItem('user') || '{}').role!=="utilisateur"&& (
+              <SectionLabel>Opérations</SectionLabel>
+            )
+          }
+          <PermissionGate role={currentRole} permission="VIEW_DEMANDE">
+            <NavItem icon={<FileText size={15} />} label="Demandes" to="/demandes" />
+          </PermissionGate>
+          <PermissionGate role={currentRole} permission="VIEW_COMMANDE">
+            <NavItem icon={<ShoppingCart size={15} />} label="Commandes" to="/commandes" />
+          </PermissionGate>
           <SectionLabel>Admin</SectionLabel>
           <PermissionGate role={currentRole} permission="MANAGE_USERS">
             <NavItem icon={<Users size={15} />} label="Utilisateurs" to="/users" />
           </PermissionGate>
-          <NavItem icon={<History size={15} />} label="Historique"  to="/historique" />
+          <PermissionGate role={currentRole} permission="VIEW_DASHBOARD">
+            <NavItem icon={<History size={15} />} label="Historique" to="/historique" />
+          </PermissionGate>
           <NavItem icon={<Settings size={15} />} label="Paramètres" to="/parametres" />
         </nav>
 
@@ -257,15 +273,15 @@ const DashboardLayout = () => {
                   <button onClick={markAllRead} className="text-[10px] text-blue-400 font-semibold">Tout marquer lu</button>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto divide-y divide-white/[0.05]">
-                    {notifications.map(n => (
-                        <button key={n.id} onClick={() => handleNotifClick(n)} className="w-full p-4 flex gap-3 hover:bg-white/[0.05] transition-colors text-left">
-                            <NotifIcon type={n.type} />
-                            <div className="flex-1">
-                                <p className="text-[12px] font-bold text-white/90">{n.title}</p>
-                                <p className="text-[11px] text-white/40 line-clamp-1">{n.message}</p>
-                            </div>
-                        </button>
-                    ))}
+                  {notifications.map(n => (
+                    <button key={n.id} onClick={() => handleNotifClick(n)} className="w-full p-4 flex gap-3 hover:bg-white/[0.05] transition-colors text-left">
+                      <NotifIcon type={n.type} />
+                      <div className="flex-1">
+                        <p className="text-[12px] font-bold text-white/90">{n.title}</p>
+                        <p className="text-[11px] text-white/40 line-clamp-1">{n.message}</p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}

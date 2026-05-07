@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, RefreshCcw, X, Send } from 'lucide-react';
-import { verifyOTP, resendOTP } from '../services/otpService'; 
+import { verifyOTP, resendOTP } from '../services/otpService';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Otp() {
@@ -101,7 +101,24 @@ export default function Otp() {
       loginUser(data);
       localStorage.removeItem('otp_expiry');
       addToast('Connexion réussie !', 'success');
-      setTimeout(() => { navigate('/Dashboard'); }, 1500);
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const role = user?.role;
+      const region = user?.region;
+
+      console.log("Role:", role, "Region:", region);
+
+      if (role === "administrateur") {
+        setTimeout(() => {
+          navigate('/Dashboard');
+        }, 1500);
+      } else if (region) {
+        setTimeout(() => {
+          navigate(`/dash/${region}`);
+        }, 1500);
+      } else {
+        console.error("Region introuvable لـ user موش admin");
+        addToast("Erreur: Région non définie", "error");
+      }
     } catch (err: any) {
       addToast(err.response?.data?.message || 'Code invalide', 'error');
     } finally {
@@ -118,14 +135,14 @@ export default function Otp() {
         <div className="w-full max-w-md">
           {/* Card: Responsive padding & width */}
           <div className="backdrop-blur-xl bg-white/10 rounded-2xl md:rounded-3xl p-6 md:p-10 border border-white/20 shadow-2xl">
-            
+
             <div className="mb-6 md:mb-10 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 mb-4 border border-white/20">
                 <ShieldCheck className="w-8 h-8 md:w-10 md:h-10 text-blue-400" />
               </div>
               <h1 className="text-2xl md:text-3xl font-bold">Sécurité</h1>
               <p className="text-white/60 text-xs md:text-sm mt-2 px-2">
-                Saisissez le code reçu sur <br/> 
+                Saisissez le code reçu sur <br />
                 <span className="text-blue-300 break-all font-medium">{email}</span>
               </p>
             </div>
@@ -150,7 +167,7 @@ export default function Otp() {
               </div>
 
               <div className="flex justify-end">
-                <button 
+                <button
                   type="button"
                   onClick={handleResend}
                   className="text-[10px] md:text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
@@ -171,8 +188,8 @@ export default function Otp() {
             <div className="mt-6 md:mt-8 text-center">
               {timer > 0 ? (
                 <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-white/50">
-                   <span>Expire dans :</span>
-                   <span className="text-blue-400 font-mono font-bold">{formatTime(timer)}</span>
+                  <span>Expire dans :</span>
+                  <span className="text-blue-400 font-mono font-bold">{formatTime(timer)}</span>
                 </div>
               ) : (
                 <button onClick={handleResend} className="text-blue-400 hover:underline flex items-center gap-2 mx-auto text-xs md:text-sm">
@@ -189,7 +206,7 @@ export default function Otp() {
         {toasts.map((toast) => (
           <div key={toast.id} className={`p-3 md:p-4 rounded-lg border backdrop-blur-md flex items-center justify-between gap-3 shadow-xl ${toast.type === 'success' ? 'bg-green-500/20 border-green-500/50' : 'bg-red-500/20 border-red-500/50'}`}>
             <p className="text-xs md:text-sm font-medium">{toast.message}</p>
-            <button onClick={() => removeToast(toast.id)} className="shrink-0"><X size={14}/></button>
+            <button onClick={() => removeToast(toast.id)} className="shrink-0"><X size={14} /></button>
           </div>
         ))}
       </div>
