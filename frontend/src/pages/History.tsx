@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, type JSX } from 'react';
 import {
   ArrowLeft, Loader2, Search, ArrowRightLeft,
   ArrowDownCircle, ArrowUpCircle, RefreshCw, Package,
-  User, Calendar, Clock, ChevronDown, Activity, MapPin
+  User, Calendar, Clock, ChevronDown, MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getMovements } from '../services/historyServices';
@@ -110,12 +110,6 @@ export default function HistoryPage() {
     });
   }, [movements, searchTerm, filterPeriod]);
 
-  const stats = useMemo(() => ({
-    total: movements.length,
-    entrees: movements.filter(m => m.type?.toLowerCase() === 'entree').length,
-    sorties: movements.filter(m => m.type?.toLowerCase() === 'sortie').length,
-    transferts: movements.filter(m => m.type?.toLowerCase() === 'transfert').length,
-  }), [movements]);
 
   return (
     <div className="min-h-screen relative font-sans text-white">
@@ -143,29 +137,6 @@ export default function HistoryPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: 'Total', value: stats.total, icon: <Activity size={18} />, color: 'blue' },
-              { label: 'Entrées', value: stats.entrees, icon: <ArrowDownCircle size={18} />, color: 'green' },
-              { label: 'Sorties', value: stats.sorties, icon: <ArrowUpCircle size={18} />, color: 'red' },
-              { label: 'Transferts', value: stats.transferts, icon: <ArrowRightLeft size={18} />, color: 'amber' },
-            ].map(({ label, value, icon, color }) => (
-              <div key={label} className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center
-                  ${color === 'blue' ? 'bg-blue-500/20 text-blue-400' : ''}
-                  ${color === 'green' ? 'bg-emerald-500/20 text-emerald-400' : ''}
-                  ${color === 'red' ? 'bg-red-500/20 text-red-400' : ''}
-                  ${color === 'amber' ? 'bg-amber-500/20 text-amber-400' : ''}
-                `}>
-                  {icon}
-                </div>
-                <div>
-                  <p className="text-white/50 text-xs">{label}</p>
-                  <p className="text-2xl font-black">{value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="md:col-span-2 relative">
