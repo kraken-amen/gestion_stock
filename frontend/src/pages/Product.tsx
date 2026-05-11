@@ -29,16 +29,16 @@ export default function ProductListPage() {
   }, [navigate]);
 
   const fetchProducts = async () => {
-  try {
-    setLoading(true);
-    const data = await getProducts(); 
-    setProducts(Array.isArray(data) ? data : data.products || []); 
-  } catch (error) {
-    console.error("Erreur:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const data = await getProducts();
+      setProducts(Array.isArray(data) ? data : data.products || []);
+    } catch (error) {
+      console.error("Erreur:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openDeleteModal = (product: Product) => {
     setSelectedProduct(product);
@@ -117,12 +117,14 @@ export default function ProductListPage() {
                 <p className="text-white/60 text-xs hidden md:block">Administration et gestion de l'inventaire</p>
               </div>
             </div>
-            <button
-              onClick={() => setIsModalOpenCreate(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95"
-            >
-              <Plus size={18} /> Nouveau
-            </button>
+            {JSON.parse(localStorage.getItem('role') || '""') === "administrateur" && (
+              <button
+                onClick={() => setIsModalOpenCreate(true)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold transition-all shadow-lg active:scale-95"
+              >
+                <Plus size={18} /> Nouveau
+              </button>
+            )}
           </div>
         </div>
 
@@ -273,7 +275,7 @@ export default function ProductListPage() {
           config={{
             title: "Supprimer le produit ?",
             confirmValue: selectedProduct?.libelle!,
-            onConfirm: ()=>executeDelete(selectedProduct?._id!)
+            onConfirm: () => executeDelete(selectedProduct?._id!)
           }}
           onClose={() => setIsModalOpenDelete(false)}
         />
